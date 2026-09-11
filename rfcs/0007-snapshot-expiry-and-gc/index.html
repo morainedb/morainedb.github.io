@@ -1,0 +1,384 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-vdxcvpsm"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>RFC 0007: Snapshot expiry and garbage collection | moraine</title><link rel="canonical" href="https://morainedb.github.io/rfcs/0007-snapshot-expiry-and-gc/"/><link rel="sitemap" href="/sitemap-index.xml"/><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.1.4"/><meta name="generator" content="Starlight v0.41.4"/><meta property="og:title" content="RFC 0007: Snapshot expiry and garbage collection"/><meta property="og:type" content="article"/><meta property="og:url" content="https://morainedb.github.io/rfcs/0007-snapshot-expiry-and-gc/"/><meta property="og:locale" content="en"/><meta property="og:description" content="A DuckLake catalog that lives in your bucket — SlateDB-backed, serverless, nothing to operate."/><meta property="og:site_name" content="moraine"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="A DuckLake catalog that lives in your bucket — SlateDB-backed, serverless, nothing to operate."/><script>
+"use strict";(()=>{(()=>{let t="theme-toggle",n;function r(){return window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}function l(){let e=localStorage.getItem(t);return e==="dark"||e==="light"?e:null}function m(){return n||l()||r()}function s(e){e===r()?localStorage.removeItem(t):localStorage.setItem(t,e)}function h(e){let o=document.documentElement;o.classList.toggle("dark",e==="dark"),o.dataset.theme=e,o.style.colorScheme=e}function a(e){n=e,s(e),h(e)}function c(){a(m())}c(),document.addEventListener("astro:after-swap",c),window.astroThemeToggle={setTheme:a,getTheme:m}})();})();
+</script><link rel="stylesheet" href="/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/_astro/common.DJmCPQrT.css"><style>@layer starlight.components{.card:where(.astro-zts4jgjd){--sl-card-border:var(--sl-color-purple);--sl-card-bg:var(--sl-color-purple-low);border:1px solid var(--sl-color-gray-5);background-color:var(--sl-color-black);flex-direction:column;gap:clamp(.5rem,.125rem + 1vw,1rem);padding:clamp(1rem,.125rem + 3vw,2.5rem)}.card:where(.astro-zts4jgjd):nth-child(4n+1){--sl-card-border:var(--sl-color-orange);--sl-card-bg:var(--sl-color-orange-low)}.card:where(.astro-zts4jgjd):nth-child(4n+3){--sl-card-border:var(--sl-color-green);--sl-card-bg:var(--sl-color-green-low)}.card:where(.astro-zts4jgjd):nth-child(4n+4){--sl-card-border:var(--sl-color-red);--sl-card-bg:var(--sl-color-red-low)}.card:where(.astro-zts4jgjd):nth-child(4n+5){--sl-card-border:var(--sl-color-blue);--sl-card-bg:var(--sl-color-blue-low)}.title:where(.astro-zts4jgjd){font-weight:600;font-size:var(--sl-text-h4);color:var(--sl-color-white);line-height:var(--sl-line-height-headings);align-items:center;gap:1rem}.card:where(.astro-zts4jgjd) .icon:where(.astro-zts4jgjd){border:1px solid var(--sl-card-border);background-color:var(--sl-card-bg);border-radius:.25rem;flex-shrink:0;padding:.2em}.card:where(.astro-zts4jgjd) .body:where(.astro-zts4jgjd){font-size:clamp(var(--sl-text-sm), calc(.5rem + 1vw), var(--sl-text-body));margin:0}.card-grid:where(.astro-lmor3ela){grid-template-columns:100%;gap:1rem;display:grid}.card-grid:where(.astro-lmor3ela)>*{margin-top:0!important}@media (width>=50rem){.card-grid:where(.astro-lmor3ela){grid-template-columns:1fr 1fr;gap:1.5rem}.stagger:where(.astro-lmor3ela){--stagger-height:5rem;padding-bottom:var(--stagger-height)}.stagger:where(.astro-lmor3ela)>:nth-child(2n){transform:translateY(var(--stagger-height))}}}
+@layer starlight.components{svg:where(.astro-n5k4ipy7){color:var(--sl-icon-color);font-size:var(--sl-icon-size,1em);width:1em;height:1em}}
+</style><script type="module" src="/_astro/page.LAbJoB63.js"></script></head><body class="astro-vdxcvpsm"><a class="sl-skip-link astro-vxeigawq" href="#_top">Skip to content</a><div class="flex min-h-screen flex-col astro-3iko6sul"><header class="fixed inset-0 z-(--sl-z-index-navbar) box-border h-(--sl-nav-height) w-full border-0 border-b border-solid border-(--sl-color-hairline) bg-(--sl-color-bg-nav) px-(--sl-nav-pad-x) py-(--sl-nav-pad-y) backdrop-blur astro-3iko6sul"><div class="box-border flex h-full items-center gap-2"><div class="-m-3 overflow-clip p-3 flex min-w-0"><span class="-m-1.5 rounded-md p-1.5 **:text-lg **:font-semibold **:text-(--sl-color-text) focus-visible:outline-offset-0"><a href="/" class="site-title sl-flex astro-clw6ags5"><img class="light:sl-hidden print:hidden astro-clw6ags5" alt src="/_astro/moraine-dark.CEVNFCXz.svg" width="128" height="128"><img class="dark:sl-hidden print:block astro-clw6ags5" alt src="/_astro/moraine.B97P_dWh.svg" width="128" height="128"><span class="astro-clw6ags5" translate="no">moraine</span></a></span></div><nav class="flex flex-1 flex-row gap-4 overflow-x-auto py-3 pr-4 pl-4 text-sm font-medium max-md:**:hidden xl:gap-6 xl:pl-6"></nav><div class="flex md:max-w-60 md:flex-1 print:hidden"><site-search class=" astro-hdulihjd" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"><button class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90 md:h-9 md:w-full md:max-w-88 md:rounded-md md:border md:border-solid md:border-(--sl-color-gray-5) md:p-2 md:text-(--sl-color-text) md:transition-colors md:hover:bg-gray-400/10 astro-hdulihjd" data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4 astro-hdulihjd"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m21 21l-4.34-4.34" /><circle cx="11" cy="11" r="8" /></g></svg><span class="sl-hidden md:sl-block astro-hdulihjd" aria-hidden="true">Search</span><kbd class="sl-hidden md:sl-flex astro-hdulihjd" style="display: none;"><kbd class="astro-hdulihjd">Ctrl</kbd><kbd class="astro-hdulihjd">K</kbd></kbd></button><dialog style="padding:0" aria-label="Search" class="astro-hdulihjd"><div class="dialog-frame sl-flex astro-hdulihjd"><button data-close-modal class="sl-flex md:sl-hidden astro-hdulihjd">Cancel</button><div class="search-container astro-hdulihjd"><div id="starlight__search" class="astro-hdulihjd"></div></div></div></dialog></site-search><script>
+  ;(() => {
+    const openBtn = document.querySelector('button[data-open-modal]')
+    const shortcut = openBtn?.querySelector('kbd')
+    if (!openBtn || !(shortcut instanceof HTMLElement)) return
+    const platformKey = shortcut.querySelector('kbd')
+    if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+      platformKey.textContent = '⌘'
+      openBtn.setAttribute('aria-keyshortcuts', 'Meta+K')
+    }
+    shortcut.style.display = ''
+  })()
+</script><script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.vTFUHulS.js"></script></div><div class="hidden items-center gap-2 md:flex print:hidden"><a href="https://github.com/morainedb/moraine" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">GitHub</span><svg aria-hidden="true" class=" astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script><div class="size-8 overflow-visible"><astro-theme-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><div class="astro-theme-toggle-icon-light"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 19a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1m-4.95-2.05a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0m11.314 0l1.414 1.414a1 1 0 0 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 1.414-1.414m-5.049-9.836a5 5 0 1 1-2.532 9.674a5 5 0 0 1 2.532-9.674M4 11a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zm18 0a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM5.636 4.222L7.05 5.636A1 1 0 0 1 5.636 7.05L4.222 5.636a1 1 0 0 1 1.414-1.414m14.142 0a1 1 0 0 1 0 1.414L18.364 7.05a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0M12 1a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1" /></svg></div><div class="astro-theme-toggle-icon-dark"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 1.992a10 10 0 1 0 9.236 13.838c.341-.82-.476-1.644-1.298-1.31a6.5 6.5 0 0 1-6.864-10.787l.077-.08c.551-.63.113-1.653-.758-1.653h-.266l-.068-.006z" /></svg></div></astro-theme-toggle><script type="module">function e(){return typeof window>`u`?`light`:window.astroThemeToggle?.getTheme?.()||`light`}function t(e){typeof window>`u`||window.astroThemeToggle?.setTheme?.(e)}function n(){t(e()===`light`?`dark`:`light`)}var r=`astro-theme-toggle-temporary-styles`;function i(){document.getElementById(r)?.remove()}function a(){i();let e=document.createElement(`style`);e.id=r,e.textContent=`::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }`,document.head.appendChild(e)}async function o(e,t,n){let r=document;if(typeof r.startViewTransition!=`function`){e();return}a();let o=r.startViewTransition(()=>{e()});await o?.ready,o?.finished?.then(i);let s=.7,c=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><defs><radialGradient id="toggle-theme-gradient"><stop offset="${s}"/><stop offset="1" stop-opacity="0"/></radialGradient></defs><circle cx="4" cy="4" r="4" fill="url(#toggle-theme-gradient)"/></svg>`,l=`data:image/svg+xml;base64,${window.btoa(c)}`,u=window.innerWidth,d=window.innerHeight,f=Math.ceil(Math.hypot(Math.max(t,u-t),Math.max(n,d-n))/s);document.documentElement.animate({maskImage:[`url('${l}')`,`url('${l}')`],maskRepeat:[`no-repeat`,`no-repeat`],maskPosition:[`${t}px ${n}px`,`${t-f}px ${n-f}px`],maskSize:[`0`,`${2*f}px`]},{duration:500,easing:`ease-in`,pseudoElement:`::view-transition-new(root)`})}function s(e){o(n,e.clientX,e.clientY)}var c=class extends HTMLElement{connectedCallback(){this.hasAttribute(`tabindex`)||this.setAttribute(`tabindex`,`0`),this.hasAttribute(`role`)||this.setAttribute(`role`,`button`),this.addEventListener(`click`,s),this.addEventListener(`keydown`,e=>{if(e.key===`Enter`||e.key===` `){e.preventDefault();let t=this.getBoundingClientRect();s({clientX:t.left+t.width/2,clientY:t.top+t.height/2})}})}};customElements.define(`astro-theme-toggle`,c);</script></div></div><div class="flex items-center gap-2 md:hidden print:hidden"><nova-mobile-menu-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90 print:hidden" aria-label="Menu" aria-controls="starlight__sidebar"><div class="transition-transform [body[data-mobile-menu-expanded]_&amp;]:rotate-90"><svg width="1em" height="1em" viewBox="0 0 24 24" class="block [body[data-mobile-menu-expanded]_&amp;]:hidden"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16M4 12h16M4 19h16" /></svg><svg width="1em" height="1em" viewBox="0 0 24 24" class="hidden [body[data-mobile-menu-expanded]_&amp;]:block"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12" /></svg></div></nova-mobile-menu-toggle><script type="module" src="/_astro/MobileMenuToggle.astro_astro_type_script_index_0_lang.Bg4YKcfM.js"></script></div></div></header><nav class="sidebar print:hidden astro-3iko6sul" aria-label="Main" id="nova-sidebar-nav"><div id="starlight__sidebar" class="nova-scroll-container invisible md:visible [body[data-mobile-menu-expanded]_&amp;]:max-md:visible fixed top-(--sl-nav-height) bottom-0 left-0 z-(--sl-z-index-menu) overflow-y-auto border-0 border-solid border-(--sl-color-hairline) bg-(--sl-color-black) max-md:w-full md:w-(--sl-sidebar-width) md:border-r astro-3iko6sul"><div class="sidebar-content flex h-full min-h-max flex-col px-(--sl-sidebar-pad-x) py-4 astro-3iko6sul"><sl-sidebar-state-persist data-hash="05ix94y" class="astro-f5yvicm7"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-ojxuodky"><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Guide</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/guide/what-is-moraine/" class="astro-ojxuodky"><span class="astro-ojxuodky">What is moraine?</span></a></li><li class="astro-ojxuodky"><a href="/guide/getting-started/" class="astro-ojxuodky"><span class="astro-ojxuodky">Getting started</span></a></li><li class="astro-ojxuodky"><a href="/guide/architecture/" class="astro-ojxuodky"><span class="astro-ojxuodky">Architecture</span></a></li><li class="astro-ojxuodky"><a href="/guide/embedding/" class="astro-ojxuodky"><span class="astro-ojxuodky">Embedding the core</span></a></li><li class="astro-ojxuodky"><a href="/guide/operating/" class="astro-ojxuodky"><span class="astro-ojxuodky">Operating a lake</span></a></li></ul></details></li><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Design (RFCs)</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/rfcs/0001-repository-structure-and-conventions/" class="astro-ojxuodky"><span class="astro-ojxuodky">0001: Repository structure and conventions</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0002-slatedb-key-encoding/" class="astro-ojxuodky"><span class="astro-ojxuodky">0002: SlateDB key encoding for DuckLake catalog state</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0003-public-api-shape/" class="astro-ojxuodky"><span class="astro-ojxuodky">0003: Public API shape of the moraine core</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0004-commit-protocol/" class="astro-ojxuodky"><span class="astro-ojxuodky">0004: Commit and transaction protocol</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0005-data-inlining/" class="astro-ojxuodky"><span class="astro-ojxuodky">0005: Data inlining on SlateDB</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0006-extension-surface/" class="astro-ojxuodky"><span class="astro-ojxuodky">0006: Extension surface</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0007-snapshot-expiry-and-gc/" aria-current="page" class="astro-ojxuodky"><span class="astro-ojxuodky">0007: Snapshot expiry and garbage collection</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0008-compaction/" class="astro-ojxuodky"><span class="astro-ojxuodky">0008: Maintenance operations — compaction and delete-file consolidation</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0009-reader-consistency-and-caching/" class="astro-ojxuodky"><span class="astro-ojxuodky">0009: Reader consistency and snapshot caching</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0010-async-sync-bridge/" class="astro-ojxuodky"><span class="astro-ojxuodky">0010: Async↔sync bridge: mechanism, runtime, threading, and cancellation</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0011-crash-recovery/" class="astro-ojxuodky"><span class="astro-ojxuodky">0011: Crash recovery</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0012-schema-evolution-and-versioning/" class="astro-ojxuodky"><span class="astro-ojxuodky">0012: Schema evolution and versioning</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0013-partitioning-sorting-and-pruning/" class="astro-ojxuodky"><span class="astro-ojxuodky">0013: Partitioning, sorting, and pruning</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0014-encryption/" class="astro-ojxuodky"><span class="astro-ojxuodky">0014: Catalog and data encryption</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0015-format-migration/" class="astro-ojxuodky"><span class="astro-ojxuodky">0015: On-disk format migration</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0016-equality-indexes/" class="astro-ojxuodky"><span class="astro-ojxuodky">0016: Equality and range indexes</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0017-read-write-and-read-only-attach/" class="astro-ojxuodky"><span class="astro-ojxuodky">0017: Read-write and read-only attach paths</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0018-column-and-name-mapping/" class="astro-ojxuodky"><span class="astro-ojxuodky">0018: Column and name mapping for externally written Parquet</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0019-macros/" class="astro-ojxuodky"><span class="astro-ojxuodky">0019: Scalar and table macros</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0020-change-data-feed/" class="astro-ojxuodky"><span class="astro-ojxuodky">0020: Change data feed</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0021-maintenance-model/" class="astro-ojxuodky"><span class="astro-ojxuodky">0021: Maintenance orchestration</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0022-commit-log-and-leader-role/" class="astro-ojxuodky"><span class="astro-ojxuodky">0022: The commit log and the leader role</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="flex items-center justify-end gap-2 py-4 print:hidden"><a href="https://github.com/morainedb/moraine" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">GitHub</span><svg aria-hidden="true" class=" astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><div class="size-8 overflow-visible"><astro-theme-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><div class="astro-theme-toggle-icon-light"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 19a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1m-4.95-2.05a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0m11.314 0l1.414 1.414a1 1 0 0 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 1.414-1.414m-5.049-9.836a5 5 0 1 1-2.532 9.674a5 5 0 0 1 2.532-9.674M4 11a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zm18 0a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM5.636 4.222L7.05 5.636A1 1 0 0 1 5.636 7.05L4.222 5.636a1 1 0 0 1 1.414-1.414m14.142 0a1 1 0 0 1 0 1.414L18.364 7.05a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0M12 1a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1" /></svg></div><div class="astro-theme-toggle-icon-dark"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 1.992a10 10 0 1 0 9.236 13.838c.341-.82-.476-1.644-1.298-1.31a6.5 6.5 0 0 1-6.864-10.787l.077-.08c.551-.63.113-1.653-.758-1.653h-.266l-.068-.006z" /></svg></div></astro-theme-toggle></div></div></div></div></div></nav><div class="main-frame astro-3iko6sul"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-nrnkqug2"><aside class="right-sidebar-container print:hidden astro-nrnkqug2"><div class="right-sidebar astro-nrnkqug2"><div class="lg:sl-hidden astro-q5mffni3"><div class="[&amp;_nav]:backdrop-blur [&amp;_summary]:border-b-(--sl-color-hairline)"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-5ulgm6bh"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-5ulgm6bh"><details id="starlight__mobile-toc" class="astro-5ulgm6bh"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-5ulgm6bh"><span class="toggle sl-flex astro-5ulgm6bh">On this page<svg aria-hidden="true" class="caret astro-5ulgm6bh astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-5ulgm6bh"></span></summary><div class="dropdown astro-5ulgm6bh"><ul class="isMobile astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#summary" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Summary</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#goals" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Goals</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#background" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Background</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#design" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Design</span></a><ul class="isMobile astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#what-ducklake-actually-issues" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">What DuckLake actually issues</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#moraines-translation-obligations" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">moraine’s translation obligations</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#read-your-writes-projections" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Read-your-writes projections</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#reader-safety" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Reader safety</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#one-reclamation-path-for-flush-and-compaction" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">One reclamation path for flush and compaction</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#test-obligations" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Test obligations</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#alternatives-considered" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Alternatives considered</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.BcSo_yiZ.js"></script></div></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-q5mffni3"><div class="sl-container astro-q5mffni3"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#summary" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Summary</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#goals" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Goals</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#background" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Background</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#design" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Design</span></a><ul class="astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#what-ducklake-actually-issues" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">What DuckLake actually issues</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#moraines-translation-obligations" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">moraine’s translation obligations</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#read-your-writes-projections" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Read-your-writes projections</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#reader-safety" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Reader safety</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#one-reclamation-path-for-flush-and-compaction" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">One reclamation path for flush and compaction</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#test-obligations" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Test obligations</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#alternatives-considered" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Alternatives considered</span></a></li></ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.Csloo1VZ.js"></script></div></div></div></aside><div class="main-pane astro-nrnkqug2"><main data-pagefind-body class="astro-vdxcvpsm" lang="en" dir="ltr"><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><h1 id="_top" class="astro-2sm4b3ln">RFC 0007: Snapshot expiry and garbage collection</h1></div></div><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><div class="sl-markdown-content"><ul>
+<li><strong>Date:</strong> 2026-07-09 (revised 2026-07-13 against DuckLake’s implementation)</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="summary">Summary</h2><a class="sl-anchor-link" href="#summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Summary”</span></a></div>
+<p>DuckLake catalog history accumulates without bound: ended entity versions
+pile up in <code dir="auto">history</code>, snapshot records in <code dir="auto">snapshot</code>, and superseded
+data/delete files linger in object storage after no snapshot references
+them. This RFC defines how that state is reclaimed when moraine is the
+catalog. The load-bearing fact, source-verified against DuckLake
+(<code dir="auto">DuckLakeMetadataManager::DeleteSnapshots</code>, <code dir="auto">ducklake_cleanup_files.cpp</code>):
+<strong>reclamation is DuckLake-driven, not moraine-driven.</strong>
+<code dir="auto">ducklake_expire_snapshots</code> computes the dead set and issues a cascade of
+interleaved SELECTs and DELETE/INSERT statements against the metadata
+catalog inside one transaction; <code dir="auto">ducklake_cleanup_old_files</code> and
+<code dir="auto">ducklake_delete_orphaned_files</code> physically delete bytes through DuckDB’s
+own filesystem. moraine’s whole job is faithful <strong>translation</strong> (staged
+DELETEs against snapshot, history, and schedule records), faithful
+<strong>projection</strong> (a real <code dir="auto">ducklake_files_scheduled_for_deletion</code> table), and
+<strong>read-your-writes</strong> (the cascade’s SELECTs observe its own uncommitted
+DELETEs). moraine invents no retention policy, computes no dead set, and
+deletes no data bytes.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="goals">Goals</h2><a class="sl-anchor-link" href="#goals"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Goals”</span></a></div>
+<ul>
+<li>Loading the current catalog stays proportional to <em>live</em> state (RFC
+0002’s load-bearing guarantee). Expiry keeps <code dir="auto">history</code> / <code dir="auto">snapshot</code> from
+growing with total history rather than live catalog size.</li>
+<li><strong>Faithful to DuckLake.</strong> moraine translates the exact row operations
+<code dir="auto">ducklake_expire_snapshots</code> / <code dir="auto">ducklake_cleanup_old_files</code> /
+<code dir="auto">ducklake_delete_orphaned_files</code> issue; it invents no stricter or looser
+policy (consistent with RFC 0004: implement DuckLake’s model, don’t
+impose one).</li>
+<li><strong>Reclamation is atomic.</strong> A maintenance transaction lands as one
+SlateDB <code dir="auto">WriteBatch</code> (RFC 0002 atomicity invariant) — a crash leaves the
+whole cleanup or none.</li>
+<li><strong>Physical deletion is decoupled from logical expiry</strong> by the schedule
+(<code dir="auto">ducklake_files_scheduled_for_deletion</code>), so a reader holding a
+slightly stale view never dereferences bytes that were just reclaimed.
+The split is DuckLake’s own design; moraine serves and mutates the
+schedule, DuckDB deletes the bytes.</li>
+</ul>
+<p>Non-goals:</p>
+<ul>
+<li><strong>Expiry policy / scheduling</strong> — <em>when</em> to expire, the retention window
+(<code dir="auto">older_than</code> / <code dir="auto">versions</code>), and the cleanup grace period are DuckLake
+parameters; moraine neither computes nor validates them.</li>
+<li><strong>Compaction / data-file rewriting</strong> — RFC 0008. Expiry removes <em>dead</em>
+state; compaction rewrites <em>live</em> state. The two meet at the schedule:
+merge-superseded files are scheduled by compaction directly,
+rewrite-superseded files become dead history this RFC’s cascade later
+reclaims.</li>
+<li><strong>Multi-writer coordination</strong> — the RFC 0004 topology stands; expiry and
+cleanup run inside the single writer.</li>
+<li><strong>A moraine-native maintenance surface</strong> — no public verb (RFC 0003).
+The staged-row path is the only mutation surface, as for every
+DuckLake-authored change.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="background">Background</h2><a class="sl-anchor-link" href="#background"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Background”</span></a></div>
+<p>RFC 0002 established the relevant shape:</p>
+<ul>
+<li><code dir="auto">history</code> (append-only) holds ended entity versions; its keys end with
+the version’s <code dir="auto">end_snapshot</code>. RFC 0002 delegates its garbage collection
+here.</li>
+<li><code dir="auto">snapshot</code> is one immutable record per snapshot; <code dir="auto">sys/head</code> holds the
+latest committed <code dir="auto">snapshot_id</code>.</li>
+<li><code dir="auto">current/gcfile</code>, keyed by <code dir="auto">data_file_id</code>, maps
+<code dir="auto">ducklake_files_scheduled_for_deletion</code> — a live bookkeeping list, not a
+time-versioned entity (no begin/end).</li>
+<li><code dir="auto">file</code> / <code dir="auto">delfile</code> records reference object-store paths in their values.</li>
+</ul>
+<p>RFC 0005’s flush hard-deletes inlined chunks outright (DuckLake’s
+delete-at-flush semantics), so the <code dir="auto">inline</code> subspace leaves nothing for
+this RFC to reclaim.</p>
+<p>RFC 0006 fixes the surface this RFC rides: DuckLake speaks generic SQL
+against moraine’s row-faithful <code dir="auto">ducklake_*</code> projections, and its writes
+arrive as staged row operations translated into one atomic batch.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="design">Design</h2><a class="sl-anchor-link" href="#design"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Design”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="what-ducklake-actually-issues">What DuckLake actually issues</h3><a class="sl-anchor-link" href="#what-ducklake-actually-issues"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “What DuckLake actually issues”</span></a></div>
+<p><strong><code dir="auto">ducklake_expire_snapshots(older_than / versions)</code></strong> selects the
+expirable snapshots <code dir="auto">E</code> (never the most recent) and runs, in one metadata
+transaction (<code dir="auto">DeleteSnapshots</code>):</p>
+<p><code dir="auto">E</code> is an arbitrary set of snapshot ids, not a prefix of history:
+<code dir="auto">versions</code> names interior snapshots directly, leaving later ones live.
+Nothing in the translation below is tail-specific — the dead-row rule asks
+whether <em>some</em> surviving snapshot sees a version, never whether the
+survivors form a suffix.</p>
+<ol>
+<li><code dir="auto">DELETE FROM ducklake_snapshot WHERE snapshot_id IN (E)</code>; same for
+<code dir="auto">ducklake_snapshot_changes</code>.</li>
+<li><code dir="auto">SELECT table_id FROM ducklake_table WHERE end_snapshot IS NOT NULL AND NOT EXISTS (SELECT … FROM ducklake_snapshot WHERE snapshot_id &gt;= begin_snapshot AND snapshot_id &lt; end_snapshot) …</code> — the <strong>dead-row
+rule</strong>: a version no surviving snapshot can see. This SELECT must
+observe step 1’s uncommitted deletes.</li>
+<li>The same dead-row rule over <code dir="auto">ducklake_data_file</code> (plus a dropped-table
+filter) → <code dir="auto">DELETE FROM ducklake_data_file / ducklake_file_column_stats / ducklake_file_variant_stats / ducklake_file_partition_value WHERE data_file_id IN (…)</code> and <code dir="auto">INSERT INTO ducklake_files_scheduled_for_deletion VALUES (data_file_id, path, path_is_relative, NOW())</code> per file.</li>
+<li>The same over <code dir="auto">ducklake_delete_file</code> → row deletes + schedule inserts.</li>
+<li>For fully-dead tables: <code dir="auto">DELETE … WHERE table_id IN (…)</code> across
+<code dir="auto">ducklake_table</code>, both stats tables, partition/sort tables,
+<code dir="auto">ducklake_column</code>, <code dir="auto">ducklake_column_tag</code>, <code dir="auto">ducklake_schema_versions</code>,
+<code dir="auto">ducklake_inlined_data_tables</code>, <code dir="auto">ducklake_column_mapping</code>, plus <code dir="auto">DROP TABLE IF EXISTS ducklake_inlined_data_&lt;t&gt;_&lt;v&gt;</code>.</li>
+<li>The dead-row rule over <code dir="auto">ducklake_schema</code> / <code dir="auto">ducklake_view</code> /
+<code dir="auto">ducklake_tag</code> / <code dir="auto">ducklake_macro</code>, then orphan-cascade deletes on
+<code dir="auto">ducklake_macro_impl</code> / <code dir="auto">ducklake_macro_parameters</code> /
+<code dir="auto">ducklake_name_mapping</code> (NOT EXISTS against their parents — observing
+step 6’s own deletes).</li>
+</ol>
+<p><strong>No new snapshot row is inserted anywhere in the cascade</strong> — expiry does
+not advance head.</p>
+<p><strong><code dir="auto">ducklake_cleanup_old_files(older_than / cleanup_all)</code></strong> reads the
+schedule, calls <code dir="auto">fs.RemoveFiles(paths)</code> — DuckDB’s filesystem, not
+moraine — then <code dir="auto">DELETE FROM ducklake_files_scheduled_for_deletion WHERE data_file_id IN (…)</code>. Bytes first, then the record: a crash between the
+two leaves a schedule row whose file is already gone, and the next cleanup
+re-issues a no-op delete and converges. Also mints no snapshot.</p>
+<p><strong><code dir="auto">ducklake_delete_orphaned_files(older_than / cleanup_all)</code></strong> LISTs the
+data prefix through DuckDB’s filesystem, diffs against the catalog’s
+referenced set (read through moraine’s projections), and deletes
+never-referenced files older than the threshold. It mutates no catalog
+record; moraine’s involvement is serving correct projections.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="moraines-translation-obligations">moraine’s translation obligations</h3><a class="sl-anchor-link" href="#moraines-translation-obligations"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “moraine’s translation obligations”</span></a></div>
+<p>The cascade arrives on the staged-row path (RFC 0006) as row operations
+moraine must translate into one atomic batch:</p>
+<ul>
+<li><strong>Schedule rows.</strong> <code dir="auto">ducklake_files_scheduled_for_deletion</code> insert →
+put <code dir="auto">current/gcfile</code> keyed by the row’s <code dir="auto">data_file_id</code> (its identity in
+DuckLake’s own schema — inserts carry it, cleanup deletes by it; no
+moraine-allocated id and no counter). Delete by <code dir="auto">data_file_id</code> → delete
+the key.</li>
+<li><strong>Snapshot records.</strong> <code dir="auto">ducklake_snapshot</code> delete by <code dir="auto">snapshot_id</code> →
+delete the <code dir="auto">snapshot</code> key. Deleting the head snapshot is refused
+(DuckLake’s own filter already excludes <code dir="auto">MAX(snapshot_id)</code>; moraine
+enforces it as a constraint). The paired <code dir="auto">ducklake_snapshot_changes</code>
+delete is a validated no-op — the two tables are one merged record.</li>
+<li><strong>Versioned-entity rows.</strong> A DELETE against a versioned kind names the
+exact row by <code dir="auto">(entity id …, begin_snapshot, end_snapshot)</code>:
+<code dir="auto">end_snapshot IS NULL</code> deletes the <code dir="auto">current</code> key, otherwise the
+<code dir="auto">history</code> key. This is a hard prune — nothing moves to history; the
+record ceases to exist.</li>
+<li><strong>Embedded rows.</strong> Deletes against tables whose rows embed in a parent
+record (<code dir="auto">ducklake_column_tag</code>, <code dir="auto">ducklake_partition_column</code>,
+<code dir="auto">ducklake_sort_expression</code>, <code dir="auto">ducklake_file_partition_value</code>,
+<code dir="auto">ducklake_name_mapping</code>) ride their parent’s deletion in the same cascade
+and translate as validated no-ops. Step 6’s orphan sweep over
+<code dir="auto">ducklake_name_mapping</code> is one of these: the rows it looks for were freed
+with the record step 5 deleted, so the sweep is accepted and lands as a
+no-op whether it shares that transaction or follows it.</li>
+<li><strong>The mapping record itself</strong> takes a real hard delete in step 5, keyed
+<code dir="auto">(mapping_id, table_id)</code> and carrying no <code dir="auto">end_snapshot</code> — the one
+unversioned kind on that path.</li>
+<li><strong>Schema-version rows.</strong> <code dir="auto">ducklake_schema_versions</code> rows are <strong>not</strong>
+expired with the snapshots that wrote them. They live in their own
+subspace (RFC 0002) and are deleted only where DuckLake’s own catalogs
+delete them: step 5’s dead-table cleanup, by <code dir="auto">table_id</code>. Expiring them
+with their snapshot would leave every data file older than the
+retention horizon unable to resolve the schema version it was written
+under, which aborts DuckLake’s compaction planner (RFC 0008) at bind
+for the whole table. A store that lost its rows that way is repaired on
+read: the projection floors each affected table at its oldest data
+file, carrying the oldest schema version still known for it.</li>
+<li><strong>Derived row-ID file statistics.</strong> The patched DuckLake backfill may
+insert an unversioned <code dir="auto">ducklake_file_column_stats</code> row for DuckDB’s
+reserved row-ID field id <code dir="auto">2147483540</code> without inserting a snapshot. The
+row is derived from an immutable active Parquet file: its dense
+<code dir="auto">row_id_start</code> range, or the embedded row-ID column for a sparse rewrite.
+This one insert shape is maintenance; ordinary file-column statistics and
+every versioned-entity insert still require a snapshot-minting commit.</li>
+<li><strong>No snapshot minted.</strong> A staged transaction whose operations are all
+maintenance operations commits without a <code dir="auto">ducklake_snapshot</code> insert: one
+<code dir="auto">WriteBatch</code>, no new snapshot record, and <code dir="auto">sys/head</code> retains its snapshot
+id while advancing its batch count. Atomicity is unchanged; a racing writer
+is caught by the store transaction’s write-write conflict detection and
+surfaces the same <code dir="auto">conflict</code>-substring error every staged commit uses. A
+mixed set (entity mutations but no snapshot row) stays a constraint error —
+DuckLake always mints a snapshot for real catalog changes.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="read-your-writes-projections">Read-your-writes projections</h3><a class="sl-anchor-link" href="#read-your-writes-projections"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Read-your-writes projections”</span></a></div>
+<p>Steps 2, 3, and 6 of the cascade compute dead sets with <code dir="auto">NOT EXISTS</code>
+subqueries over <code dir="auto">ducklake_snapshot</code> <em>after</em> the same transaction staged
+its snapshot deletes, and the orphan-cascade deletes read parents deleted
+moments earlier. Projections that serve only committed state would make
+the cascade see expired snapshots as still present and silently
+under-schedule — expiry would delete snapshot rows but never reclaim
+files.</p>
+<p>The extension surface therefore serves projections <strong>through the active
+staged transaction</strong> when one exists: the dump overlays the transaction’s
+accumulated operations on the committed state, so a statement reads what
+its transaction already wrote. Outside a write transaction, dumps serve
+committed state as before. This is an RFC 0006 obligation.</p>
+<p>The overlay is <strong>not</strong> commit-time translation run early, and that is what
+makes it cheap. A staged row is stored untranslated — DuckLake’s own cells,
+carrying the snapshot ids DuckLake itself authored — so what a transaction
+will see is fully determined the moment it stages the row. The overlay
+therefore decodes each staged row with the same decoders translation uses
+and applies it to the scanned records in stage order: an insert appends, a
+hard delete drops exactly the version it names, an <code dir="auto">UPDATE ... SET end_snapshot</code> ends the live version, an <code dir="auto">UPDATE ... SET begin_snapshot</code>
+rebases it, and the unversioned kinds overwrite or remove by key. It
+validates nothing and diffs nothing; a row translation would refuse still
+appears here and fails at commit, where the refusal belongs.</p>
+<p>One overlay serves every kind, so a kind is added by naming its key, its
+lifecycle accessors, and its row decoder — never by hand-writing a
+projection. Committed records are scanned once per transaction and shared
+across kinds, since the transaction is snapshot-isolated and a metadata
+population asks for one kind after another.</p>
+<p>Four shapes cover the whole catalog:</p>
+<ul>
+<li><strong>Versioned records</strong> — the entity kinds, keyed by their <code dir="auto">EntityKey</code> and
+moved by the lifecycle rules above.</li>
+<li><strong>Unversioned records</strong> — the statistics kinds, the deletion schedule, and
+the mappings: overwritten or removed by key, no lifecycle at all.</li>
+<li><strong>Embedded rows</strong> — a partition spec’s columns, a file’s partition values,
+a macro’s implementations and their parameters, a mapping’s name rows, a
+column’s tags. These ride their parent’s record, so the projection is its
+parents’ rows plus the rows this transaction staged for parents it is
+inserting. A staged child always names a parent the same batch inserts —
+translation refuses one that does not — and an embedded row is only ever
+removed alongside the parent that carries it, so the parent’s own overlay
+is the delete.</li>
+<li><strong>Derived projections</strong> — <code dir="auto">ducklake_schema_versions</code>, assembled from the
+<code dir="auto">schema_version</code> records plus the snapshots that still fold the same rows
+in plus the data files the floor rows repair, and <code dir="auto">ducklake_metadata</code>,
+whose fixed rows are store facts and whose stored half is an option
+overlay. Each is built from its overlaid inputs by the very function the
+committed dump uses, so the two cannot diverge.</li>
+</ul>
+<p><strong>Every kind is tx-aware, and that is not merely thoroughness.</strong> Partial
+coverage is <em>worse</em> than none: a cascade joining an overlaid table against a
+committed-state one sees a torn view — a data file this transaction deleted,
+still carrying partition-value rows that name it. Uniformity is what makes
+the view a view.</p>
+<p><strong>The scan and the write path must overlay identically.</strong> A rowid a
+metadata scan emits is the row’s index into whatever list that scan
+materialized, and the staged-write sink resolves the index back against a
+list of its own. Making a kind tx-aware for the scan alone is therefore
+not a partial improvement but a corruption: an <code dir="auto">UPDATE</code>/<code dir="auto">DELETE ... WHERE ctid</code>-shaped statement would resolve an index into the overlaid list
+against the committed one, and name a different row or none.</p>
+<p>Identical <em>content</em> is not enough, because two materializations taken at
+two committed heads can differ in content — which is why the two are one
+materialization rather than two that agree. <strong>A table is materialized once
+per DuckDB transaction and shared</strong> (RFC 0009’s read-side companion to
+this): the scan takes the list, the sink takes the same list, and the
+index cannot mean two things. The sink pins it <em>before</em> opening the staged
+transaction, because opening one is what moves the transaction from
+reading the pinned committed dump to reading through the staged
+transaction’s own read point — and the scan that emitted the rowids bound
+in whichever of those held.</p>
+<p>That sharing is confined to the reader side. Once a transaction has opened
+a staged transaction, every read of a writable kind goes to the staged
+dump and nothing caches over it: DuckLake’s commit loop re-reads exactly
+that surface between attempts, and a retry served the state its first
+attempt saw would re-check its conflict matrix against a premise that
+already lost.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="reader-safety">Reader safety</h3><a class="sl-anchor-link" href="#reader-safety"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Reader safety”</span></a></div>
+<p>The safety contract is unchanged from DuckLake’s own, and is documented
+for operators in the “Operating a lake” guide: <strong>the retention window must
+exceed the maximum expected read/attach duration</strong>, and the cleanup grace period
+(<code dir="auto">cleanup_old_files</code>’ <code dir="auto">older_than</code>) must exceed the maximum reader/scan
+duration. Logical expiry deletes no bytes; a reader holding a view of an
+expired snapshot keeps scanning bytes that survive until a cleanup whose
+grace period has passed. A reader that held a view longer than the window
+may find its snapshot expired and must re-resolve from head
+(<code dir="auto">SnapshotExpired</code>, RFC 0003/0009).</p>
+<p>moraine exposes no registry of live reader snapshots. Readers are
+cross-process and uncoordinated (RFC 0004), so an extension-local registry
+would be incomplete and could not safely derive a retention window. Operators
+set the window from the workload’s externally observed transaction and scan
+durations; a process-local diagnostic would not change that contract.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="one-reclamation-path-for-flush-and-compaction">One reclamation path for flush and compaction</h3><a class="sl-anchor-link" href="#one-reclamation-path-for-flush-and-compaction"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “One reclamation path for flush and compaction”</span></a></div>
+<p>Inline flush (RFC 0005) hard-deletes its consumed inline records itself.
+Compaction (RFC 0008) schedules merge-superseded files directly and ends
+rewrite-superseded rows into history, whence this RFC’s cascade reclaims
+them once no surviving snapshot references them. Every path to physical
+deletion goes through <code dir="auto">ducklake_files_scheduled_for_deletion</code> and
+DuckDB’s cleanup functions.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="test-obligations">Test obligations</h3><a class="sl-anchor-link" href="#test-obligations"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Test obligations”</span></a></div>
+<p>Per RFC 0001, core tests run against real SlateDB on in-memory
+<code dir="auto">object_store</code>; the live path is pinned by <code dir="auto">cargo xtask e2e</code>:</p>
+<ul>
+<li><strong>Maintenance commits preserve head.</strong> A staged expiry lands with no new
+snapshot record and an unchanged <code dir="auto">sys/head</code>.</li>
+<li><strong>Expiry prunes.</strong> After a staged cascade mirroring DuckLake’s output:
+the named snapshot records are gone; dead history keys are gone; the
+scheduled files appear in <code dir="auto">current/gcfile</code> with their paths; the current
+view at head is unchanged.</li>
+<li><strong>Cleanup forgets.</strong> A schedule-row delete removes the <code dir="auto">gcfile</code> key.</li>
+<li><strong>Head-snapshot deletion is refused</strong> with a constraint error.</li>
+<li><strong>Time travel below the prune no longer resolves; above it, resolves
+identically to pre-expiry.</strong></li>
+<li><strong>Read-your-writes.</strong> A dump through a staged transaction that deleted a
+snapshot omits it; a dump outside the transaction still serves it.</li>
+<li><strong>Live e2e.</strong> <code dir="auto">ducklake_expire_snapshots</code> then <code dir="auto">ducklake_cleanup_old_files</code>
+against a real DuckLake: expired snapshots unlistable, time travel to
+them errors, current results unchanged, scheduled Parquet survives until
+cleanup and is deleted by it, the schedule drains, and
+<code dir="auto">ducklake_delete_orphaned_files</code> removes a planted stray while every
+catalogued file survives.</li>
+<li><strong>Racing verb commits stay sound.</strong> A verb-path retry whose base
+predates a concurrent expiry treats a missing intervening snapshot
+record as a conflict-and-refresh, never as corruption.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="alternatives-considered">Alternatives considered</h2><a class="sl-anchor-link" href="#alternatives-considered"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Alternatives considered”</span></a></div>
+<ul>
+<li><strong>A moraine-side expiry engine</strong> (the prior revision of this RFC:
+moraine computes a retention horizon, prunes history by an
+<code dir="auto">end_snapshot &lt;= H</code> rule, allocates deletion ids, advances head, and
+issues object-store DELETEs itself). Rejected on source-verification:
+DuckLake already drives all of it through the metadata catalog, and a
+parallel moraine engine would be a second policy implementation to keep
+faithful forever. The v0.1 target is DuckLake parity through DuckLake’s
+own code paths; a native surface can be designed later if a non-DuckLake
+consumer appears.</li>
+<li><strong>Expiry commits that mint a snapshot</strong> (every head-visible mutation is
+a snapshot). Rejected: DuckLake’s cascade inserts no snapshot row, and
+minting one moraine-side would desynchronize <code dir="auto">ducklake_snapshot</code> from
+what DuckLake wrote — the projections would serve a row DuckLake never
+authored. Head-preserving maintenance commits keep row-faithfulness;
+options-only commits set the precedent.</li>
+<li><strong>Keying the schedule by a moraine-allocated <code dir="auto">deletion_id</code></strong> (the prior
+revision). Rejected: the schedule’s identity in DuckLake’s schema is
+<code dir="auto">data_file_id</code> (inserts carry it first; cleanup deletes
+<code dir="auto">WHERE data_file_id IN (…)</code>), a file is scheduled at most once (its
+catalog rows are removed in the transaction that schedules it), and a
+moraine counter would need somewhere durable to advance — maintenance
+commits mint no snapshot record to carry it.</li>
+<li><strong>Reference-counting files instead of scan-based scheduling.</strong> Rejected:
+a per-file count is mutable shared state requiring read-modify-write on
+every commit that adds or ends a reference — contradicting RFC 0002’s
+append-only writes and inflating RFC 0004’s conflict sets. DuckLake’s
+dead-row rule identifies unreferenced files without maintaining any
+count.</li>
+<li><strong>Tombstoning <code dir="auto">snapshot</code> records instead of deleting them.</strong> Rejected:
+the goal is to reclaim space; a tombstone still occupies the range a
+time-travel loader scans. <code dir="auto">snapshot</code> immutability is relaxed <em>only</em> for
+expiry, and deletion is the whole point.</li>
+<li><strong>Committed-state-only projections with a re-ordered cascade.</strong> Rejected:
+the statement order is DuckLake’s, not moraine’s to re-order, and its
+correctness depends on transactional read-your-writes — the property
+every SQL-backed metadata catalog provides. Serving it at the
+projection layer is the faithful move; anything else silently
+under-reclaims.</li>
+</ul>
+</div><script type="module">var e=class extends HTMLElement{constructor(){super()}connectedCallback(){let e=()=>{let e=t===`ready`?`<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></g></svg>`:`<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/></svg>`;this.innerHTML=`<span class="w-full h-full block [&_svg]:w-full [&_svg]:h-full">`+e+`</span>`},t=`ready`;e(),this.addEventListener(`click`,()=>{if(t===`ready`){t=`success`,e();let n=this.dataset.code||``;navigator.clipboard.writeText(n),setTimeout(()=>{t=`ready`,e()},1500)}})}};customElements.define(`nova-code-copy-button`,e);</script><script type="module" src="/_astro/MarkdownContent.astro_astro_type_script_index_0_lang.x0CmCSF8.js"></script><footer class="sl-flex astro-xhxjzfa7"><div class="meta sl-flex astro-xhxjzfa7"></div><div class="flex min-w-full flex-row items-stretch justify-between gap-2 px-1 pt-0 pb-6 print:hidden" dir="ltr"><a href="/rfcs/0006-extension-surface/" rel="prev" data-side="left" class="group m-0 flex items-center justify-end gap-2 rounded-xl p-2 font-medium text-(--sl-color-gray-2) no-underline transition hover:text-(--sl-color-white) md:text-lg [[rel='next']]:flex-row [[rel='prev']]:flex-row-reverse"><span>0006: Extension surface</span><svg width="1em" height="1em" viewBox="0 0 24 24" class="block min-h-5 min-w-5 transition group-hover:-translate-x-1"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18l-6-6l6-6" /></svg></a><div class="flex-1"></div><a href="/rfcs/0008-compaction/" rel="next" data-side="right" class="group m-0 flex items-center justify-end gap-2 rounded-xl p-2 font-medium text-(--sl-color-gray-2) no-underline transition hover:text-(--sl-color-white) md:text-lg [[rel='next']]:flex-row [[rel='prev']]:flex-row-reverse"><span>0008: Maintenance operations — compaction and delete-file consolidation</span><svg width="1em" height="1em" viewBox="0 0 24 24" class="block min-h-5 min-w-5 transition group-hover:translate-x-1"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6" /></svg></a></div></footer></div></div></main></div></div></div></div></body></html>

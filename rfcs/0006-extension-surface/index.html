@@ -1,0 +1,1205 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-vdxcvpsm"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>RFC 0006: Extension surface | moraine</title><link rel="canonical" href="https://morainedb.github.io/rfcs/0006-extension-surface/"/><link rel="sitemap" href="/sitemap-index.xml"/><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.1.4"/><meta name="generator" content="Starlight v0.41.4"/><meta property="og:title" content="RFC 0006: Extension surface"/><meta property="og:type" content="article"/><meta property="og:url" content="https://morainedb.github.io/rfcs/0006-extension-surface/"/><meta property="og:locale" content="en"/><meta property="og:description" content="A DuckLake catalog that lives in your bucket — SlateDB-backed, serverless, nothing to operate."/><meta property="og:site_name" content="moraine"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="A DuckLake catalog that lives in your bucket — SlateDB-backed, serverless, nothing to operate."/><script>
+"use strict";(()=>{(()=>{let t="theme-toggle",n;function r(){return window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}function l(){let e=localStorage.getItem(t);return e==="dark"||e==="light"?e:null}function m(){return n||l()||r()}function s(e){e===r()?localStorage.removeItem(t):localStorage.setItem(t,e)}function h(e){let o=document.documentElement;o.classList.toggle("dark",e==="dark"),o.dataset.theme=e,o.style.colorScheme=e}function a(e){n=e,s(e),h(e)}function c(){a(m())}c(),document.addEventListener("astro:after-swap",c),window.astroThemeToggle={setTheme:a,getTheme:m}})();})();
+</script><link rel="stylesheet" href="/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/_astro/common.DJmCPQrT.css"><style>@layer starlight.components{.card:where(.astro-zts4jgjd){--sl-card-border:var(--sl-color-purple);--sl-card-bg:var(--sl-color-purple-low);border:1px solid var(--sl-color-gray-5);background-color:var(--sl-color-black);flex-direction:column;gap:clamp(.5rem,.125rem + 1vw,1rem);padding:clamp(1rem,.125rem + 3vw,2.5rem)}.card:where(.astro-zts4jgjd):nth-child(4n+1){--sl-card-border:var(--sl-color-orange);--sl-card-bg:var(--sl-color-orange-low)}.card:where(.astro-zts4jgjd):nth-child(4n+3){--sl-card-border:var(--sl-color-green);--sl-card-bg:var(--sl-color-green-low)}.card:where(.astro-zts4jgjd):nth-child(4n+4){--sl-card-border:var(--sl-color-red);--sl-card-bg:var(--sl-color-red-low)}.card:where(.astro-zts4jgjd):nth-child(4n+5){--sl-card-border:var(--sl-color-blue);--sl-card-bg:var(--sl-color-blue-low)}.title:where(.astro-zts4jgjd){font-weight:600;font-size:var(--sl-text-h4);color:var(--sl-color-white);line-height:var(--sl-line-height-headings);align-items:center;gap:1rem}.card:where(.astro-zts4jgjd) .icon:where(.astro-zts4jgjd){border:1px solid var(--sl-card-border);background-color:var(--sl-card-bg);border-radius:.25rem;flex-shrink:0;padding:.2em}.card:where(.astro-zts4jgjd) .body:where(.astro-zts4jgjd){font-size:clamp(var(--sl-text-sm), calc(.5rem + 1vw), var(--sl-text-body));margin:0}.card-grid:where(.astro-lmor3ela){grid-template-columns:100%;gap:1rem;display:grid}.card-grid:where(.astro-lmor3ela)>*{margin-top:0!important}@media (width>=50rem){.card-grid:where(.astro-lmor3ela){grid-template-columns:1fr 1fr;gap:1.5rem}.stagger:where(.astro-lmor3ela){--stagger-height:5rem;padding-bottom:var(--stagger-height)}.stagger:where(.astro-lmor3ela)>:nth-child(2n){transform:translateY(var(--stagger-height))}}}
+@layer starlight.components{svg:where(.astro-n5k4ipy7){color:var(--sl-icon-color);font-size:var(--sl-icon-size,1em);width:1em;height:1em}}
+</style><script type="module" src="/_astro/page.LAbJoB63.js"></script></head><body class="astro-vdxcvpsm"><a class="sl-skip-link astro-vxeigawq" href="#_top">Skip to content</a><div class="flex min-h-screen flex-col astro-3iko6sul"><header class="fixed inset-0 z-(--sl-z-index-navbar) box-border h-(--sl-nav-height) w-full border-0 border-b border-solid border-(--sl-color-hairline) bg-(--sl-color-bg-nav) px-(--sl-nav-pad-x) py-(--sl-nav-pad-y) backdrop-blur astro-3iko6sul"><div class="box-border flex h-full items-center gap-2"><div class="-m-3 overflow-clip p-3 flex min-w-0"><span class="-m-1.5 rounded-md p-1.5 **:text-lg **:font-semibold **:text-(--sl-color-text) focus-visible:outline-offset-0"><a href="/" class="site-title sl-flex astro-clw6ags5"><img class="light:sl-hidden print:hidden astro-clw6ags5" alt src="/_astro/moraine-dark.CEVNFCXz.svg" width="128" height="128"><img class="dark:sl-hidden print:block astro-clw6ags5" alt src="/_astro/moraine.B97P_dWh.svg" width="128" height="128"><span class="astro-clw6ags5" translate="no">moraine</span></a></span></div><nav class="flex flex-1 flex-row gap-4 overflow-x-auto py-3 pr-4 pl-4 text-sm font-medium max-md:**:hidden xl:gap-6 xl:pl-6"></nav><div class="flex md:max-w-60 md:flex-1 print:hidden"><site-search class=" astro-hdulihjd" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"><button class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90 md:h-9 md:w-full md:max-w-88 md:rounded-md md:border md:border-solid md:border-(--sl-color-gray-5) md:p-2 md:text-(--sl-color-text) md:transition-colors md:hover:bg-gray-400/10 astro-hdulihjd" data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4 astro-hdulihjd"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m21 21l-4.34-4.34" /><circle cx="11" cy="11" r="8" /></g></svg><span class="sl-hidden md:sl-block astro-hdulihjd" aria-hidden="true">Search</span><kbd class="sl-hidden md:sl-flex astro-hdulihjd" style="display: none;"><kbd class="astro-hdulihjd">Ctrl</kbd><kbd class="astro-hdulihjd">K</kbd></kbd></button><dialog style="padding:0" aria-label="Search" class="astro-hdulihjd"><div class="dialog-frame sl-flex astro-hdulihjd"><button data-close-modal class="sl-flex md:sl-hidden astro-hdulihjd">Cancel</button><div class="search-container astro-hdulihjd"><div id="starlight__search" class="astro-hdulihjd"></div></div></div></dialog></site-search><script>
+  ;(() => {
+    const openBtn = document.querySelector('button[data-open-modal]')
+    const shortcut = openBtn?.querySelector('kbd')
+    if (!openBtn || !(shortcut instanceof HTMLElement)) return
+    const platformKey = shortcut.querySelector('kbd')
+    if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+      platformKey.textContent = '⌘'
+      openBtn.setAttribute('aria-keyshortcuts', 'Meta+K')
+    }
+    shortcut.style.display = ''
+  })()
+</script><script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.vTFUHulS.js"></script></div><div class="hidden items-center gap-2 md:flex print:hidden"><a href="https://github.com/morainedb/moraine" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">GitHub</span><svg aria-hidden="true" class=" astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script><div class="size-8 overflow-visible"><astro-theme-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><div class="astro-theme-toggle-icon-light"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 19a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1m-4.95-2.05a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0m11.314 0l1.414 1.414a1 1 0 0 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 1.414-1.414m-5.049-9.836a5 5 0 1 1-2.532 9.674a5 5 0 0 1 2.532-9.674M4 11a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zm18 0a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM5.636 4.222L7.05 5.636A1 1 0 0 1 5.636 7.05L4.222 5.636a1 1 0 0 1 1.414-1.414m14.142 0a1 1 0 0 1 0 1.414L18.364 7.05a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0M12 1a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1" /></svg></div><div class="astro-theme-toggle-icon-dark"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 1.992a10 10 0 1 0 9.236 13.838c.341-.82-.476-1.644-1.298-1.31a6.5 6.5 0 0 1-6.864-10.787l.077-.08c.551-.63.113-1.653-.758-1.653h-.266l-.068-.006z" /></svg></div></astro-theme-toggle><script type="module">function e(){return typeof window>`u`?`light`:window.astroThemeToggle?.getTheme?.()||`light`}function t(e){typeof window>`u`||window.astroThemeToggle?.setTheme?.(e)}function n(){t(e()===`light`?`dark`:`light`)}var r=`astro-theme-toggle-temporary-styles`;function i(){document.getElementById(r)?.remove()}function a(){i();let e=document.createElement(`style`);e.id=r,e.textContent=`::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }`,document.head.appendChild(e)}async function o(e,t,n){let r=document;if(typeof r.startViewTransition!=`function`){e();return}a();let o=r.startViewTransition(()=>{e()});await o?.ready,o?.finished?.then(i);let s=.7,c=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><defs><radialGradient id="toggle-theme-gradient"><stop offset="${s}"/><stop offset="1" stop-opacity="0"/></radialGradient></defs><circle cx="4" cy="4" r="4" fill="url(#toggle-theme-gradient)"/></svg>`,l=`data:image/svg+xml;base64,${window.btoa(c)}`,u=window.innerWidth,d=window.innerHeight,f=Math.ceil(Math.hypot(Math.max(t,u-t),Math.max(n,d-n))/s);document.documentElement.animate({maskImage:[`url('${l}')`,`url('${l}')`],maskRepeat:[`no-repeat`,`no-repeat`],maskPosition:[`${t}px ${n}px`,`${t-f}px ${n-f}px`],maskSize:[`0`,`${2*f}px`]},{duration:500,easing:`ease-in`,pseudoElement:`::view-transition-new(root)`})}function s(e){o(n,e.clientX,e.clientY)}var c=class extends HTMLElement{connectedCallback(){this.hasAttribute(`tabindex`)||this.setAttribute(`tabindex`,`0`),this.hasAttribute(`role`)||this.setAttribute(`role`,`button`),this.addEventListener(`click`,s),this.addEventListener(`keydown`,e=>{if(e.key===`Enter`||e.key===` `){e.preventDefault();let t=this.getBoundingClientRect();s({clientX:t.left+t.width/2,clientY:t.top+t.height/2})}})}};customElements.define(`astro-theme-toggle`,c);</script></div></div><div class="flex items-center gap-2 md:hidden print:hidden"><nova-mobile-menu-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90 print:hidden" aria-label="Menu" aria-controls="starlight__sidebar"><div class="transition-transform [body[data-mobile-menu-expanded]_&amp;]:rotate-90"><svg width="1em" height="1em" viewBox="0 0 24 24" class="block [body[data-mobile-menu-expanded]_&amp;]:hidden"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16M4 12h16M4 19h16" /></svg><svg width="1em" height="1em" viewBox="0 0 24 24" class="hidden [body[data-mobile-menu-expanded]_&amp;]:block"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12" /></svg></div></nova-mobile-menu-toggle><script type="module" src="/_astro/MobileMenuToggle.astro_astro_type_script_index_0_lang.Bg4YKcfM.js"></script></div></div></header><nav class="sidebar print:hidden astro-3iko6sul" aria-label="Main" id="nova-sidebar-nav"><div id="starlight__sidebar" class="nova-scroll-container invisible md:visible [body[data-mobile-menu-expanded]_&amp;]:max-md:visible fixed top-(--sl-nav-height) bottom-0 left-0 z-(--sl-z-index-menu) overflow-y-auto border-0 border-solid border-(--sl-color-hairline) bg-(--sl-color-black) max-md:w-full md:w-(--sl-sidebar-width) md:border-r astro-3iko6sul"><div class="sidebar-content flex h-full min-h-max flex-col px-(--sl-sidebar-pad-x) py-4 astro-3iko6sul"><sl-sidebar-state-persist data-hash="05ix94y" class="astro-f5yvicm7"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-ojxuodky"><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Guide</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/guide/what-is-moraine/" class="astro-ojxuodky"><span class="astro-ojxuodky">What is moraine?</span></a></li><li class="astro-ojxuodky"><a href="/guide/getting-started/" class="astro-ojxuodky"><span class="astro-ojxuodky">Getting started</span></a></li><li class="astro-ojxuodky"><a href="/guide/architecture/" class="astro-ojxuodky"><span class="astro-ojxuodky">Architecture</span></a></li><li class="astro-ojxuodky"><a href="/guide/embedding/" class="astro-ojxuodky"><span class="astro-ojxuodky">Embedding the core</span></a></li><li class="astro-ojxuodky"><a href="/guide/operating/" class="astro-ojxuodky"><span class="astro-ojxuodky">Operating a lake</span></a></li></ul></details></li><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Design (RFCs)</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/rfcs/0001-repository-structure-and-conventions/" class="astro-ojxuodky"><span class="astro-ojxuodky">0001: Repository structure and conventions</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0002-slatedb-key-encoding/" class="astro-ojxuodky"><span class="astro-ojxuodky">0002: SlateDB key encoding for DuckLake catalog state</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0003-public-api-shape/" class="astro-ojxuodky"><span class="astro-ojxuodky">0003: Public API shape of the moraine core</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0004-commit-protocol/" class="astro-ojxuodky"><span class="astro-ojxuodky">0004: Commit and transaction protocol</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0005-data-inlining/" class="astro-ojxuodky"><span class="astro-ojxuodky">0005: Data inlining on SlateDB</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0006-extension-surface/" aria-current="page" class="astro-ojxuodky"><span class="astro-ojxuodky">0006: Extension surface</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0007-snapshot-expiry-and-gc/" class="astro-ojxuodky"><span class="astro-ojxuodky">0007: Snapshot expiry and garbage collection</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0008-compaction/" class="astro-ojxuodky"><span class="astro-ojxuodky">0008: Maintenance operations — compaction and delete-file consolidation</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0009-reader-consistency-and-caching/" class="astro-ojxuodky"><span class="astro-ojxuodky">0009: Reader consistency and snapshot caching</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0010-async-sync-bridge/" class="astro-ojxuodky"><span class="astro-ojxuodky">0010: Async↔sync bridge: mechanism, runtime, threading, and cancellation</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0011-crash-recovery/" class="astro-ojxuodky"><span class="astro-ojxuodky">0011: Crash recovery</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0012-schema-evolution-and-versioning/" class="astro-ojxuodky"><span class="astro-ojxuodky">0012: Schema evolution and versioning</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0013-partitioning-sorting-and-pruning/" class="astro-ojxuodky"><span class="astro-ojxuodky">0013: Partitioning, sorting, and pruning</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0014-encryption/" class="astro-ojxuodky"><span class="astro-ojxuodky">0014: Catalog and data encryption</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0015-format-migration/" class="astro-ojxuodky"><span class="astro-ojxuodky">0015: On-disk format migration</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0016-equality-indexes/" class="astro-ojxuodky"><span class="astro-ojxuodky">0016: Equality and range indexes</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0017-read-write-and-read-only-attach/" class="astro-ojxuodky"><span class="astro-ojxuodky">0017: Read-write and read-only attach paths</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0018-column-and-name-mapping/" class="astro-ojxuodky"><span class="astro-ojxuodky">0018: Column and name mapping for externally written Parquet</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0019-macros/" class="astro-ojxuodky"><span class="astro-ojxuodky">0019: Scalar and table macros</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0020-change-data-feed/" class="astro-ojxuodky"><span class="astro-ojxuodky">0020: Change data feed</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0021-maintenance-model/" class="astro-ojxuodky"><span class="astro-ojxuodky">0021: Maintenance orchestration</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0022-commit-log-and-leader-role/" class="astro-ojxuodky"><span class="astro-ojxuodky">0022: The commit log and the leader role</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="flex items-center justify-end gap-2 py-4 print:hidden"><a href="https://github.com/morainedb/moraine" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">GitHub</span><svg aria-hidden="true" class=" astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><div class="size-8 overflow-visible"><astro-theme-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><div class="astro-theme-toggle-icon-light"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 19a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1m-4.95-2.05a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0m11.314 0l1.414 1.414a1 1 0 0 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 1.414-1.414m-5.049-9.836a5 5 0 1 1-2.532 9.674a5 5 0 0 1 2.532-9.674M4 11a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zm18 0a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM5.636 4.222L7.05 5.636A1 1 0 0 1 5.636 7.05L4.222 5.636a1 1 0 0 1 1.414-1.414m14.142 0a1 1 0 0 1 0 1.414L18.364 7.05a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0M12 1a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1" /></svg></div><div class="astro-theme-toggle-icon-dark"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 1.992a10 10 0 1 0 9.236 13.838c.341-.82-.476-1.644-1.298-1.31a6.5 6.5 0 0 1-6.864-10.787l.077-.08c.551-.63.113-1.653-.758-1.653h-.266l-.068-.006z" /></svg></div></astro-theme-toggle></div></div></div></div></div></nav><div class="main-frame astro-3iko6sul"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-nrnkqug2"><aside class="right-sidebar-container print:hidden astro-nrnkqug2"><div class="right-sidebar astro-nrnkqug2"><div class="lg:sl-hidden astro-q5mffni3"><div class="[&amp;_nav]:backdrop-blur [&amp;_summary]:border-b-(--sl-color-hairline)"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-5ulgm6bh"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-5ulgm6bh"><details id="starlight__mobile-toc" class="astro-5ulgm6bh"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-5ulgm6bh"><span class="toggle sl-flex astro-5ulgm6bh">On this page<svg aria-hidden="true" class="caret astro-5ulgm6bh astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-5ulgm6bh"></span></summary><div class="dropdown astro-5ulgm6bh"><ul class="isMobile astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#summary" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Summary</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#goals" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Goals</span></a><ul class="isMobile astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#non-goals" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Non-goals</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#design" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Design</span></a><ul class="isMobile astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#positioning-moraine-is-ducklakes-catalog" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Positioning: moraine is DuckLake’s catalog</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#how-ducklake-reaches-moraine" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">How DuckLake reaches moraine</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#store-uris-and-credentials" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Store URIs and credentials</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#interception-level-catalog-entry-row-faithful-b1" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Interception level: catalog-entry, row-faithful (B1)</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#scoping-the-file-and-file-statistics-scans" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Scoping the file and file-statistics scans</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#composition-c-shim-over-the-rust-core-forced" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Composition: C++ shim over the Rust core (forced)</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#c-abi-error-mapping-v0" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">C ABI error mapping (v0)</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#diagnostics-seam" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Diagnostics seam</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#read-cancellation-seam" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Read cancellation seam</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#version-pinning-and-distribution" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Version pinning and distribution</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#build-and-pin-mechanics-as-implemented" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Build and pin mechanics (as implemented)</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#the-staged-transaction-abi-surface" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">The staged-transaction ABI surface</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#data_inlining_row_limit-is-deliberately-not-synthesized-and-dynamic-inline-table-interception" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">data_inlining_row_limit is deliberately not synthesized, and dynamic inline-table interception</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#standalone-data-scan-retirement" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Standalone data-scan retirement</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#a-known-upstream-race-pin-threads1-for-ducklake-re-reads-after-a-write" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">A known upstream race: pin threads=1 for DuckLake re-reads after a write</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#alternatives-considered" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Alternatives considered</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.BcSo_yiZ.js"></script></div></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-q5mffni3"><div class="sl-container astro-q5mffni3"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#summary" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Summary</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#goals" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Goals</span></a><ul class="astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#non-goals" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Non-goals</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#design" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Design</span></a><ul class="astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#positioning-moraine-is-ducklakes-catalog" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Positioning: moraine is DuckLake’s catalog</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#how-ducklake-reaches-moraine" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">How DuckLake reaches moraine</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#store-uris-and-credentials" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Store URIs and credentials</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#interception-level-catalog-entry-row-faithful-b1" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Interception level: catalog-entry, row-faithful (B1)</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#scoping-the-file-and-file-statistics-scans" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Scoping the file and file-statistics scans</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#composition-c-shim-over-the-rust-core-forced" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Composition: C++ shim over the Rust core (forced)</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#c-abi-error-mapping-v0" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">C ABI error mapping (v0)</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#diagnostics-seam" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Diagnostics seam</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#read-cancellation-seam" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Read cancellation seam</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#version-pinning-and-distribution" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Version pinning and distribution</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#build-and-pin-mechanics-as-implemented" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Build and pin mechanics (as implemented)</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#the-staged-transaction-abi-surface" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">The staged-transaction ABI surface</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#data_inlining_row_limit-is-deliberately-not-synthesized-and-dynamic-inline-table-interception" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">data_inlining_row_limit is deliberately not synthesized, and dynamic inline-table interception</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#standalone-data-scan-retirement" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Standalone data-scan retirement</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#a-known-upstream-race-pin-threads1-for-ducklake-re-reads-after-a-write" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">A known upstream race: pin threads=1 for DuckLake re-reads after a write</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#alternatives-considered" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Alternatives considered</span></a></li></ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.Csloo1VZ.js"></script></div></div></div></aside><div class="main-pane astro-nrnkqug2"><main data-pagefind-body class="astro-vdxcvpsm" lang="en" dir="ltr"><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><h1 id="_top" class="astro-2sm4b3ln">RFC 0006: Extension surface</h1></div></div><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><div class="sl-markdown-content"><ul>
+<li><strong>Date:</strong> 2026-07-09</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="summary">Summary</h2><a class="sl-anchor-link" href="#summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Summary”</span></a></div>
+<p>Defines how the <code dir="auto">moraine-duckdb</code> extension exposes the moraine core to DuckDB.
+moraine is a <strong>DuckLake metadata-catalog backend</strong>: the extension registers a
+DuckDB <code dir="auto">StorageExtension</code> so DuckLake <code dir="auto">ATTACH</code>es moraine as its catalog and
+drives it with ordinary SQL, exactly as it drives a PostgreSQL or SQLite
+catalog. moraine serves the <code dir="auto">ducklake_*</code> metadata tables <strong>row-faithfully</strong>
+from SlateDB — the tables <em>are</em> the catalog state (RFC 0002 encodes their
+rows), not a re-modeled projection. Because DuckDB’s stable C extension API
+cannot register a catalog, the extension is a thin <strong>C++ shim</strong> linking
+DuckDB’s internals over a <strong>C ABI</strong> to the Rust core; all catalog logic stays
+in <code dir="auto">moraine</code>.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="goals">Goals</h2><a class="sl-anchor-link" href="#goals"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Goals”</span></a></div>
+<ul>
+<li><strong>DuckLake drives moraine unmodified.</strong> moraine implements DuckLake’s
+catalog contract and invents nothing (consistent with RFC 0004: moraine
+implements DuckLake’s conflict model, it does not impose its own). Whatever
+SQL DuckLake issues against <code dir="auto">ducklake_*</code>, moraine serves.</li>
+<li><strong>Thin extension, language-agnostic.</strong> No DuckLake domain logic lives in
+<code dir="auto">moraine-duckdb</code> — only <code dir="auto">StorageExtension</code> registration, C-ABI marshalling,
+the sync↔async bridge, and (RFC 0021) sequencing calls to DuckLake’s own
+maintenance SQL. Everything else is in the Rust core, testable without
+DuckDB (RFC 0001 Unit/Integration tests). The maintenance carve-out exists
+because the core cannot issue SQL at all, so no other layer can compose
+those calls; it is bounded to sequencing — the shim decides nothing from
+the results — and it is the one part of the shim that only e2e can cover.</li>
+<li><strong>Faithful catalog state.</strong> The <code dir="auto">ducklake_*</code> rows are the source of truth;
+moraine stores and returns those rows (B1). No semantic re-modeling that
+could drift from DuckLake’s own reading of its tables.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="non-goals">Non-goals</h3><a class="sl-anchor-link" href="#non-goals"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Non-goals”</span></a></div>
+<ul>
+<li><strong>A standalone moraine attach as an end in itself.</strong> <code dir="auto">ATTACH '&lt;path&gt;' AS m (TYPE moraine)</code> ships and serves attach, listings, and every
+<code dir="auto">ducklake_*</code> projection — it is the smallest real end-to-end proof of
+the shim/ABI/core stack, and every layer it exercises is on the DuckLake
+path anyway — but it is a verification surface, not a query surface: it
+refuses user-table data scans outright (below). The <code dir="auto">moraine</code> core
+remains a standalone Rust library regardless.</li>
+<li><strong>Semantic projection of the catalog</strong> (storing a re-modeled form and
+projecting it into <code dir="auto">ducklake_*</code> on read). Rejected, not merely deferred;
+see Alternatives for the evidence and the one condition that would
+revive it.</li>
+<li><strong>The data-file read/write path.</strong> DuckLake and DuckDB own object-store
+reads/writes of Parquet data files. moraine serves catalog <em>metadata</em> and
+the inlined-data tables (RFC 0005) only.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="design">Design</h2><a class="sl-anchor-link" href="#design"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Design”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="positioning-moraine-is-ducklakes-catalog">Positioning: moraine is DuckLake’s catalog</h3><a class="sl-anchor-link" href="#positioning-moraine-is-ducklakes-catalog"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Positioning: moraine is DuckLake’s catalog”</span></a></div>
+<div data-nova-code-container="" class="not-content relative overflow-hidden [&amp;_pre]:relative [&amp;_nova-code-copy-button]:opacity-0 [&amp;:hover_nova-code-copy-button]:opacity-100 border border-solid border-(--sl-color-gray-5) rounded-md"><pre class="astro-code astro-code-themes one-light github-dark-dimmed" style="--shiki-light:#383A42;--shiki-dark:#adbac7;--shiki-light-bg:#FAFAFA;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="plaintext" dir="ltr"><code dir="auto"><span class="line"><span>DuckDB engine</span></span>
+<span class="line"><span>  └─ ducklake extension        planner, transactions, query execution</span></span>
+<span class="line"><span>       └─ moraine catalog      DuckDB StorageExtension  (the extension surface)</span></span>
+<span class="line"><span>            └─ moraine core     DuckLake catalog semantics on SlateDB  (Rust)</span></span>
+<span class="line"><span>                 └─ SlateDB → object store</span></span></code></pre><nova-code-copy-button type="button" data-code="DuckDB engine
+  └─ ducklake extension        planner, transactions, query execution
+       └─ moraine catalog      DuckDB StorageExtension  (the extension surface)
+            └─ moraine core     DuckLake catalog semantics on SlateDB  (Rust)
+                 └─ SlateDB → object store" title="Copy code" aria-label="Copy code" class="absolute top-2 right-2 m-0 size-6 rounded border border-solid border-(--sl-color-gray-5) bg-gray-100/30 p-1 text-black backdrop-blur-sm transition hover:bg-gray-200/50 active:scale-90 dark:bg-gray-600/30 dark:text-white hover:dark:bg-gray-500/50"></nova-code-copy-button></div>
+<p>DuckLake stays the query/planner/transaction layer. moraine occupies exactly
+the slot a PostgreSQL/SQLite/DuckDB catalog database occupies today: an
+<code dir="auto">ATTACH</code>-able catalog whose tables are the <code dir="auto">ducklake_*</code> metadata tables. The
+DuckLake specification requires the catalog to be a transactional SQL store
+with primary-key constraints; moraine satisfies that contract over SlateDB.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="how-ducklake-reaches-moraine">How DuckLake reaches moraine</h3><a class="sl-anchor-link" href="#how-ducklake-reaches-moraine"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “How DuckLake reaches moraine”</span></a></div>
+<p>moraine registers a <code dir="auto">StorageExtension</code> under a catalog attach type so DuckLake
+can point its metadata connection at it. The intended user surface:</p>
+<div data-nova-code-container="" class="not-content relative overflow-hidden [&amp;_pre]:relative [&amp;_nova-code-copy-button]:opacity-0 [&amp;:hover_nova-code-copy-button]:opacity-100 border border-solid border-(--sl-color-gray-5) rounded-md"><pre class="astro-code astro-code-themes one-light github-dark-dimmed" style="--shiki-light:#383A42;--shiki-dark:#adbac7;--shiki-light-bg:#FAFAFA;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="sql" dir="ltr"><code dir="auto"><span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">ATTACH</span><span style="--shiki-light:#50A14F;--shiki-dark:#96D0FF"> 'ducklake:moraine:&lt;slatedb-uri&gt;'</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067"> AS</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7"> lake (DATA_PATH </span><span style="--shiki-light:#50A14F;--shiki-dark:#96D0FF">'&lt;object-store-uri&gt;'</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">);</span></span></code></pre><nova-code-copy-button type="button" data-code="ATTACH &#x27;ducklake:moraine:<slatedb-uri>&#x27; AS lake (DATA_PATH &#x27;<object-store-uri>&#x27;);" title="Copy code" aria-label="Copy code" class="absolute top-2 right-2 m-0 size-6 rounded border border-solid border-(--sl-color-gray-5) bg-gray-100/30 p-1 text-black backdrop-blur-sm transition hover:bg-gray-200/50 active:scale-90 dark:bg-gray-600/30 dark:text-white hover:dark:bg-gray-500/50"></nova-code-copy-button></div>
+<p>DuckLake connects to its metadata catalog by executing a literal nested
+DuckDB <code dir="auto">ATTACH</code> of everything after its <code dir="auto">ducklake:</code> prefix
+(<code dir="auto">DuckLakeInitializer::Initialize</code> builds and runs the statement text;
+backend dialects are a six-entry map keyed by the path’s extension
+prefix). So <code dir="auto">ducklake:moraine:&lt;slatedb-uri&gt;</code> nests
+<code dir="auto">ATTACH 'moraine:&lt;slatedb-uri&gt;'</code>, resolved by DuckDB’s ordinary attach
+dispatch to moraine’s registered storage extension — the same mechanism
+<code dir="auto">postgres:</code>/<code dir="auto">sqlite:</code> ride, no DuckLake-side hook. moraine therefore
+accepts the <code dir="auto">moraine:</code> path-prefix form alongside <code dir="auto">TYPE moraine</code>. Absent
+from DuckLake’s dialect map, moraine is spoken to in the <strong>default
+dialect</strong>: plain DuckDB SQL, native types, no wrapper calls.</p>
+<p><strong>How the prefix names and nests the attach</strong> is settled, and settled by
+observation rather than by reading DuckLake’s source: DuckDB’s <code dir="auto">QueryLog</code>
+records every statement executed on the instance, DuckLake’s internal
+metadata connection included, so the generated text is captured from a
+running session and pinned (<code dir="auto">tests/ducklake_load/wire_contract.rs</code>). For
+<code dir="auto">ATTACH 'ducklake:moraine:&lt;uri&gt;' AS warehouse</code>:</p>
+<div data-nova-code-container="" class="not-content relative overflow-hidden [&amp;_pre]:relative [&amp;_nova-code-copy-button]:opacity-0 [&amp;:hover_nova-code-copy-button]:opacity-100 border border-solid border-(--sl-color-gray-5) rounded-md"><pre class="astro-code astro-code-themes one-light github-dark-dimmed" style="--shiki-light:#383A42;--shiki-dark:#adbac7;--shiki-light-bg:#FAFAFA;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="sql" dir="ltr"><code dir="auto"><span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">ATTACH</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067"> OR</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067"> REPLACE</span><span style="--shiki-light:#50A14F;--shiki-dark:#96D0FF"> 'moraine:&lt;uri&gt;'</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067"> AS</span><span style="--shiki-light:#50A14F;--shiki-dark:#96D0FF"> "__ducklake_metadata_warehouse"</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7"> (</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">HIDDEN</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7"> true)</span></span>
+<span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">SELECT</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067"> NULL</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067"> FROM</span><span style="--shiki-light:#50A14F;--shiki-dark:#96D0FF"> "__ducklake_metadata_warehouse"</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#50A14F;--shiki-dark:#96D0FF">"main"</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">.ducklake_metadata </span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">LIMIT</span><span style="--shiki-light:#986801;--shiki-dark:#6CB6FF"> 1</span></span></code></pre><nova-code-copy-button type="button" data-code="ATTACH OR REPLACE &#x27;moraine:<uri>&#x27; AS &quot;__ducklake_metadata_warehouse&quot; (HIDDEN true)
+SELECT NULL FROM &quot;__ducklake_metadata_warehouse&quot;.&quot;main&quot;.ducklake_metadata LIMIT 1" title="Copy code" aria-label="Copy code" class="absolute top-2 right-2 m-0 size-6 rounded border border-solid border-(--sl-color-gray-5) bg-gray-100/30 p-1 text-black backdrop-blur-sm transition hover:bg-gray-200/50 active:scale-90 dark:bg-gray-600/30 dark:text-white hover:dark:bg-gray-500/50"></nova-code-copy-button></div>
+<p>Three consequences. The nested catalog’s <strong>name derives from the outer
+alias</strong> (<code dir="auto">__ducklake_metadata_</code> + alias), so it collides with nothing and
+moves with a rename of the lake. It is <strong>addressable</strong>: <code dir="auto">SELECT * FROM __ducklake_metadata_warehouse.main.ducklake_snapshot</code> works, which is how
+the e2e suite inspects what DuckLake wrote without going through
+DuckLake’s reader. And <code dir="auto">HIDDEN true</code> keeps it <strong>out of
+<code dir="auto">duckdb_databases()</code></strong>, which lists only the outer catalog — whose <code dir="auto">path</code>
+column is exactly the nested attach string. The pin is re-verified on
+every DuckDB/DuckLake bump; nothing in moraine depends on the naming
+scheme, but the e2e suite’s whole verification surface does.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="store-uris-and-credentials">Store URIs and credentials</h3><a class="sl-anchor-link" href="#store-uris-and-credentials"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Store URIs and credentials”</span></a></div>
+<p>The <code dir="auto">&lt;slatedb-uri&gt;</code> selects moraine’s object-store backend:</p>
+<ul>
+<li><strong>Local filesystem</strong> — a path (<code dir="auto">/var/lib/lake</code>): the catalog is a directory,
+created if absent.</li>
+<li><strong>In-memory</strong> — <code dir="auto">memory://</code>: an ephemeral store, for tests and scratch work.</li>
+<li><strong>S3 / S3-compatible</strong> — <code dir="auto">s3://&lt;bucket&gt;[/&lt;prefix&gt;]</code>: the catalog lives in
+<code dir="auto">&lt;bucket&gt;</code> under the optional key <code dir="auto">&lt;prefix&gt;</code> (empty places it at the bucket
+root). The bucket must already exist; moraine writes keys into it and never
+creates the bucket.</li>
+</ul>
+<p>For an <code dir="auto">s3://</code> store, credentials resolve through DuckDB’s secret manager:
+moraine looks up the <code dir="auto">s3</code>-type secret whose scope matches the <code dir="auto">s3://</code> path —
+one created with <code dir="auto">CREATE SECRET (TYPE s3, KEY_ID …, SECRET …, REGION …[, ENDPOINT …, URL_STYLE 'path', USE_SSL false])</code>, the same secret DuckLake and
+httpfs consult for <code dir="auto">DATA_PATH</code>. Fields the secret leaves unset fall back to the
+<code dir="auto">AWS_*</code> process environment. No credentials appear in SQL text or ATTACH
+options.</p>
+<p><strong>The standalone attach is a metadata-only surface.</strong> Table <em>data</em> is
+served through DuckLake, which owns delete-file merging, row lineage, and
+pushdown; a standalone data scan re-implementing that read path would
+silently return deleted rows once merge-on-read exists. Standalone
+<code dir="auto">TYPE moraine</code> therefore serves listings, <code dir="auto">DESCRIBE</code>, and the <code dir="auto">ducklake_*</code>
+projections (below), while user-table scans bind normally (so <code dir="auto">DESCRIBE</code>
+and <code dir="auto">EXPLAIN</code> work) and raise a redirect error naming the
+<code dir="auto">ducklake:moraine:</code> attach at execution time. No opt-out option exists.</p>
+<p><strong>Metadata projections.</strong> Every <code dir="auto">ducklake_*</code> table the keyed store models
+is queryable through the attached catalog, served row-faithfully — <code dir="auto">current</code>
+and <code dir="auto">history</code> rows both, since DuckLake filters lifecycles in SQL; unversioned
+kinds serve current values. DuckDB’s executor plans joins over per-table
+scans. This row-faithfulness is what makes <strong>time travel</strong> work with no
+time-travel logic in moraine: <code dir="auto">AT (VERSION =&gt; N)</code> is DuckLake filtering the
+served rows by begin/end snapshot — reconstructing past <em>schema</em> from the
+<code dir="auto">ducklake_column</code> versions as readily as past data — and it is verified live
+across inline inserts, schema evolution, and flush (<code dir="auto">ducklake_load.rs</code>). <code dir="auto">ducklake_metadata</code> is synthesized from store facts (format
+version, options) so DuckLake’s exists-probe and version reads succeed on
+any initialized moraine store: a moraine store is a valid DuckLake catalog
+from birth, and DuckLake’s bootstrap DDL batch never runs against one.</p>
+<p><strong>Attach modes and the single writer.</strong> The RFC 0004 topology is enforced at
+the attach surface. An attach is either <strong>read-write</strong> — opening the one
+SlateDB <code dir="auto">Db</code> writer — or <strong>read-only</strong> (<code dir="auto">READ_ONLY</code>, mapped to SlateDB’s
+<code dir="auto">DbReader</code>), which never becomes a writer and never participates in
+fencing. The plumbing that carries the <code dir="auto">READ_ONLY</code> flag from <code dir="auto">ATTACH</code>
+through the shim to the store open is specified and implemented in RFC 0017. This distinction is not cosmetic: SlateDB fencing means <em>the
+newest writer wins</em> — a second read-write attach from another process
+fences the incumbent’s committer rather than failing itself, so two
+processes attaching read-write take turns breaking each other. A
+deployment therefore designates exactly one read-write process; every
+other DuckDB process attaches <code dir="auto">READ_ONLY</code>. This is a real limitation
+relative to the multi-client SQL catalogs DuckLake otherwise targets, and
+it is documented at the user surface (ATTACH docs, README), not only here.</p>
+<p><code dir="auto">READ_ONLY</code> is read-only at the <em>catalog</em> level, not at the IAM level:
+SlateDB’s <code dir="auto">DbReader</code> in its default follow-latest mode writes a checkpoint
+into the manifest on open and refreshes it for the attach’s lifetime
+(RFC 0004, Topology), so reader credentials need manifest write access.</p>
+<p><strong><code dir="auto">CHECKPOINT</code> — the truly-zero-write attach.</strong> Given the id of a
+checkpoint minted ahead of time, the reader opens against it instead of
+establishing its own: SlateDB records nothing, spawns no manifest poller,
+refreshes nothing, and deletes nothing on close, so the attach issues
+object-store reads and no writes at all. The core half is RFC 0004’s
+(<code dir="auto">CatalogOptions::checkpoint</code>, <code dir="auto">Catalog::create_checkpoint</code>); what this
+RFC owns is carrying an id from <code dir="auto">ATTACH</code> through the shim into that open,
+spelled <code dir="auto">META_CHECKPOINT</code> through a DuckLake attach or <code dir="auto">CHECKPOINT</code>
+directly on a standalone one. That the attach writes nothing is asserted
+end to end by comparing the store’s whole object set across it — an
+absence is only worth claiming if something would break were it false.</p>
+<p>The cost is a <strong>fixed cut</strong>: SlateDB stops polling the manifest entirely,
+so the attach never observes a commit made after the checkpoint —
+advancing means minting a new one and re-attaching. Three refusals keep
+that from surprising anyone: a checkpoint id on a read-write attach (a
+writer commits at head; a checkpoint is a past cut), an id the manifest no
+longer carries (a reader told to serve a fixed cut must never quietly
+serve a different one), and a malformed id.</p>
+<p>The lifecycle is three table functions, and they do not all take the same
+argument. <code dir="auto">moraine_create_checkpoint('&lt;attached catalog&gt;')</code> names a
+catalog because the core mints through the writer that attach already
+opened — a second read-write open would fence it — and takes an optional
+lifetime, since a checkpoint given none pins its objects until released by
+hand. <code dir="auto">moraine_checkpoints('&lt;store&gt;')</code> and
+<code dir="auto">moraine_delete_checkpoint('&lt;store&gt;', '&lt;id&gt;')</code> name a store path instead,
+for the same reason <code dir="auto">moraine_migrate</code> does: neither opens the writer, so
+both run against a live catalog without fencing it, and the processes that
+attach against the id hold no write credentials, so those calls happen
+wherever the credentials are. Listing exists so a checkpoint whose id was
+lost can still be found and released.</p>
+<p><strong>Creating an S3 lake needs <code dir="auto">READ_WRITE</code>.</strong> DuckDB bumps any attach whose
+path begins with a remote prefix (<code dir="auto">s3://</code>, <code dir="auto">gcs://</code>, <code dir="auto">azure://</code>, <code dir="auto">http(s)://</code>,
+…) from <code dir="auto">AUTOMATIC</code> to <code dir="auto">READ_ONLY</code> before the storage extension is reached
+(<code dir="auto">DatabaseManager::AttachDatabase</code>, on the premise that remote DB <em>files</em> are
+not writable). moraine honors that flag, so an <code dir="auto">s3://</code> attach with no explicit
+mode opens read-only — and a read-only open never bootstraps, so <em>creating</em> a
+new S3 lake fails with the SlateDB “no manifest” error. The premise is wrong
+for moraine (SlateDB is object-store-native and writes S3 happily), but the
+heuristic is a blanket path-prefix rule with no per-extension opt-out. The user
+contract is therefore: <strong>creating or writing an S3-backed lake requires
+<code dir="auto">READ_WRITE</code> on the ATTACH</strong> — <code dir="auto">ATTACH 'ducklake:moraine:s3://bucket/prefix' AS lake (DATA_PATH 's3://bucket/prefix-data/', READ_WRITE)</code> — the same opt-in any
+writable remote DuckDB database needs. Local and <code dir="auto">memory://</code> stores default to
+read-write and need no flag. When a read-only attach targets an uninitialized
+store the shim rewrites the terse store error to name this fix (add
+<code dir="auto">READ_WRITE</code>). Other DuckLake metadata backends sidestep this because their
+paths are not remote-file URIs — a Postgres/MySQL connection string never
+matches the prefix rule, and local DuckDB/SQLite files default read-write.</p>
+<p><strong><code dir="auto">CACHE_DIR</code> — the block cache’s disk tier, for S3 stores.</strong> Every query
+rebinds the catalog by reading its metadata (snapshot → tables → columns →
+files → stats) from the store; on an <code dir="auto">s3://</code>-backed catalog those reads are
+S3 round-trips, and the in-memory tier starts empty in each new process. The
+<code dir="auto">CACHE_DIR</code> attach option — <code dir="auto">ATTACH 'ducklake:moraine:s3://…' AS lake (DATA_PATH '…', READ_WRITE, META_CACHE_DIR '/var/cache/moraine')</code>, or
+<code dir="auto">CACHE_DIR</code> directly on a standalone <code dir="auto">moraine:</code> attach — gives each
+store’s block cache (RFC 0009) a disk device under that directory: blocks
+are written there at block grain as they are read, so repeat reads skip
+the GETs, and a new process recovers what the last one left, so a
+re-attach in the same order starts warm without a preload. It threads
+through the shim (<code dir="auto">moraine_attach</code>’s <code dir="auto">cache_dir</code>) into
+<code dir="auto">CatalogOptions::cache_dir</code> and <code dir="auto">StoreBuilder</code>, applying to both the
+writer and the reader; unset (the default), only the memory tier applies.
+Redundant for local/<code dir="auto">memory://</code> stores.</p>
+<p>There is one budget, shared by every store the process attaches, and one
+cache per store under it (RFC 0009). The first attach to open settles the
+sizing and later ones are sized by it, so these options are the process’s
+rather than the attach’s. SST indexes and filters are held at a higher
+eviction priority than data blocks, so a scan cannot push them out, while
+metadata a store does not need is space blocks take; each store’s blocks
+spill at block grain to its own device under <code dir="auto">CACHE_DIR</code>, capped by
+<code dir="auto">CACHE_SIZE</code>, with <code dir="auto">CACHE_MEMORY</code> budgeting the memory every store’s cache
+and the parsed-footer cache share, re-split across the stores attached.
+There is no separate object-part cache beneath — a byte is cached decoded,
+once.</p>
+<p><strong><code dir="auto">CACHE_SIZE</code> — how much disk the cache may take.</strong> A byte count —
+<code dir="auto">META_CACHE_SIZE 2147483648</code> through the DuckLake attach or <code dir="auto">CACHE_SIZE</code>
+directly on a standalone <code dir="auto">moraine:</code> attach — capping each store’s disk
+device: the first attach to name a <code dir="auto">CACHE_DIR</code> settles it, and every
+store’s device opens with that cap as a ceiling, filled only by what the
+store reads. Zero on the ABI means “not given”, leaving the default
+cap (16 GiB); the option is inert without a <code dir="auto">CACHE_DIR</code>, since there is no
+disk tier to bound. It threads through the shim (<code dir="auto">moraine_attach</code>’s
+<code dir="auto">cache_size_bytes</code>, and <code dir="auto">moraine_migrate</code>’s) into
+<code dir="auto">CatalogOptions::cache_size</code> and <code dir="auto">StoreBuilder</code>.</p>
+<p><strong><code dir="auto">CACHE_MEMORY</code> — how much memory the cache may take.</strong> The same shape for
+the memory side — <code dir="auto">META_CACHE_MEMORY</code> through the DuckLake attach,
+<code dir="auto">CACHE_MEMORY</code> standalone — and the one cache option that is never inert,
+because the memory tiers exist with or without a disk device. It is one
+budget across both kinds, which share one cache and are separated by
+eviction priority rather than by capacity; <code dir="auto">moraine_store_census</code> reports a
+store’s index and filter bytes, and the attach warns when the budget cannot
+hold them. Unset, the budget is what SlateDB would give a <em>single</em>
+store by default — now for the whole process, so a multi-store host is
+strictly smaller than before, and a single-store host is unchanged. This
+is the number to weigh against DuckDB’s <code dir="auto">memory_limit</code> when sizing a
+host: DuckDB’s budget covers its own buffers and the data-file cache, and
+this cache is the process-wide memory consumer beside it. A handle’s
+decoded catalog is not in it: that is bounded by the catalog’s size rather
+than by an option, and is reported rather than budgeted.</p>
+<p><strong><code dir="auto">CACHE_PUTS</code> — fill the cache from the write path too.</strong> Left alone, the
+cache fills only from reads: blocks the store just flushed are fetched back
+from object storage and decoded the first time something asks for them,
+even though the writer had them in hand. <code dir="auto">CACHE_PUTS true</code> inserts the
+blocks of flushed and compacted SSTs into the cache as they are written —
+decoded, on the write path, at the cost of memory-tier space and no fetch.
+Within the process the effect reaches every handle: a reader session served
+by the shared cache reads what the writer just flushed with no round trip
+at all.</p>
+<p>It is opt-in because compaction output goes through the same insertion
+policy: a merge writing a large SST can evict blocks that reads had warmed,
+and a store whose merges outpace its queries is better off letting reads
+decide what stays. The option threads through the shim (<code dir="auto">moraine_attach</code>’s
+<code dir="auto">cache_puts</code>) into <code dir="auto">CatalogOptions::cache_puts</code> and <code dir="auto">StoreBuilder</code>.</p>
+<p><strong><code dir="auto">CACHE_PRELOAD</code> — fill it before the first query, not during it.</strong> Both of
+the above leave a fresh process cold: the cache fills as queries ask for
+blocks, so the first query of an attach pays every first touch itself.
+<code dir="auto">CACHE_PRELOAD</code> warms the store into the cache while the attach opens, by
+reading it (RFC 0009) — <code dir="auto">'l0'</code> (the default) touches every subspace far
+enough to pull its SST metadata, <code dir="auto">'all'</code> additionally walks the scan-shaped
+subspaces whole, <code dir="auto">'none'</code> (or <code dir="auto">'off'</code>) warms nothing. Neither pulls the <code dir="auto">index</code>
+subspace’s data bulk, so a store whose weight is a multi-GiB <code dir="auto">index</code> run
+preloads in metadata-sized bytes rather than store-sized ones; a table’s
+<code dir="auto">index</code> and <code dir="auto">inline</code> ranges are warmed per table instead, in the
+background, the first time a query touches it and after each commit that
+writes data files against it; at any level but <code dir="auto">'none'</code>, the extension also
+warms every table’s probe ranges in the background after the open, so the
+first lookup on any table finds them cached (RFC 0009). The shim’s option
+parsing owns the default; the level crosses the ABI as a code (<code dir="auto">0</code>, <code dir="auto">1</code>,
+<code dir="auto">2</code>) on <code dir="auto">moraine_attach</code> and <code dir="auto">moraine_migrate</code>, and any other code is
+refused rather than treated as “none”, so a misspelled level surfaces as an
+error instead of an attach that merely feels slow.</p>
+<p>The cost lands entirely on the attach. The warm runs inside the open — the
+handle is returned only once it finishes — with bounded parallelism, and
+the cache’s caps govern the load: what exceeds them is admitted and evicted
+by the cache’s own policy, newest-first enumeration putting the levelled
+tail last in line. Nothing in that path says it happened, which would leave
+a half-warmed attach looking exactly like a warm one, so moraine compares
+the bytes the warm would fetch against the governing cap as it opens and
+warns with both numbers. A subspace that fails to warm is skipped rather
+than fatal: a preload is an optimization, and no attach should die
+because one read did not land. Subspace-awareness keeps the <code dir="auto">'l0'</code>
+default’s cost small — on S3 it adds about 120 ms to the attach and takes
+a table’s first index lookup from roughly 400 ms to 3 ms — and <code dir="auto">'all'</code> the
+choice for an attach that can wait: it fetches metadata plus the
+scan-shaped subspaces, not the store, trading a slower ATTACH for a first
+query that touches object storage not at all. <code dir="auto">'none'</code> suits an attach that
+must return as fast as the open allows.</p>
+<p><strong><code dir="auto">moraine_cache_tally()</code> — what the cache has served.</strong> One row:
+<code dir="auto">metadata_hits</code>/<code dir="auto">metadata_misses</code> and <code dir="auto">block_hits</code>/<code dir="auto">block_misses</code> with a
+rate beside each, plus <code dir="auto">errors</code> for lookups the cache itself failed and
+read through. <code dir="auto">preload_metadata_hits</code>/<code dir="auto">misses</code>, <code dir="auto">preload_block_hits</code>/<code dir="auto">misses</code>,
+and <code dir="auto">preload_failures</code> attribute the attach-time warm subset. Without
+arguments the numbers are the host’s — a process
+keeps one cache and every attached store reads through it — which is the
+scope the budget is set at.</p>
+<p><code dir="auto">moraine_cache_tally('lake')</code> narrows the same row to one attach. The
+cache and its budget stay the process’s; what the lake name adds is which
+attach is spending them, which is the question a host with several
+catalogs on one cache has and the process-wide numbers cannot answer. A
+detached catalog’s counts leave with it, while the process’s keep them,
+so the two forms do not have to agree on totals.</p>
+<p>The two slots are reported apart because they are budgeted apart: a
+healthy stack keeps metadata near fully served — that is the slot being
+sized to hold the store’s filters and indexes — while blocks land
+wherever the working set does. A metadata rate that is not near 1 says
+<code dir="auto">CACHE_MEMORY</code> is too small for the store’s SST metadata, which
+<code dir="auto">moraine_store_census</code> measures directly; a low block rate with a healthy
+metadata rate says the working set exceeds the block slot, which is a
+<code dir="auto">CACHE_MEMORY</code> or <code dir="auto">CACHE_DIR</code> decision rather than a correctness one.</p>
+<p>The metadata case does not wait to be noticed: the attach itself compares
+the store’s filter and index bytes against the share of the cache metadata
+holds under eviction protection, and warns when that share cannot hold
+them, so a rate read later confirms a sizing problem rather than
+discovering one.</p>
+<p>A rate is NULL, not zero, before anything has been looked up: zero would
+read as a cold cache to a monitoring query, and “nothing asked” is not
+the same fact.</p>
+<p><strong><code dir="auto">moraine_cache_status()</code> — what the process-wide caches occupy.</strong> One row
+reports capacity, current occupancy, and cumulative evictions for SlateDB
+metadata, SlateDB data-block memory, and parsed Parquet metadata. It also
+reports the configured data-block disk capacity, NULL without a disk tier.
+Disk occupancy is omitted because Foyer does not expose a reliable live
+value through the cache interface; configured capacity is not mislabeled as
+usage. <code dir="auto">moraine_store_census</code> adds <code dir="auto">filter_bytes</code>, <code dir="auto">index_bytes</code>, and
+<code dir="auto">stats_bytes</code> per subspace from the manifest, which is the store-side demand
+to compare with metadata capacity.</p>
+<p><code dir="auto">CACHE_MEMORY</code> is only the shared cache budget. It is not a process-memory
+limit and excludes SlateDB’s WAL and memtables, decoded catalog projections,
+commit staging, DuckDB allocations, and allocator retention.</p>
+<p><strong><code dir="auto">moraine_memory_tally('lake')</code> — what live memory can be attributed.</strong> One
+row reports this catalog’s SlateDB WAL-plus-memtable gauge, its decoded
+projection estimate, and its last staged-row commit’s equality-entry count
+and encoded batch bytes. The same row includes process-wide occupancy for
+SlateDB metadata, data blocks, and parsed Parquet metadata. The scopes are
+spelled out in the column meanings: cache residents are shared, while write
+buffers and projections belong to the named attach. This is logical
+accounting rather than RSS; the gap includes allocator overhead and retention,
+DuckDB, extension glue, and any dependency memory with no exported gauge.</p>
+<p><strong><code dir="auto">moraine_object_store_tally('lake')</code> — what SlateDB sent to storage.</strong>
+One cumulative row per attach reports <code dir="auto">main_gets</code>, <code dir="auto">main_puts</code>, and
+<code dir="auto">main_deletes</code>, the same three counts for a separately configured WAL store,
+and summed request time beside every count in milliseconds. Moraine currently
+uses one physical store, so WAL-object traffic appears in the <code dir="auto">main_*</code> fields;
+the <code dir="auto">wal_*</code> fields are reserved for an explicit second store. A GET includes
+the read-shaped APIs such as range, head, and list, and a PUT includes multipart
+operations. The instrumentation is inside SlateDB’s retry loop, so attempts and
+their durations, not only logical calls, are counted.</p>
+<p><code dir="auto">errors</code> counts failed attempts, including errors SlateDB handles internally
+such as an expected missing-object probe; it is diagnostic, not a statement
+that the catalog operation failed. Durations are sums and can exceed wall time
+when requests overlap. The core surface is
+<code dir="auto">ReadOnlyCatalog::object_store_tally</code>, carrying an <code dir="auto">ObjectStoreTally</code>; the C ABI
+copies it through <code dir="auto">moraine_catalog_object_store_tally</code> without exposing the
+metrics recorder. There is deliberately no process-wide SQL form: unlike the
+one shared cache budget, physical requests belong to the catalog handle that
+issued them.</p>
+<p>The data path needs none of this and gets none of it. Parquet reads are
+DuckDB’s, not moraine’s, and DuckDB caches them itself: a lake read goes
+through its caching file system, so data bytes sit under <code dir="auto">memory_limit</code>
+rather than in a budget of moraine’s (RFC 0009). What the embedding host
+should set beside a moraine attach — <code dir="auto">validate_external_file_cache = 'NO_VALIDATION'</code> (safe: DuckLake data files are immutable),
+<code dir="auto">parquet_metadata_cache = true</code>, <code dir="auto">enable_http_metadata_cache = true</code> —
+is embedding guidance, documented with the attach options; the shim
+never sets a global for the user.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="interception-level-catalog-entry-row-faithful-b1">Interception level: catalog-entry, row-faithful (B1)</h3><a class="sl-anchor-link" href="#interception-level-catalog-entry-row-faithful-b1"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Interception level: catalog-entry, row-faithful (B1)”</span></a></div>
+<p>moraine intercepts at DuckDB’s <strong>Catalog / table-scan / DML layer</strong> — the
+<code dir="auto">postgres_scanner</code> pattern — never by parsing raw SQL. Parsing DuckLake’s SQL
+would mean reimplementing a query engine; instead DuckDB’s own executor plans
+DuckLake’s statements and calls moraine per table.</p>
+<p>moraine’s catalog exposes the fixed set of <code dir="auto">ducklake_*</code> tables (and the
+per-schema-version inlined-data tables) as catalog entries with the DuckLake
+schema, and implements:</p>
+<ul>
+<li><strong>Scan</strong> — given a table and the columns DuckDB asks for, produce rows from
+SlateDB. Row filters are <strong>not</strong> applied by the scan, so it materializes the
+addressed kind and DuckDB’s executor filters over the returned rows. The
+data-scaled kinds narrow <em>how much</em> they materialize without taking on
+that filtering — see “Scoping the file and file-statistics scans” below.
+Projection is pushed down, but it selects output columns from an
+already-materialized row set rather than narrowing the read. What narrowing
+exists comes from the address, not from a predicate: the RFC 0002 key layout
+puts each kind — and each table’s inlined data — under its own prefix, so
+serving one table reads only that table’s range.</li>
+<li><strong>Insert / Update / Delete</strong> — apply row mutations to the store.</li>
+<li><strong>Transactions</strong> — <code dir="auto">begin</code>/<code dir="auto">commit</code>/<code dir="auto">rollback</code> mapped onto RFC 0004’s
+<strong>staged-row commit path</strong>: a transaction stages row mutations; commit
+drives them through the single fenced atomic batch under head conflict
+detection. On this path moraine performs <strong>no internal retry</strong> — DuckLake
+authored the ids, counters, and snapshot values embedded in the staged
+rows, so any lost race (benign-shaped or not) aborts with the typed
+<code dir="auto">CommitConflict</code>, surfaced to DuckLake as a transaction failure. DuckLake
+then re-drives it: its <code dir="auto">RunCommitLoop</code> (source-verified) retries
+metadata-catalog commit failures with bounded jittered backoff,
+re-checking its own conflict matrix first. Two wire-contract consequences
+for the shim, both load-bearing: <strong>(a) the error message matters</strong> —
+DuckLake’s <code dir="auto">RetryOnError</code> decides retryability by substring match on the
+lowercased message (<code dir="auto">"primary key"</code>, <code dir="auto">"unique"</code>, <code dir="auto">"conflict"</code>,
+<code dir="auto">"concurrent"</code>), so the text moraine surfaces for a lost commit must
+contain <code dir="auto">"conflict"</code> or DuckLake will abort instead of retrying; <strong>(b)
+moraine must serve conflict-resolution reads mid-retry</strong> — between
+attempts DuckLake queries <code dir="auto">ducklake_snapshot</code> /
+<code dir="auto">ducklake_snapshot_changes</code> for everything after its transaction
+snapshot, through the ordinary scan hook.</li>
+<li><strong>Constraints</strong> — the primary keys DuckLake’s spec relies on. Its schema
+declares exactly five, on <code dir="auto">ducklake_snapshot</code>, <code dir="auto">ducklake_snapshot_changes</code>,
+<code dir="auto">ducklake_schema</code>, <code dir="auto">ducklake_data_file</code>, and <code dir="auto">ducklake_delete_file</code>, and
+moraine refuses an insert that would displace a live row under one of them
+with a typed <code dir="auto">Constraint</code>. The two snapshot kinds need no lookup: a snapshot
+record exists only at or below head, so the head-advance check that already
+guards every staged commit covers them by construction — surfacing there as
+the lost race it is, which DuckLake re-drives, rather than as a constraint
+it would abandon. <strong>No name
+uniqueness is enforced anywhere</strong>, deliberately — DuckLake’s schema declares
+no <code dir="auto">UNIQUE</code> constraint on any name column and polices naming in its binder,
+so inventing one here would refuse rows its other backends accept. Both
+halves are pinned.</li>
+</ul>
+<p>Because the <code dir="auto">ducklake_*</code> rows are the catalog state (B1), RFC 0002 keys are an
+efficient encoding of those rows and RFC 0005’s inlined chunks are the storage
+of specific <code dir="auto">ducklake_*</code> tables — not a separate model that must be
+reconciled. This keeps moraine robust to DuckLake evolving its SQL: the same scan/DML
+hooks serve new access patterns over the same tables.</p>
+<p><strong>The access set is known, not assumed.</strong> DuckDB’s <code dir="auto">QueryLog</code> records the
+statements DuckLake issues on its metadata connection, so a workload
+reaching every modelled feature — DDL, bulk and inlined writes, updates,
+deletes, schema evolution, views, comments, compaction, expiry, cleanup,
+time travel — yields the exact set of tables read and written, pinned as
+a set equality (<code dir="auto">wire_contract.rs</code>). Thirty tables, of which twenty are
+both read and written; the reads are the metadata-projection scans, and
+the writes are the staged-row translations. Two findings fall out of it
+directly. <code dir="auto">ducklake_file_variant_stats</code> never appears, because DuckLake
+writes it only for a column whose extra stats are VARIANT and moraine
+refuses a VARIANT column at creation (its inline encoding is Arrow, which
+has no VARIANT representation) — so the always-empty stand-in is exactly
+right, and modelling the table is downstream of VARIANT support, not
+independently owed. And nothing in the set is a pattern the row-faithful
+layout serves badly, which is the evidence semantic projection (B2, below)
+was waiting on.</p>
+<p>“No semantic re-modeling” comes with <strong>exactly one interpreted
+convention</strong>, stated so its scope is bounded. The RFC 0002 <code dir="auto">current</code>/<code dir="auto">history</code>
+split physically encodes the begin/end-snapshot lifecycle columns, so
+moraine must <em>recognize</em> the lifecycle in DuckLake’s DML — an <code dir="auto">UPDATE</code> that
+sets a row’s <code dir="auto">end_snapshot</code> translates to end-version bookkeeping (delete
+the <code dir="auto">current</code> key, write the <code dir="auto">history</code> key), not a blind value overwrite. That is
+a semantic mapping, and it is where the residual drift risk concentrates:
+if DuckLake ever mutates those columns in a shape moraine does not
+recognize (un-ending a row, say), the translation would misfile it. The
+convention is deliberately minimal — lifecycle columns only, everything
+else opaque — and the e2e suite pins it against every lifecycle transition
+real DuckLake SQL produces. The contract is not zero interpretation; it is
+exactly one, tested.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="scoping-the-file-and-file-statistics-scans">Scoping the file and file-statistics scans</h3><a class="sl-anchor-link" href="#scoping-the-file-and-file-statistics-scans"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Scoping the file and file-statistics scans”</span></a></div>
+<p>Materializing the addressed kind whole is affordable for every kind but the
+three that grow with the data. <code dir="auto">ducklake_file_column_stats</code> holds a row per
+file per column — a production catalog measured 145,995 of them against
+1,013 data files — and each becomes ten <code dir="auto">duckdb::Value</code>s, two of them heap
+strings. <code dir="auto">ducklake_data_file</code> holds one row per file, sixteen values wide,
+and <code dir="auto">ducklake_delete_file</code> one per file deleted from without a rewrite,
+thirteen wide. DuckLake’s planner reads all three to prune — its file list
+selects the first and left-joins the other two — so a statement pays them
+once and a writing transaction pays them per statement; on a lake whose
+files are spread across many tables, that is every table’s files read to
+plan a query against one. All three name the table in the read
+(<code dir="auto">WHERE data.table_id = ?</code>), so all three narrow to it. Every other kind is
+bounded by the catalog’s shape rather than its data, and none of them
+narrows.</p>
+<p>An append-only lake holds no delete files at all, so that third scope is
+worth nothing there and everything on a lake that deletes: over 20 000
+files across eight tables on a local store, giving every file a delete file
+cost a cold statement 237 ms against 159 ms without them, and a warm one
+51 ms against 39 ms — all of it the other seven tables’ deletions.</p>
+<p><strong>The scan still applies no filters.</strong> It reads the <code dir="auto">table_id</code> equality
+through <code dir="auto">pushdown_complex_filter</code> and <strong>consumes nothing</strong>, so DuckDB keeps
+applying every predicate itself. A filter shape the match does not recognize
+costs a wider materialization, never a wrong row. <code dir="auto">filter_pushdown</code> stays off
+for exactly this reason: setting it deletes the filter operator and makes the
+scan answerable for the whole of <code dir="auto">TableFilterType</code>, which is a standing
+correctness liability — a filter type added upstream would begin silently
+dropping rows on a version bump.</p>
+<p><strong>Row identity is what a narrowed scan has to keep.</strong> These tables have no
+physical row ids: a row’s <code dir="auto">rowid</code> is <em>its index into the materialized row
+set</em>, so a write resolving one against a second materialization would be
+trusting two lists to agree. Narrowing makes them disagree by construction,
+and a commit landing mid-statement does too — silently, and only when a
+statement both narrows and writes. So a scan that emits row ids <strong>registers
+the list it emitted them for</strong> with the transaction, numbered from a base
+that transaction hands out, and the <code dir="auto">UPDATE</code>/<code dir="auto">DELETE</code> sinks resolve each id
+against that run rather than against a fresh dump.</p>
+<p>What the keying buys is the cost of the narrowed read: all three kinds are
+keyed table-major, so one table’s rows are a <strong>contiguous key range</strong>, and the
+core’s scoped dump reads that range out of the shared record set instead of
+walking every record of every kind. That is what <code dir="auto">scope_column</code> records,
+paired with the <code dir="auto">scoped_provider</code> that reads it.</p>
+<p>The filter also has to arrive before the work. Materialization otherwise
+happens in <code dir="auto">GetScanFunction</code>, at bind, before a plan exists; a narrowable
+kind therefore builds nothing there and <code dir="auto">InitGlobal</code> materializes instead —
+scoped when an equality reached the bind data, whole otherwise. A scan
+mid-write drops the scope: only the unscoped dump carries the staged overlay
+a read then owes.</p>
+<p>Scoped materializations are cached like unscoped ones, under a key that
+carries the scope: the per-transaction pin and the attach-level hold are
+both keyed by kind <strong>and</strong> scope, so a narrowed set can never answer a read
+of the kind, nor one table’s run answer another’s. Without that the scope
+would have to rebuild per statement where the whole set reuses, which costs
+more than narrowing saves on a lake whose addressed table is most of it.</p>
+<p>Within a transaction the whole set wins where it exists: a scoped read finds
+it pinned and filters it rather than reading the store, which is what keeps
+both standing at one head. Across transactions the attach holds each scope
+under the stamp it was dumped at, and holding at a new stamp drops the
+kind’s entries at older ones, so the map tracks the tables read since the
+last commit rather than every table the attach has ever addressed.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="composition-c-shim-over-the-rust-core-forced">Composition: C++ shim over the Rust core (forced)</h3><a class="sl-anchor-link" href="#composition-c-shim-over-the-rust-core-forced"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Composition: C++ shim over the Rust core (forced)”</span></a></div>
+<p>DuckDB’s stable C extension API (<code dir="auto">duckdb_ext_api_v1</code>) exposes scalar
+functions, table functions, and a handful of other hooks — <strong>not</strong>
+storage/catalog registration. A writable DuckLake catalog requires a
+<code dir="auto">StorageExtension</code> (DuckLake issues <code dir="auto">CREATE</code>/<code dir="auto">INSERT</code>/<code dir="auto">UPDATE</code> against it;
+read-only table functions cannot serve that), and registering one means
+<strong>linking DuckDB’s C++ internals</strong>. This is the same path the built-in
+postgres/sqlite/mysql catalog attachers take. The pure-Rust extension crates
+(<code dir="auto">duckdb-rs</code>, <code dir="auto">extension-template-rs</code>) ride the C API and therefore cannot
+register a catalog.</p>
+<p>Therefore <code dir="auto">moraine-duckdb</code> is:</p>
+<ul>
+<li>a <strong>thin C++ shim</strong> that links DuckDB’s internal C++ API and registers the
+<code dir="auto">StorageExtension</code>, <code dir="auto">Catalog</code>, and <code dir="auto">TransactionManager</code>, plus</li>
+<li>the Rust <strong><code dir="auto">moraine</code> core</strong> compiled as a staticlib exposing a <strong>minimal C
+ABI</strong>: open/attach, <code dir="auto">begin</code>/<code dir="auto">commit</code>/<code dir="auto">rollback</code>, <code dir="auto">scan(table, projection, filters) -&gt; Arrow</code>, and <code dir="auto">apply(mutations)</code>.</li>
+</ul>
+<p>The shim contains no domain logic — it translates DuckDB catalog callbacks
+into C-ABI calls. This preserves RFC 0001’s “thin by policy” intent, restated
+<strong>language-agnostically</strong>: no catalog semantics in the extension layer,
+regardless of the language it is written in.</p>
+<ul>
+<li>
+<p><strong>Boundary format: typed C structs, plus the Arrow C Data Interface for
+inline chunks.</strong> Metadata and inline <em>scan</em> results cross the ABI as
+owned arrays of <code dir="auto">#[repr(C)]</code> row structs (<code dir="auto">crates/moraine-duckdb/src/ dumps.rs</code>/<code dir="auto">inline.rs</code>), one <code dir="auto">_free</code> per array — not Arrow arrays as
+originally intended here. Inline chunk <em>bodies</em> are the exception and do
+use the Arrow C Data Interface: the shim converts a <code dir="auto">DataChunk</code> to
+<code dir="auto">ArrowArray</code>/<code dir="auto">ArrowSchema</code> with DuckDB’s <code dir="auto">ArrowConverter</code> and the Rust
+bridge (<code dir="auto">src/arrow_ipc.rs</code>) serializes to Arrow IPC, with the structs
+crossing the ABI by pointer (<code dir="auto">moraine_arrow_encode_*</code>/<code dir="auto">_decode_stream</code>,
+consuming on encode and producing on decode; ownership rules in
+<code dir="auto">arrow_ipc.rs</code>).</p>
+<p><strong>Scan results stay row structs.</strong> The split above is the decision, not
+an interim state. Arrow’s win is bulk columnar transfer, and the
+metadata path has no bulk to transfer: rows are built one at a time from
+a <code dir="auto">BTreeMap</code> of protobuf-decoded records, so an Arrow builder would
+visit every field exactly as often — it moves the copy rather than
+removing it. The measured cost is elsewhere anyway (<code dir="auto">BENCHMARK.md</code>:
+~5–7 µs per live entity to materialize, and RFC 0009’s open item names
+the <em>clone</em> in <code dir="auto">dump_entities</code>, not the marshalling), and that fix is
+strictly cheaper and strictly prior. Against that, the row structs are
+the schema contract: each is checked field-for-field against
+<code dir="auto">metadata_tables.cpp</code>’s spec table by the compiler and against
+DuckLake’s own DDL by review, where an Arrow schema assembled at runtime
+would move both to a runtime failure. Inline chunk bodies are the case
+that genuinely is columnar and where DuckDB owns both export and import,
+which is exactly why they are the exception. Revisit only on a profile
+naming dump marshalling — not materialization, not cloning — as a
+material share of catalog rebind time.</p>
+</li>
+<li>
+<p><strong>Sync↔async bridge lives in the Rust C-ABI layer.</strong> The core is async
+(SlateDB requires tokio, RFC 0001). The C-ABI layer owns the tokio runtime
+and <code dir="auto">block_on</code>s core futures, so the C++ shim only ever calls synchronous C
+functions. This is the “FFI boundary” of RFC 0001’s async rule.</p>
+</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="c-abi-error-mapping-v0">C ABI error mapping (v0)</h3><a class="sl-anchor-link" href="#c-abi-error-mapping-v0"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “C ABI error mapping (v0)”</span></a></div>
+<p>Pinned by the extension-loads slice (<code dir="auto">moraine-duckdb/src/error.rs</code>, <code dir="auto">mod codes</code>). Every fallible C-ABI entry point returns an <code dir="auto">i32</code> code and, on
+failure, fills a caller-provided <code dir="auto">(code, message)</code> pair (<code dir="auto">MoraineError</code>);
+messages are UTF-8, allocated by Rust, and freed only via the exported
+<code dir="auto">moraine_error_free</code>. Every entry point wraps its whole body — <code dir="auto">block_on</code>
+included — in <code dir="auto">catch_unwind</code>, so a core panic surfaces as a code, never as
+an unwind into C++. The shim translates codes to DuckDB exceptions:</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>ABI constant</th>
+<th>Source</th>
+<th>Shim raises</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td><code dir="auto">OK</code></td>
+<td>success</td>
+<td>—</td>
+</tr>
+<tr>
+<td>1</td>
+<td><code dir="auto">NOT_FOUND</code></td>
+<td><code dir="auto">Error::NotFound</code></td>
+<td><code dir="auto">CatalogException</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code dir="auto">ALREADY_EXISTS</code></td>
+<td><code dir="auto">Error::AlreadyExists</code></td>
+<td><code dir="auto">CatalogException</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code dir="auto">CONSTRAINT</code></td>
+<td><code dir="auto">Error::Constraint</code></td>
+<td><code dir="auto">CatalogException</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code dir="auto">COMMIT_CONFLICT</code></td>
+<td><code dir="auto">Error::CommitConflict</code></td>
+<td><code dir="auto">TransactionException</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code dir="auto">CORRUPTION</code></td>
+<td><code dir="auto">Error::Corruption</code>, plus catalog strings that cannot cross the boundary (embedded NUL)</td>
+<td><code dir="auto">IOException</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code dir="auto">STORE</code></td>
+<td><code dir="auto">Error::Store</code> (and, conservatively, any future core variant)</td>
+<td><code dir="auto">IOException</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code dir="auto">INVALID_ARGUMENT</code></td>
+<td>ABI-layer validation: null pointer, invalid UTF-8, unsupported store scheme</td>
+<td><code dir="auto">InvalidInputException</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code dir="auto">INTERNAL</code></td>
+<td>a panic caught at the FFI boundary</td>
+<td><code dir="auto">InternalException</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td><code dir="auto">INTERRUPTED</code></td>
+<td>a read was cancelled, or a commit was cancelled before its future was polled</td>
+<td><code dir="auto">InterruptException</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td><code dir="auto">RETRY_EXHAUSTED</code></td>
+<td><code dir="auto">Error::RetryBudgetExhausted</code> — the commit spent its whole internal retry budget without settling</td>
+<td><code dir="auto">TransactionException</code></td>
+</tr>
+<tr>
+<td>11</td>
+<td><code dir="auto">FENCED</code></td>
+<td><code dir="auto">Error::Fenced</code> — another process took over as the writer; the handle can no longer commit, and the message says to re-attach</td>
+<td><code dir="auto">IOException</code></td>
+</tr>
+<tr>
+<td>12</td>
+<td><code dir="auto">MIGRATION</code></td>
+<td>unsupported or incomplete format migration</td>
+<td><code dir="auto">IOException</code></td>
+</tr>
+<tr>
+<td>13</td>
+<td><code dir="auto">SNAPSHOT_EXPIRED</code></td>
+<td>requested snapshot was reclaimed</td>
+<td><code dir="auto">CatalogException</code></td>
+</tr>
+<tr>
+<td>14</td>
+<td><code dir="auto">UNSUPPORTED</code></td>
+<td>unsupported feature</td>
+<td><code dir="auto">NotImplementedException</code></td>
+</tr>
+<tr>
+<td>15</td>
+<td><code dir="auto">OPEN_RACED</code></td>
+<td>another process created the store first</td>
+<td><code dir="auto">IOException</code></td>
+</tr>
+<tr>
+<td>16</td>
+<td><code dir="auto">COMMIT_OUTCOME_UNKNOWN</code></td>
+<td>submitted write was not acknowledged, or a commit call was cancelled after polling began</td>
+<td><code dir="auto">IOException</code></td>
+</tr>
+</tbody>
+</table>
+<p>Wire contract: the <code dir="auto">COMMIT_CONFLICT</code> message always contains the literal
+substring <code dir="auto">conflict</code> — DuckLake’s <code dir="auto">RetryOnError</code> keys its retry decision on
+that substring (see the Transactions bullet above) — so the message text
+is part of the ABI contract, not incidental diagnostics.</p>
+<p>The contract runs both ways. <code dir="auto">RETRY_EXHAUSTED</code> is terminal, so its message
+carries <strong>none</strong> of the four substrings DuckLake retries on (<code dir="auto">conflict</code>,
+<code dir="auto">concurrent</code>, <code dir="auto">unique</code>, <code dir="auto">primary key</code>); the same rule governs the
+equality-index uniqueness rejection. DuckLake’s loop is itself bounded — by
+<code dir="auto">ducklake_max_retry_count</code>, default 10 — so a retryable terminal error does
+not spin forever, but it does multiply the work by that factor before
+failing, which for a large commit is the difference between an error and an
+apparent hang. Both codes raise <code dir="auto">TransactionException</code>: DuckLake’s retry
+decision reads the text, not the exception kind.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="diagnostics-seam">Diagnostics seam</h3><a class="sl-anchor-link" href="#diagnostics-seam"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Diagnostics seam”</span></a></div>
+<p>The core emits <code dir="auto">tracing</code> events; a loaded extension consumes none by
+default, and the host cannot consume them for it — the extension is a
+separate dynamically-loaded library with its own statically-linked
+<code dir="auto">tracing</code>, so a subscriber installed by an embedding process never sees
+them. Left there, every diagnostic the core produces is dropped, which is
+how a commit that spends its retry budget can present as a silent stall.</p>
+<p><code dir="auto">ATTACH</code> installs a process-wide buffering subscriber (<code dir="auto">logging.rs</code>), once,
+via <code dir="auto">try_init</code> — a host that already set a global subscriber keeps it. The
+buffer is bounded (oldest-first eviction, with the drop count reported on
+the next drain) so diagnostics never grow without limit behind a caller
+that stops draining. <code dir="auto">MORAINE_LOG</code> sets the captured level, default <code dir="auto">info</code>.</p>
+<p>Events fire on the handle’s tokio worker threads, where no <code dir="auto">ClientContext</code>
+is in scope. While a catalog is attached, that does not delay them: the
+catalog registers a database-scoped writer
+(<code dir="auto">Logger::Get(DatabaseInstance&amp;)</code>, which is thread-safe) as its handle’s
+push sink via <code dir="auto">moraine_register_log_sink(handle, sink, ctx)</code>, and the
+handle’s events write through it as they fire. A watcher querying
+<code dir="auto">duckdb_logs</code> from another connection therefore sees a running commit’s
+diagnostics while the commit runs — the stalled-commit case the logs exist
+to explain — and nothing is ever evicted while a sink is registered. The
+catalog’s destructor unregisters via <code dir="auto">moraine_unregister_log_sink(handle)</code>
+before the handle or the database goes away, and unregistration returning
+guarantees no push is in flight.</p>
+<p>Delivery is routed per handle, though <code dir="auto">tracing</code> itself is process-global:
+each attach’s runtime tags its worker threads with the handle’s identity
+at spawn, the FFI <code dir="auto">block_on</code> wrappers tag the calling thread per call, and
+an event is attributed to whichever handle tagged the thread it fires on.
+One process serving many attached lakes keeps their diagnostics apart —
+each lake’s records surface only in its own database’s <code dir="auto">duckdb_logs</code>.
+Records carry DuckDB’s own <code dir="auto">LogLevel</code> values, so the sink forwards them
+unchanged, and appear under the <code dir="auto">moraine</code> type after
+<code dir="auto">CALL enable_logging(level =&gt; 'info', storage =&gt; 'memory')</code> — the default
+storage writes to stdout rather than the table. Under DuckDB’s default
+<code dir="auto">LEVEL_ONLY</code> mode the type string is not filtered on, so no log-type
+registration is required.</p>
+<p>Events with no routable sink — fired before the handle’s sink registers
+(registration flushes that handle’s backlog through it), after it
+unregisters, or on a thread no handle tagged — buffer instead, and the
+shim drains the buffer through <code dir="auto">moraine_drain_logs(sink, ctx)</code> on threads
+that hold what each sink needs, wherever events could otherwise strand:</p>
+<ul>
+<li><strong><code dir="auto">CommitTransaction</code></strong>, on every outcome — success, conflict, or
+exhausted budget — and <strong><code dir="auto">StartTransaction</code></strong>, after the snapshot
+resolve, both writing through <code dir="auto">Logger::Get(context)</code>. With push sinks
+registered these find little to drain; they exist for the gaps around
+registration and for unattributed events.</li>
+<li><strong><code dir="auto">Attach</code></strong>, on both exits — a failed open’s events would otherwise
+wait forever, since no catalog (and so no push sink) ever exists. On
+success, registration itself flushes the handle’s backlog through the
+new sink.</li>
+<li><strong>The maintenance pass</strong>, which runs on the scheduler’s own thread,
+drains through the same database-scoped writer and closes each pass with
+one shim-originated outcome line: <code dir="auto">warn</code> naming every failed step,
+<code dir="auto">info</code> for a clean pass.</li>
+</ul>
+<p>The sink never throws: an exception escaping into the ABI would unwind
+across the boundary, and a lost diagnostic must not fail the operation
+that produced it.</p>
+<p><strong>Event frequency is a rule, not a convention.</strong> The buffer holds 512
+records and drops oldest-first, so its capacity is a budget shared by
+everything the core logs between drains. Events are emitted at
+per-operation frequency — per commit, per open, per pass — never per
+entry, per row, or per file. A per-entry event at <code dir="auto">debug</code> would evict the
+very warnings the buffer exists to preserve.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="read-cancellation-seam">Read cancellation seam</h3><a class="sl-anchor-link" href="#read-cancellation-seam"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Read cancellation seam”</span></a></div>
+<p>Pinned by <code dir="auto">moraine-duckdb/src/abi/</code>, <code dir="auto">staged.rs</code>, and <code dir="auto">runtime.rs</code>. Every cancellable entry
+point <code dir="auto">block_on</code>s a <code dir="auto">select!</code> between the core future and its
+cancellation signal, <code dir="auto">biased</code> toward the signal so a pending interrupt
+always wins a tie and aborts before the core future does any work. A
+cancelled read returns <code dir="auto">INTERRUPTED</code>, which the shim raises as
+<code dir="auto">InterruptException</code>; the handle stays fully usable and the next call is
+unaffected.</p>
+<p><strong>The signal is per call, not per handle.</strong> Cancellable entry points take
+a trailing <code dir="auto">MoraineInterruptProbe probe, void *probe_ctx</code> pair
+(<code dir="auto">typedef bool (*MoraineInterruptProbe)(void *)</code>). The probe is checked
+once synchronously before the core future is first polled (a timer’s
+first tick is pending at the poll level even when already elapsed, so a
+future completing on its first poll would otherwise beat a pending
+interrupt), then the <code dir="auto">select!</code> polls it on a ~100 ms interval — DuckDB’s
+own slice convention for interruptible waits. A null probe means
+non-cancellable. The probe may run on any of the runtime’s threads, so it
+must be thread-safe and <code dir="auto">probe_ctx</code> valid for the duration of the call —
+the shim’s probe is a single atomic load of <code dir="auto">ClientContext::interrupted</code>,
+the flag DuckDB’s own executor polls. Level-triggered, so a signal cannot
+leak past the call that observed it: the probe is only consulted while a
+call is in flight, and DuckDB clears the flag before the next query
+issues one.</p>
+<p>Per-call is what the deployment shape requires, and it is why the earlier
+per-handle <code dir="auto">Notify</code> and its <code dir="auto">moraine_interrupt(handle)</code> push channel are
+gone rather than merely unused. DuckDB’s flag is per <em>connection</em>, and
+several connections share one attached catalog; a single per-handle
+signal would let one connection’s Ctrl-C abort another’s query, or be
+consumed by it. Two overlapping reads on one handle cancelling
+independently is pinned by test.</p>
+<p>This is how the shim wires Ctrl-C: DuckDB offers no interrupt callback to
+a storage extension (cancellation is cooperative polling of a public
+atomic flag; a thread blocked in an FFI call never reaches the executor’s
+poll sites), so the poll moves inside the blocked call, where the async
+core makes cancellation a dropped future. No first-party remote-catalog
+extension (postgres, mysql, iceberg, delta, httpfs — or DuckLake itself)
+cancels a blocked external call; their shipped mitigations are timeouts.</p>
+<p>Read-only cancellable entry points include: <code dir="auto">moraine_snapshot</code>, the <code dir="auto">moraine_dump_*</code> reads, the
+<code dir="auto">moraine_inline_*</code> reads, and <code dir="auto">moraine_tx_begin</code> (reads the head
+snapshot; nothing is staged yet, so aborting it leaves no state). The
+snapshot listing calls (<code dir="auto">moraine_snapshot_schemas</code>/<code dir="auto">tables_in</code>/
+<code dir="auto">columns_of</code>/<code dir="auto">views_in</code>/<code dir="auto">data_files_of</code>) walk the already-materialized
+snapshot in memory and take no probe.</p>
+<p><code dir="auto">moraine_attach</code> is cancellable too, and is the exception to
+“mutates nothing”: the store open is the one long blocking call an attach
+makes, and against an unreachable endpoint it is the one a user is most
+likely to want out of. A cancelled attach writes no handle and leaves
+nothing attached, but it may already have taken the writer epoch — an
+attach cannot know whether it will finish before it claims one — so a
+process that was attached before it must re-attach, exactly as after any
+failed attach. Its abandoned runtime is wound down with a deadline rather
+than dropped: a plain drop blocks until every background task of the
+half-built store finishes, which is the hang the cancellation existed to
+escape.</p>
+<p>Commit calls also take a probe. Before the commit future is first polled,
+cancellation returns <code dir="auto">INTERRUPTED</code> and that call submitted nothing. Once
+polling begins, cancellation returns <code dir="auto">COMMIT_OUTCOME_UNKNOWN</code>; a submitted
+write continues on its own task. Preparation that has not yet submitted is
+conservatively classified the same way. An acknowledged result is returned
+normally when the commit future completes.</p>
+<p><code dir="auto">COMMIT_OUTCOME_UNKNOWN</code> is terminal for automatic retry. Its ABI message is
+fixed so backend error text cannot introduce DuckLake’s retry substrings.
+The detailed reason is logged. The shim adds the structured DuckDB error
+field <code dir="auto">commit_outcome=unknown</code>. DuckDB’s COMMIT wrapper discards extra fields,
+so <code dir="auto">moraine: commit outcome unknown;</code> is also a fixed transport marker. The
+bundled DuckLake patch treats either signal as terminal and clears its transaction’s file-cleanup ownership before
+rollback. This preserves newly written data and delete files even if rollback
+runs again. Errors without the flag retain DuckLake’s usual cleanup behavior. Callers retain external files and reconcile
+catalog state before resubmitting. Located deletion retains supplied delete
+files on every commit-call failure, including unknown outcomes; orphan
+cleanup can reclaim files no successful catalog commit registered.</p>
+<p><code dir="auto">moraine_detach</code> takes no probe: cancellation during teardown could leak the
+handle or leave the store half-closed.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="version-pinning-and-distribution">Version pinning and distribution</h3><a class="sl-anchor-link" href="#version-pinning-and-distribution"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Version pinning and distribution”</span></a></div>
+<p>Linking DuckDB’s C++ internals ties the extension to a specific DuckDB build;
+the ABI is not stable across releases. This is the “FFI/build/version-pinning
+tax” RFC 0001 explicitly chose to defer out of the core and pay only at the
+extension boundary; the rest of this section is what paying it looks like.</p>
+<p><strong>A build is bound to one DuckDB version string, exactly.</strong> DuckDB refuses a
+C++-ABI extension whose metadata footer names a different version —
+<code dir="auto">ParsedExtensionMetaData::GetInvalidMetadataError</code> compares the strings, patch
+releases included — so a user on one patch release cannot load another’s
+build. Supporting a series therefore means building each release in it
+separately, and the distribution unit is a DuckDB <em>release</em>, not a series.</p>
+<p><strong>One manifest owns the pin.</strong> <code dir="auto">.github/duckdb-versions</code> lists the releases
+moraine builds for, newest first, the first line carrying the commit each
+submodule must sit on. <code dir="auto">xtask</code> reads it, both release workflows build a
+matrix from it, assets are published as
+<code dir="auto">moraine.&lt;duckdb-version&gt;.&lt;platform&gt;.duckdb_extension</code> so several versions
+coexist in one release, and <code dir="auto">cargo xtask check-pins</code> fails if any other place
+naming a version disagrees. That check exists because the failure mode is
+silent: a bump that misses one of the six places produces an artifact that
+builds, passes every other job, and then refuses to load. <code dir="auto">cargo xtask bump-duckdb &lt;version&gt;</code> writes those places, so the check guards a
+transcription no one has to make by hand. It covers the DuckLake commit
+too, which DuckDB chooses rather than moraine — otherwise a DuckDB bump
+moves it silently and only e2e says so.</p>
+<p><strong>Which releases are listed</strong> is a judgement, and a short list is the default.
+Each entry multiplies the release build by five platforms, and only the
+primary is proven end-to-end against a real DuckLake — the e2e suite is
+moraine’s whole correctness story for the shim, and running it per entry is
+the real cost, not the build. So the list holds the releases users are
+plausibly on; dropping one only stops future releases from carrying it, since
+published assets stay where they are.</p>
+<p><strong>Which DuckDB series moraine tracks:</strong> the one DuckLake’s current release
+branch targets, adopted when DuckLake cuts that branch rather than when DuckDB
+releases. The extension exists to be DuckLake’s catalog, and a DuckDB with no
+DuckLake built for it has nothing to attach. DuckLake versions by DuckDB-series
+branch, so the two move together by construction.</p>
+<p><strong>Signing is DuckDB’s, not moraine’s.</strong> The public keys
+<code dir="auto">ExtensionHelper::GetPublicKeys</code> trusts are compiled into every DuckDB binary,
+so no third party can produce a signature the stock CLI accepts;
+<code dir="auto">extension-upload-single.sh</code> zeroes the footer’s 256-byte signature region
+unless it holds one of those private keys. Hence: moraine’s own release
+workflow publishes unsigned, every e2e harness starts the CLI with
+<code dir="auto">-unsigned</code>, and the community-extensions pipeline — pointed at this repo by
+<code dir="auto">description.yml</code> — is the only route to a signed build. That is a
+consequence of DuckDB’s design rather than an unbuilt piece of moraine’s.</p>
+<p><strong>The pin, tracking latest stable:</strong></p>
+<table>
+<thead>
+<tr>
+<th>What</th>
+<th>Pinned at</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DuckDB</td>
+<td><strong>v1.5.5</strong></td>
+<td>the primary entry of <code dir="auto">.github/duckdb-versions</code>; both submodules sit on it, and it is the version the e2e suite proves the chain against</td>
+</tr>
+<tr>
+<td>DuckLake extension</td>
+<td><strong><code dir="auto">d8a1881e</code></strong></td>
+<td>the DuckLake source moraine bundles, with the <code dir="auto">patches/ducklake</code> series applied: what <code dir="auto">INSTALL ducklake</code> resolves to against the pinned CLI, since DuckDB v1.5.5 hard-codes the commit in <code dir="auto">.github/config/extensions/ducklake.cmake</code>, so the pair moves only when the DuckDB pin does. Verified by running, not assumed</td>
+</tr>
+<tr>
+<td>DuckLake branch</td>
+<td><strong><code dir="auto">v1.5-variegata</code></strong></td>
+<td>DuckLake publishes no release tags — it versions by DuckDB-series branches (<code dir="auto">v1.3-ossivalis</code>, <code dir="auto">v1.4-andium</code>, <code dir="auto">v1.5-variegata</code>); <code dir="auto">main</code> is development</td>
+</tr>
+<tr>
+<td>DuckLake catalog format</td>
+<td><strong><code dir="auto">1.0</code></strong> (<code dir="auto">DuckLakeVersion::V1_0</code>)</td>
+<td>the highest version the stable branch writes (its migration chain ends at <code dir="auto">'1.0'</code>); <code dir="auto">V1_1_DEV_1</code> exists on <code dir="auto">main</code> only and is not targeted</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Patch-level ABI friction between the two does not appear.</strong> DuckDB’s own CI
+builds the DuckLake extension against v1.5.3 while moraine statically links
+v1.5.5, and the concern was that objects crossing the extension↔host boundary
+by pointer between those two builds might disagree. They do not: the bundled
+DuckLake loads with moraine and the full chain answers correctly, pinned by
+<code dir="auto">wire_contract.rs</code> alongside the version strings, so a bump that introduces
+friction fails there rather than in the field. The fallback to v1.5.3 an
+earlier revision of this RFC held open is therefore not needed and not taken.</p>
+<p>The source-verified behaviors this RFC suite cites (conflict matrix, commit
+retry loop, <code dir="auto">SchemaChangesMade</code> classification, per-table column-id
+allocation, the five primary keys) were verified on <code dir="auto">main</code> @ <code dir="auto">34db89b</code>
+(2026-07-09) and re-checked <strong>identical on the pinned branch</strong> — the diffs
+between the two are cosmetic (accessor renames, formatting). The e2e suite
+regression-pins against the table above; moving any row of it is a
+deliberate, reviewed bump.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="build-and-pin-mechanics-as-implemented">Build and pin mechanics (as implemented)</h3><a class="sl-anchor-link" href="#build-and-pin-mechanics-as-implemented"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Build and pin mechanics (as implemented)”</span></a></div>
+<p><strong>Built through DuckDB’s extension toolchain.</strong> moraine-duckdb builds via
+<code dir="auto">extension-ci-tools</code> — the same CMake+Make toolchain the community-extensions
+repository uses — added as a git submodule alongside a <code dir="auto">duckdb</code> submodule
+pinned to the supported release. The toolchain owns the whole extension link:
+it builds DuckDB from the submodule and <strong>statically links it into the
+loadable</strong>, compiles the C++ shim as extension sources against DuckDB’s full
+<code dir="auto">src/include/</code> tree (every internal header at its real path — the parser and
+storage-extension types the shim needs, e.g. <code dir="auto">TableFunctionRef</code>,
+<code dir="auto">LogicalInsert</code>/<code dir="auto">LogicalUpdate</code>/<code dir="auto">LogicalDelete</code>, which the amalgamation never
+exposed), and links the moraine Rust core in as a static library via
+<a href="https://github.com/corrosion-rs/corrosion">corrosion</a>. Static DuckDB linkage
+is what makes the extension loadable into the stock CLI on every platform:
+the stock Linux release CLI exports none of its C++ internals, so a <code dir="auto">dlopen</code>
+that deferred symbol resolution could never resolve them there — carrying its
+own copy is exactly how official DuckDB C++ extensions are shaped. Objects
+cross the extension↔host boundary by pointer between ABI-identical builds of
+the same pinned version — the version pin is what makes this sound. None of
+this linking lives in the crate: it declares <code dir="auto">crate-type = ["staticlib", "rlib"]</code> — <code dir="auto">staticlib</code> is what CMake links, <code dir="auto">rlib</code> is what the crate’s own
+integration tests link against — and its <code dir="auto">build.rs</code> does one thing
+unrelated to the extension link, generating <code dir="auto">cpp/moraine_abi.h</code> from the
+<code dir="auto">extern "C"</code> surface with cbindgen so the header cannot drift from the
+Rust definitions. Two build details the toolchain needs supplied per
+target: a C++17 bump on the shim targets (it uses <code dir="auto">std::optional</code>; DuckDB
+pins the global standard to C++11), GCC 14 for Linux to match DuckLake’s
+extension pipeline, and, on macOS, the <code dir="auto">IOKit</code>/<code dir="auto">Security</code>/
+<code dir="auto">CoreFoundation</code>/<code dir="auto">SystemConfiguration</code> frameworks the Rust dependency tree
+links.</p>
+<p><strong>Entry point and packaging.</strong> DuckDB’s loader <code dir="auto">dlsym</code>s a fixed entry
+symbol derived from the artifact filename with every <code dir="auto">.</code>-suffix stripped,
+so the loadable carries exactly one dot (<code dir="auto">moraine.duckdb_extension</code> →
+<code dir="auto">moraine_duckdb_cpp_init</code>). The entry point is a C++ symbol emitted by the
+toolchain’s <code dir="auto">DUCKDB_CPP_EXTENSION_ENTRY(moraine, loader)</code> macro
+(<code dir="auto">cpp/moraine_extension.cpp</code>), which forwards to the StorageExtension
+registration; the toolchain’s linker whitelist exports exactly that one
+symbol and hides everything else (including the Rust core’s C ABI, resolved
+internally at static-link time). The toolchain also appends the required
+512-byte metadata footer (ABI type, extension version, the exact DuckDB
+version string, target platform, magic value, and a signature region left
+zero for unsigned local loading, filled by DuckDB’s own signing in the
+community-extensions pipeline). <code dir="auto">cargo xtask e2e</code> builds the loadable by
+invoking the toolchain (<code dir="auto">make release</code>) and points the integration tests at
+<code dir="auto">build/release/extension/moraine/moraine.duckdb_extension</code>.</p>
+<p><strong>e2e harness.</strong> <code dir="auto">cargo xtask e2e</code> downloads and caches the pinned DuckDB
+CLI under <code dir="auto">target/</code> (skipping the fetch once cached), redirects
+<code dir="auto">extension_directory</code> under <code dir="auto">target/duckdb-extensions/</code> before <code dir="auto">INSTALL ducklake</code>/<code dir="auto">LOAD ducklake</code> (also cached, never the CLI’s home-directory
+default), then drives the CLI with <code dir="auto">-unsigned</code> — required because moraine
+cannot sign the artifact at all (above) — through <code dir="auto">LOAD</code>, <code dir="auto">ATTACH</code>, listing,
+and metadata-projection queries against the standalone attach, and through
+<code dir="auto">ducklake:moraine:</code> for the real DuckLake read/write round trip, against
+stores seeded through the <code dir="auto">moraine</code> API. Full mechanics, including every
+build-time discovery, are recorded in <code dir="auto">crates/moraine-duckdb/README.md</code>.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="the-staged-transaction-abi-surface">The staged-transaction ABI surface</h3><a class="sl-anchor-link" href="#the-staged-transaction-abi-surface"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “The staged-transaction ABI surface”</span></a></div>
+<p>DuckLake’s own <code dir="auto">INSERT</code>/<code dir="auto">UPDATE</code>/<code dir="auto">DELETE</code> against <code dir="auto">ducklake_*</code> tables
+reach moraine through four C-ABI entry points (<code dir="auto">moraine_abi.h</code>):
+<code dir="auto">moraine_tx_begin(catalog) -&gt; tx</code>, <code dir="auto">moraine_tx_stage(tx, table_kind, operation_kind, cells)</code> (accumulates one typed row operation — <code dir="auto">insert</code>, <code dir="auto">delete</code>,
+or <code dir="auto">update_set_end</code> — without touching the store), <code dir="auto">moraine_tx_commit(tx) -&gt; snapshot_id</code> (translates every staged operation into one atomic SlateDB
+batch and returns the new head), and <code dir="auto">moraine_tx_rollback(tx)</code> (discards
+the accumulated operations, no store access). The C++ shim’s <code dir="auto">PlanInsert</code>/
+<code dir="auto">PlanUpdate</code>/<code dir="auto">PlanDelete</code> (<code dir="auto">cpp/catalog.cpp</code>, <code dir="auto">cpp/staged_write.cpp</code>)
+recognize exactly one target: a <code dir="auto">ducklake_*</code> metadata table entry whose
+spec names a writable <code dir="auto">table_kind</code>; every other target — a real user table,
+or a <code dir="auto">ducklake_*</code> kind this crate does not model as a store entity — still
+throws <code dir="auto">NotImplementedException</code>, matching the “translate staged rows,
+author nothing else” scope above. Per the staged-row rules: DuckLake
+authors every id/counter/<code dir="auto">schema_version</code>/<code dir="auto">begin_snapshot</code> value, carried
+across the ABI verbatim; the one interpreted convention is an <code dir="auto">UPDATE</code>
+setting <code dir="auto">end_snapshot</code>, translated to a <code dir="auto">current</code>-key delete plus <code dir="auto">history</code>-key
+write; a lost race at commit returns an error whose message contains the
+literal substring <code dir="auto">conflict</code> (never retried internally, per the C ABI
+error mapping table above).</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="data_inlining_row_limit-is-deliberately-not-synthesized-and-dynamic-inline-table-interception"><code dir="auto">data_inlining_row_limit</code> is deliberately not synthesized, and dynamic inline-table interception</h3><a class="sl-anchor-link" href="#data_inlining_row_limit-is-deliberately-not-synthesized-and-dynamic-inline-table-interception"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “data_inlining_row_limit is deliberately not synthesized, and dynamic inline-table interception”</span></a></div>
+<p>Beyond the keys the exists-probe path reads (version, encrypted,
+created_by — see the metadata-catalog section below), the synthesized
+<code dir="auto">ducklake_metadata</code> serves <strong>no</strong> row for <code dir="auto">data_inlining_row_limit</code>.
+Inlining is on regardless: DuckLake’s <code dir="auto">WriteNewInlinedTables</code>
+(source-verified) skips registering a table’s per-schema-version
+inlined-data table only when <code dir="auto">DataInliningRowLimit(...)</code> resolves to 0,
+and absent any served value that resolves to a compiled default of 10.
+(An earlier revision served <code dir="auto">"0"</code> to keep inlining off while RFC 0005 was
+unimplemented, then <code dir="auto">"10"</code> to make the choice legible.)</p>
+<p>Serving it is worse than redundant. <code dir="auto">DataInliningRowLimit</code> reads the
+catalog’s configuration options first and only then the DuckDB setting
+<code dir="auto">ducklake_default_data_inlining_row_limit</code>, and an
+<code dir="auto">ATTACH ... (DATA_INLINING_ROW_LIMIT n)</code> lands in that same option map —
+so a served row outranks both knobs and shadows them silently, leaving an
+operator with no way to raise the limit. Serving nothing keeps the same
+default and keeps both knobs working; a store that wants a different
+limit records a real option row, which overrides the default as any
+stored option does.</p>
+<p>With inlining on, DuckLake <strong>dynamically creates and drives per-table
+physical tables</strong> in the metadata catalog rather than writing fixed
+<code dir="auto">ducklake_*</code> rows (RFC 0005’s “Extension surface (as implemented)” has
+the full operation → keyspace mapping). This shim recognizes two dynamic
+name families by pattern, not by a fixed catalog-entry list — this is
+the one place moraine’s catalog lookup does more than serve the fixed
+<code dir="auto">ducklake_*</code> set B1 describes above:</p>
+<ul>
+<li><code dir="auto">ducklake_inlined_data_&lt;table_id&gt;_&lt;schema_version&gt;</code> — recognized once
+<code dir="auto">moraine_inline_schemas</code> has a matching <code dir="auto">(table_id, schema_version)</code>
+record (so a <code dir="auto">CREATE TABLE IF NOT EXISTS</code> existence probe correctly
+reports “does not exist” before the first <code dir="auto">CREATE</code>, and the same
+connection’s own <code dir="auto">LookupInlineTableEntry</code> accepts the <code dir="auto">CREATE</code> that
+follows).</li>
+<li><code dir="auto">ducklake_inlined_delete_&lt;table_id&gt;</code> — recognized from the table’s
+first inlined file-delete until the table is dropped. DuckLake probes
+this table’s existence with <code dir="auto">SELECT NULL FROM ... LIMIT 1</code> and treats a
+bind error as “does not exist”, so unlike the data family this one must
+report missing for a real table_id until that first file-delete, or
+DuckLake’s own existence discipline breaks. It must equally keep
+existing once emptied: <code dir="auto">ducklake_flush_inlined_data</code> writes the table’s
+deletions out as a real delete file and clears it with an unqualified
+<code dir="auto">DELETE</code>, and DuckLake caches the table’s existence for the life of the
+catalog rather than re-probing — so an existence derived from whether
+any deletion is currently held vanishes under it mid-session and every
+later bind fails. Existence is recorded in the store (RFC 0005’s
+<code dir="auto">inline/file_delete_table</code> marker) for exactly that reason.</li>
+</ul>
+<p>Both route through the same staged-row commit path (<code dir="auto">cpp/inline_tables. cpp</code>) as the fixed <code dir="auto">ducklake_*</code> tables, translating into <code dir="auto">inline/*</code>
+records — see RFC 0005 for the exact wire shape and the encoding
+deviation from that RFC’s Arrow-IPC design.</p>
+<p><code dir="auto">ducklake_flush_inlined_data</code> and DuckLake’s compaction/rewrite cleanup
+paths also touch fixed <code dir="auto">ducklake_*</code> tables beyond the entity
+projections. <code dir="auto">ducklake_files_scheduled_for_deletion</code> is served for real
+(the <code dir="auto">current/gcfile</code> schedule, written by expiry/compaction and drained
+by <code dir="auto">ducklake_cleanup_old_files</code>). The tables of still-unmodeled features
+(variant-column stats, name/column mapping, macros) remain always-empty
+stand-ins (<code dir="auto">metadata_tables.cpp</code>) purely so DuckLake’s generic cleanup
+<code dir="auto">DELETE</code>/<code dir="auto">INSERT</code> batch — issued unconditionally as part of a commit
+that removes or supersedes data files, not gated on any of these
+features actually being in use — binds against an existing table instead
+of failing the whole commit with a “table could not be found” error.
+Raw <code dir="auto">DELETE</code>s against tables with no delete translation plan as
+void-deletes that throw if a row ever actually matches.</p>
+<p>Two obligations of DuckLake’s maintenance functions land here rather
+than in the core. <strong>Read-your-writes on the snapshot projection:</strong>
+<code dir="auto">ducklake_expire_snapshots</code> stages its snapshot deletes and then
+re-reads <code dir="auto">ducklake_snapshot</code> in the same transaction (its dead-row rule
+is <code dir="auto">NOT EXISTS</code> over the survivors), so a scan of the snapshot tables
+inside a write transaction with an open staged tx serves the
+transaction’s own view (<code dir="auto">moraine_tx_dump_snapshots</code>), not committed
+state. <strong>Head-preserving maintenance commits:</strong> an expiry or cleanup
+transaction inserts no <code dir="auto">ducklake_snapshot</code> row; the staged path commits
+it as reclamation-only, minting no snapshot and leaving <code dir="auto">sys/head</code>
+untouched (RFC 0007).</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="standalone-data-scan-retirement">Standalone data-scan retirement</h3><a class="sl-anchor-link" href="#standalone-data-scan-retirement"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Standalone data-scan retirement”</span></a></div>
+<p>User-table <em>data</em> is served only through DuckLake now, matching the
+Non-goals decision above: the standalone attach’s own scan
+(<code dir="auto">MoraineTableEntry::GetScanFunction</code>, <code dir="auto">cpp/scan.cpp</code>) still binds
+unconditionally, so <code dir="auto">DESCRIBE</code>/<code dir="auto">EXPLAIN</code> keep working, but its
+<code dir="auto">init_global</code> — called once per query execution, not once per bind —
+unconditionally throws <code dir="auto">InvalidInputException</code>, naming the table and the
+<code dir="auto">ducklake:moraine:&lt;store&gt;</code> attach to use instead (<code dir="auto">DATA_PATH</code> stays a
+placeholder; this shim has no store-level source of truth for a lake-wide
+data path). The message is deliberately built to exclude DuckLake’s own
+retry substrings (<code dir="auto">conflict</code>/<code dir="auto">unique</code>/<code dir="auto">primary key</code>/<code dir="auto">concurrent</code>, per the C
+ABI error mapping table): this is a permanent redirect, not a race to
+retry. The scan machinery this replaced — a nested <code dir="auto">read_parquet</code> query
+over resolved file paths, path-resolution rules, streaming, and a
+column-count guard — is deleted outright; see
+<code dir="auto">crates/moraine-duckdb/README.md</code>’s “User-table data is served only
+through DuckLake” section for the full account and the exact error text.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="a-known-upstream-race-pin-threads1-for-ducklake-re-reads-after-a-write">A known upstream race: pin <code dir="auto">threads=1</code> for DuckLake re-reads after a write</h3><a class="sl-anchor-link" href="#a-known-upstream-race-pin-threads1-for-ducklake-re-reads-after-a-write"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “A known upstream race: pin threads=1 for DuckLake re-reads after a write”</span></a></div>
+<p>DuckLake’s own catalog cache has a multi-threaded race, independent of
+moraine: a fresh attach’s catalog listing comes back <strong>empty</strong> right after
+a write, under DuckDB’s default multi-threaded query execution. Not a
+moraine defect — the identical sequence reproduces against a plain
+duckdb-file-backed DuckLake attach with zero moraine code in the chain, in
+<strong>23 of 40 runs</strong> at the tracked version. It is also not <code dir="auto">RENAME</code>-specific
+as an earlier revision of this RFC had it: a plain <code dir="auto">CREATE TABLE</code> is
+enough. Dropping the workaround fails the e2e suite in roughly four runs
+out of five.</p>
+<p><code dir="auto">SET threads=1;</code> before the attach closes it deterministically, and every
+session runner in <code dir="auto">crates/moraine-duckdb/tests/ducklake_load/helpers.rs</code>
+sets it for exactly that reason, not as a production recommendation.
+moraine’s own row-faithful projections independently verify that every
+write this crate translates lands correctly regardless of whether
+DuckLake’s cache race fires on the read side.</p>
+<p>The workaround costs every e2e session its parallelism, so a test asserts
+the race’s <strong>presence</strong> against the reference chain
+(<code dir="auto">the_upstream_ducklake_listing_race_still_needs_threads_1</code>). The
+inversion is deliberate: without a canary nobody learns when the
+workaround stopped being needed, and its failure is the signal to delete
+both it and the <code dir="auto">SET threads=1</code>.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="alternatives-considered">Alternatives considered</h2><a class="sl-anchor-link" href="#alternatives-considered"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Alternatives considered”</span></a></div>
+<ul>
+<li><strong>A2 — a standalone moraine <code dir="auto">ATTACH</code> DuckDB catalog</strong> in addition to
+the DuckLake surface. Originally deferred; since <strong>adopted</strong> as the first
+shipping surface (<code dir="auto">ATTACH ... (TYPE moraine)</code>, see Non-goals) — not for a
+direct-query consumer, but because it proves the shim/ABI/core stack
+end-to-end with the least machinery while the DuckLake chaining
+ergonomics are still open.</li>
+<li><strong>B2 — semantic projection.</strong> Store a re-modeled catalog form and project it
+into the <code dir="auto">ducklake_*</code> views on read, translating writes back. Rejected: it
+couples moraine to DuckLake’s exact SQL shapes and re-encodes logic DuckLake
+already owns, so a DuckLake change can silently misread. B1 keeps moraine
+faithful and evolution-robust. The e2e evidence this was waiting on now
+exists and does not call for it: the pinned access set (above) is thirty
+tables of straightforward per-kind scans and staged-row writes, with no
+filter pushed down and therefore no shape a re-modeled store would serve
+better. Revisit only if a <em>specific</em> pinned access pattern turns out to be
+expensive because of the row-faithful layout itself — not because the
+catalog is large, which is 0009’s lazy-materialization question, and not
+because a scan clones, which is 0009’s <code dir="auto">dump_entities</code> item.</li>
+<li><strong>Raw-SQL interception.</strong> moraine parses and answers the SQL DuckLake emits.
+Rejected: reimplements a query engine for no benefit; DuckDB’s executor
+already does this over moraine’s table scans.</li>
+<li><strong>Pure-Rust cdylib over the stable C extension API.</strong> Rejected on
+feasibility: the C API exposes scalar/table functions only, not catalog
+registration. A read-only table-function surface cannot be DuckLake’s
+writable catalog. A <code dir="auto">StorageExtension</code> requires DuckDB’s C++ internals.</li>
+<li><strong>Wire-impersonating an existing backend</strong> (present as PostgreSQL/DuckDB over
+the wire so DuckLake attaches to moraine as one of its known types).
+Rejected: reimplements a wire protocol and still must satisfy the same
+metadata semantics — cost with no offsetting benefit, and brittle against
+protocol changes.</li>
+</ul>
+</div><script type="module">var e=class extends HTMLElement{constructor(){super()}connectedCallback(){let e=()=>{let e=t===`ready`?`<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></g></svg>`:`<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/></svg>`;this.innerHTML=`<span class="w-full h-full block [&_svg]:w-full [&_svg]:h-full">`+e+`</span>`},t=`ready`;e(),this.addEventListener(`click`,()=>{if(t===`ready`){t=`success`,e();let n=this.dataset.code||``;navigator.clipboard.writeText(n),setTimeout(()=>{t=`ready`,e()},1500)}})}};customElements.define(`nova-code-copy-button`,e);</script><script type="module" src="/_astro/MarkdownContent.astro_astro_type_script_index_0_lang.x0CmCSF8.js"></script><footer class="sl-flex astro-xhxjzfa7"><div class="meta sl-flex astro-xhxjzfa7"></div><div class="flex min-w-full flex-row items-stretch justify-between gap-2 px-1 pt-0 pb-6 print:hidden" dir="ltr"><a href="/rfcs/0005-data-inlining/" rel="prev" data-side="left" class="group m-0 flex items-center justify-end gap-2 rounded-xl p-2 font-medium text-(--sl-color-gray-2) no-underline transition hover:text-(--sl-color-white) md:text-lg [[rel='next']]:flex-row [[rel='prev']]:flex-row-reverse"><span>0005: Data inlining on SlateDB</span><svg width="1em" height="1em" viewBox="0 0 24 24" class="block min-h-5 min-w-5 transition group-hover:-translate-x-1"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18l-6-6l6-6" /></svg></a><div class="flex-1"></div><a href="/rfcs/0007-snapshot-expiry-and-gc/" rel="next" data-side="right" class="group m-0 flex items-center justify-end gap-2 rounded-xl p-2 font-medium text-(--sl-color-gray-2) no-underline transition hover:text-(--sl-color-white) md:text-lg [[rel='next']]:flex-row [[rel='prev']]:flex-row-reverse"><span>0007: Snapshot expiry and garbage collection</span><svg width="1em" height="1em" viewBox="0 0 24 24" class="block min-h-5 min-w-5 transition group-hover:translate-x-1"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6" /></svg></a></div></footer></div></div></main></div></div></div></div></body></html>

@@ -1,0 +1,936 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-vdxcvpsm"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>RFC 0004: Commit and transaction protocol | moraine</title><link rel="canonical" href="https://morainedb.github.io/rfcs/0004-commit-protocol/"/><link rel="sitemap" href="/sitemap-index.xml"/><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.1.4"/><meta name="generator" content="Starlight v0.41.4"/><meta property="og:title" content="RFC 0004: Commit and transaction protocol"/><meta property="og:type" content="article"/><meta property="og:url" content="https://morainedb.github.io/rfcs/0004-commit-protocol/"/><meta property="og:locale" content="en"/><meta property="og:description" content="A DuckLake catalog that lives in your bucket — SlateDB-backed, serverless, nothing to operate."/><meta property="og:site_name" content="moraine"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="A DuckLake catalog that lives in your bucket — SlateDB-backed, serverless, nothing to operate."/><script>
+"use strict";(()=>{(()=>{let t="theme-toggle",n;function r(){return window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}function l(){let e=localStorage.getItem(t);return e==="dark"||e==="light"?e:null}function m(){return n||l()||r()}function s(e){e===r()?localStorage.removeItem(t):localStorage.setItem(t,e)}function h(e){let o=document.documentElement;o.classList.toggle("dark",e==="dark"),o.dataset.theme=e,o.style.colorScheme=e}function a(e){n=e,s(e),h(e)}function c(){a(m())}c(),document.addEventListener("astro:after-swap",c),window.astroThemeToggle={setTheme:a,getTheme:m}})();})();
+</script><link rel="stylesheet" href="/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/_astro/common.DJmCPQrT.css"><style>@layer starlight.components{.card:where(.astro-zts4jgjd){--sl-card-border:var(--sl-color-purple);--sl-card-bg:var(--sl-color-purple-low);border:1px solid var(--sl-color-gray-5);background-color:var(--sl-color-black);flex-direction:column;gap:clamp(.5rem,.125rem + 1vw,1rem);padding:clamp(1rem,.125rem + 3vw,2.5rem)}.card:where(.astro-zts4jgjd):nth-child(4n+1){--sl-card-border:var(--sl-color-orange);--sl-card-bg:var(--sl-color-orange-low)}.card:where(.astro-zts4jgjd):nth-child(4n+3){--sl-card-border:var(--sl-color-green);--sl-card-bg:var(--sl-color-green-low)}.card:where(.astro-zts4jgjd):nth-child(4n+4){--sl-card-border:var(--sl-color-red);--sl-card-bg:var(--sl-color-red-low)}.card:where(.astro-zts4jgjd):nth-child(4n+5){--sl-card-border:var(--sl-color-blue);--sl-card-bg:var(--sl-color-blue-low)}.title:where(.astro-zts4jgjd){font-weight:600;font-size:var(--sl-text-h4);color:var(--sl-color-white);line-height:var(--sl-line-height-headings);align-items:center;gap:1rem}.card:where(.astro-zts4jgjd) .icon:where(.astro-zts4jgjd){border:1px solid var(--sl-card-border);background-color:var(--sl-card-bg);border-radius:.25rem;flex-shrink:0;padding:.2em}.card:where(.astro-zts4jgjd) .body:where(.astro-zts4jgjd){font-size:clamp(var(--sl-text-sm), calc(.5rem + 1vw), var(--sl-text-body));margin:0}.card-grid:where(.astro-lmor3ela){grid-template-columns:100%;gap:1rem;display:grid}.card-grid:where(.astro-lmor3ela)>*{margin-top:0!important}@media (width>=50rem){.card-grid:where(.astro-lmor3ela){grid-template-columns:1fr 1fr;gap:1.5rem}.stagger:where(.astro-lmor3ela){--stagger-height:5rem;padding-bottom:var(--stagger-height)}.stagger:where(.astro-lmor3ela)>:nth-child(2n){transform:translateY(var(--stagger-height))}}}
+@layer starlight.components{svg:where(.astro-n5k4ipy7){color:var(--sl-icon-color);font-size:var(--sl-icon-size,1em);width:1em;height:1em}}
+</style><script type="module" src="/_astro/page.LAbJoB63.js"></script></head><body class="astro-vdxcvpsm"><a class="sl-skip-link astro-vxeigawq" href="#_top">Skip to content</a><div class="flex min-h-screen flex-col astro-3iko6sul"><header class="fixed inset-0 z-(--sl-z-index-navbar) box-border h-(--sl-nav-height) w-full border-0 border-b border-solid border-(--sl-color-hairline) bg-(--sl-color-bg-nav) px-(--sl-nav-pad-x) py-(--sl-nav-pad-y) backdrop-blur astro-3iko6sul"><div class="box-border flex h-full items-center gap-2"><div class="-m-3 overflow-clip p-3 flex min-w-0"><span class="-m-1.5 rounded-md p-1.5 **:text-lg **:font-semibold **:text-(--sl-color-text) focus-visible:outline-offset-0"><a href="/" class="site-title sl-flex astro-clw6ags5"><img class="light:sl-hidden print:hidden astro-clw6ags5" alt src="/_astro/moraine-dark.CEVNFCXz.svg" width="128" height="128"><img class="dark:sl-hidden print:block astro-clw6ags5" alt src="/_astro/moraine.B97P_dWh.svg" width="128" height="128"><span class="astro-clw6ags5" translate="no">moraine</span></a></span></div><nav class="flex flex-1 flex-row gap-4 overflow-x-auto py-3 pr-4 pl-4 text-sm font-medium max-md:**:hidden xl:gap-6 xl:pl-6"></nav><div class="flex md:max-w-60 md:flex-1 print:hidden"><site-search class=" astro-hdulihjd" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"><button class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90 md:h-9 md:w-full md:max-w-88 md:rounded-md md:border md:border-solid md:border-(--sl-color-gray-5) md:p-2 md:text-(--sl-color-text) md:transition-colors md:hover:bg-gray-400/10 astro-hdulihjd" data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4 astro-hdulihjd"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m21 21l-4.34-4.34" /><circle cx="11" cy="11" r="8" /></g></svg><span class="sl-hidden md:sl-block astro-hdulihjd" aria-hidden="true">Search</span><kbd class="sl-hidden md:sl-flex astro-hdulihjd" style="display: none;"><kbd class="astro-hdulihjd">Ctrl</kbd><kbd class="astro-hdulihjd">K</kbd></kbd></button><dialog style="padding:0" aria-label="Search" class="astro-hdulihjd"><div class="dialog-frame sl-flex astro-hdulihjd"><button data-close-modal class="sl-flex md:sl-hidden astro-hdulihjd">Cancel</button><div class="search-container astro-hdulihjd"><div id="starlight__search" class="astro-hdulihjd"></div></div></div></dialog></site-search><script>
+  ;(() => {
+    const openBtn = document.querySelector('button[data-open-modal]')
+    const shortcut = openBtn?.querySelector('kbd')
+    if (!openBtn || !(shortcut instanceof HTMLElement)) return
+    const platformKey = shortcut.querySelector('kbd')
+    if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+      platformKey.textContent = '⌘'
+      openBtn.setAttribute('aria-keyshortcuts', 'Meta+K')
+    }
+    shortcut.style.display = ''
+  })()
+</script><script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.vTFUHulS.js"></script></div><div class="hidden items-center gap-2 md:flex print:hidden"><a href="https://github.com/morainedb/moraine" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">GitHub</span><svg aria-hidden="true" class=" astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script><div class="size-8 overflow-visible"><astro-theme-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><div class="astro-theme-toggle-icon-light"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 19a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1m-4.95-2.05a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0m11.314 0l1.414 1.414a1 1 0 0 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 1.414-1.414m-5.049-9.836a5 5 0 1 1-2.532 9.674a5 5 0 0 1 2.532-9.674M4 11a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zm18 0a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM5.636 4.222L7.05 5.636A1 1 0 0 1 5.636 7.05L4.222 5.636a1 1 0 0 1 1.414-1.414m14.142 0a1 1 0 0 1 0 1.414L18.364 7.05a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0M12 1a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1" /></svg></div><div class="astro-theme-toggle-icon-dark"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 1.992a10 10 0 1 0 9.236 13.838c.341-.82-.476-1.644-1.298-1.31a6.5 6.5 0 0 1-6.864-10.787l.077-.08c.551-.63.113-1.653-.758-1.653h-.266l-.068-.006z" /></svg></div></astro-theme-toggle><script type="module">function e(){return typeof window>`u`?`light`:window.astroThemeToggle?.getTheme?.()||`light`}function t(e){typeof window>`u`||window.astroThemeToggle?.setTheme?.(e)}function n(){t(e()===`light`?`dark`:`light`)}var r=`astro-theme-toggle-temporary-styles`;function i(){document.getElementById(r)?.remove()}function a(){i();let e=document.createElement(`style`);e.id=r,e.textContent=`::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }`,document.head.appendChild(e)}async function o(e,t,n){let r=document;if(typeof r.startViewTransition!=`function`){e();return}a();let o=r.startViewTransition(()=>{e()});await o?.ready,o?.finished?.then(i);let s=.7,c=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><defs><radialGradient id="toggle-theme-gradient"><stop offset="${s}"/><stop offset="1" stop-opacity="0"/></radialGradient></defs><circle cx="4" cy="4" r="4" fill="url(#toggle-theme-gradient)"/></svg>`,l=`data:image/svg+xml;base64,${window.btoa(c)}`,u=window.innerWidth,d=window.innerHeight,f=Math.ceil(Math.hypot(Math.max(t,u-t),Math.max(n,d-n))/s);document.documentElement.animate({maskImage:[`url('${l}')`,`url('${l}')`],maskRepeat:[`no-repeat`,`no-repeat`],maskPosition:[`${t}px ${n}px`,`${t-f}px ${n-f}px`],maskSize:[`0`,`${2*f}px`]},{duration:500,easing:`ease-in`,pseudoElement:`::view-transition-new(root)`})}function s(e){o(n,e.clientX,e.clientY)}var c=class extends HTMLElement{connectedCallback(){this.hasAttribute(`tabindex`)||this.setAttribute(`tabindex`,`0`),this.hasAttribute(`role`)||this.setAttribute(`role`,`button`),this.addEventListener(`click`,s),this.addEventListener(`keydown`,e=>{if(e.key===`Enter`||e.key===` `){e.preventDefault();let t=this.getBoundingClientRect();s({clientX:t.left+t.width/2,clientY:t.top+t.height/2})}})}};customElements.define(`astro-theme-toggle`,c);</script></div></div><div class="flex items-center gap-2 md:hidden print:hidden"><nova-mobile-menu-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90 print:hidden" aria-label="Menu" aria-controls="starlight__sidebar"><div class="transition-transform [body[data-mobile-menu-expanded]_&amp;]:rotate-90"><svg width="1em" height="1em" viewBox="0 0 24 24" class="block [body[data-mobile-menu-expanded]_&amp;]:hidden"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16M4 12h16M4 19h16" /></svg><svg width="1em" height="1em" viewBox="0 0 24 24" class="hidden [body[data-mobile-menu-expanded]_&amp;]:block"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12" /></svg></div></nova-mobile-menu-toggle><script type="module" src="/_astro/MobileMenuToggle.astro_astro_type_script_index_0_lang.Bg4YKcfM.js"></script></div></div></header><nav class="sidebar print:hidden astro-3iko6sul" aria-label="Main" id="nova-sidebar-nav"><div id="starlight__sidebar" class="nova-scroll-container invisible md:visible [body[data-mobile-menu-expanded]_&amp;]:max-md:visible fixed top-(--sl-nav-height) bottom-0 left-0 z-(--sl-z-index-menu) overflow-y-auto border-0 border-solid border-(--sl-color-hairline) bg-(--sl-color-black) max-md:w-full md:w-(--sl-sidebar-width) md:border-r astro-3iko6sul"><div class="sidebar-content flex h-full min-h-max flex-col px-(--sl-sidebar-pad-x) py-4 astro-3iko6sul"><sl-sidebar-state-persist data-hash="05ix94y" class="astro-f5yvicm7"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-ojxuodky"><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Guide</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/guide/what-is-moraine/" class="astro-ojxuodky"><span class="astro-ojxuodky">What is moraine?</span></a></li><li class="astro-ojxuodky"><a href="/guide/getting-started/" class="astro-ojxuodky"><span class="astro-ojxuodky">Getting started</span></a></li><li class="astro-ojxuodky"><a href="/guide/architecture/" class="astro-ojxuodky"><span class="astro-ojxuodky">Architecture</span></a></li><li class="astro-ojxuodky"><a href="/guide/embedding/" class="astro-ojxuodky"><span class="astro-ojxuodky">Embedding the core</span></a></li><li class="astro-ojxuodky"><a href="/guide/operating/" class="astro-ojxuodky"><span class="astro-ojxuodky">Operating a lake</span></a></li></ul></details></li><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Design (RFCs)</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/rfcs/0001-repository-structure-and-conventions/" class="astro-ojxuodky"><span class="astro-ojxuodky">0001: Repository structure and conventions</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0002-slatedb-key-encoding/" class="astro-ojxuodky"><span class="astro-ojxuodky">0002: SlateDB key encoding for DuckLake catalog state</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0003-public-api-shape/" class="astro-ojxuodky"><span class="astro-ojxuodky">0003: Public API shape of the moraine core</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0004-commit-protocol/" aria-current="page" class="astro-ojxuodky"><span class="astro-ojxuodky">0004: Commit and transaction protocol</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0005-data-inlining/" class="astro-ojxuodky"><span class="astro-ojxuodky">0005: Data inlining on SlateDB</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0006-extension-surface/" class="astro-ojxuodky"><span class="astro-ojxuodky">0006: Extension surface</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0007-snapshot-expiry-and-gc/" class="astro-ojxuodky"><span class="astro-ojxuodky">0007: Snapshot expiry and garbage collection</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0008-compaction/" class="astro-ojxuodky"><span class="astro-ojxuodky">0008: Maintenance operations — compaction and delete-file consolidation</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0009-reader-consistency-and-caching/" class="astro-ojxuodky"><span class="astro-ojxuodky">0009: Reader consistency and snapshot caching</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0010-async-sync-bridge/" class="astro-ojxuodky"><span class="astro-ojxuodky">0010: Async↔sync bridge: mechanism, runtime, threading, and cancellation</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0011-crash-recovery/" class="astro-ojxuodky"><span class="astro-ojxuodky">0011: Crash recovery</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0012-schema-evolution-and-versioning/" class="astro-ojxuodky"><span class="astro-ojxuodky">0012: Schema evolution and versioning</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0013-partitioning-sorting-and-pruning/" class="astro-ojxuodky"><span class="astro-ojxuodky">0013: Partitioning, sorting, and pruning</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0014-encryption/" class="astro-ojxuodky"><span class="astro-ojxuodky">0014: Catalog and data encryption</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0015-format-migration/" class="astro-ojxuodky"><span class="astro-ojxuodky">0015: On-disk format migration</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0016-equality-indexes/" class="astro-ojxuodky"><span class="astro-ojxuodky">0016: Equality and range indexes</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0017-read-write-and-read-only-attach/" class="astro-ojxuodky"><span class="astro-ojxuodky">0017: Read-write and read-only attach paths</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0018-column-and-name-mapping/" class="astro-ojxuodky"><span class="astro-ojxuodky">0018: Column and name mapping for externally written Parquet</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0019-macros/" class="astro-ojxuodky"><span class="astro-ojxuodky">0019: Scalar and table macros</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0020-change-data-feed/" class="astro-ojxuodky"><span class="astro-ojxuodky">0020: Change data feed</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0021-maintenance-model/" class="astro-ojxuodky"><span class="astro-ojxuodky">0021: Maintenance orchestration</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0022-commit-log-and-leader-role/" class="astro-ojxuodky"><span class="astro-ojxuodky">0022: The commit log and the leader role</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="flex items-center justify-end gap-2 py-4 print:hidden"><a href="https://github.com/morainedb/moraine" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">GitHub</span><svg aria-hidden="true" class=" astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><div class="size-8 overflow-visible"><astro-theme-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><div class="astro-theme-toggle-icon-light"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 19a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1m-4.95-2.05a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0m11.314 0l1.414 1.414a1 1 0 0 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 1.414-1.414m-5.049-9.836a5 5 0 1 1-2.532 9.674a5 5 0 0 1 2.532-9.674M4 11a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zm18 0a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM5.636 4.222L7.05 5.636A1 1 0 0 1 5.636 7.05L4.222 5.636a1 1 0 0 1 1.414-1.414m14.142 0a1 1 0 0 1 0 1.414L18.364 7.05a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0M12 1a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1" /></svg></div><div class="astro-theme-toggle-icon-dark"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 1.992a10 10 0 1 0 9.236 13.838c.341-.82-.476-1.644-1.298-1.31a6.5 6.5 0 0 1-6.864-10.787l.077-.08c.551-.63.113-1.653-.758-1.653h-.266l-.068-.006z" /></svg></div></astro-theme-toggle></div></div></div></div></div></nav><div class="main-frame astro-3iko6sul"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-nrnkqug2"><aside class="right-sidebar-container print:hidden astro-nrnkqug2"><div class="right-sidebar astro-nrnkqug2"><div class="lg:sl-hidden astro-q5mffni3"><div class="[&amp;_nav]:backdrop-blur [&amp;_summary]:border-b-(--sl-color-hairline)"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-5ulgm6bh"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-5ulgm6bh"><details id="starlight__mobile-toc" class="astro-5ulgm6bh"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-5ulgm6bh"><span class="toggle sl-flex astro-5ulgm6bh">On this page<svg aria-hidden="true" class="caret astro-5ulgm6bh astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-5ulgm6bh"></span></summary><div class="dropdown astro-5ulgm6bh"><ul class="isMobile astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#summary" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Summary</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#goals" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Goals</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#background" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Background</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#design" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Design</span></a><ul class="isMobile astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#topology" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Topology</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#submission-outcomes" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Submission outcomes</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#bootstrap--the-commit-that-creates-the-store" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Bootstrap — the commit that creates the store</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#mutation-sized-verb-preparation" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Mutation-sized verb preparation</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#the-commit-sequence" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">The commit sequence</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#conflict-detection--table-level" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Conflict detection — table-level</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#conflict-resolution--abort-with-internal-benign-race-retry" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Conflict resolution — abort, with internal benign-race retry</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#id-allocation" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Id allocation</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#schema-version-tracking" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Schema-version tracking</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#staged-row-commits--the-extension-path" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Staged-row commits — the extension path</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#inlined-writes-as-commit-participants" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Inlined writes as commit participants</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#group-commit" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Group commit</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#sequence-numbers-are-the-stores-not-moraines" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Sequence numbers are the store’s, not moraine’s</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#reader-visibility-after-commit" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Reader visibility after commit</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#flush-pacing" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Flush pacing</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#test-obligations" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Test obligations</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#alternatives-considered" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Alternatives considered</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.BcSo_yiZ.js"></script></div></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-q5mffni3"><div class="sl-container astro-q5mffni3"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#summary" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Summary</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#goals" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Goals</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#background" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Background</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#design" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Design</span></a><ul class="astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#topology" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Topology</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#submission-outcomes" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Submission outcomes</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#bootstrap--the-commit-that-creates-the-store" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Bootstrap — the commit that creates the store</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#mutation-sized-verb-preparation" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Mutation-sized verb preparation</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#the-commit-sequence" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">The commit sequence</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#conflict-detection--table-level" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Conflict detection — table-level</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#conflict-resolution--abort-with-internal-benign-race-retry" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Conflict resolution — abort, with internal benign-race retry</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#id-allocation" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Id allocation</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#schema-version-tracking" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Schema-version tracking</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#staged-row-commits--the-extension-path" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Staged-row commits — the extension path</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#inlined-writes-as-commit-participants" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Inlined writes as commit participants</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#group-commit" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Group commit</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#sequence-numbers-are-the-stores-not-moraines" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Sequence numbers are the store’s, not moraine’s</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#reader-visibility-after-commit" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Reader visibility after commit</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#flush-pacing" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Flush pacing</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#test-obligations" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Test obligations</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#alternatives-considered" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Alternatives considered</span></a></li></ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.Csloo1VZ.js"></script></div></div></div></aside><div class="main-pane astro-nrnkqug2"><main data-pagefind-body class="astro-vdxcvpsm" lang="en" dir="ltr"><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><h1 id="_top" class="astro-2sm4b3ln">RFC 0004: Commit and transaction protocol</h1></div></div><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><div class="sl-markdown-content"><ul>
+<li><strong>Date:</strong> 2026-07-09</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="summary">Summary</h2><a class="sl-anchor-link" href="#summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Summary”</span></a></div>
+<p>Defines how a DuckLake catalog mutation becomes a durable, atomic commit in
+moraine: how a committer reads the head snapshot, allocates ids, detects
+conflicts against concurrent commits, and lands everything in a single
+atomic SlateDB write. Builds directly on RFC 0002’s atomicity invariant
+(one commit = one batch) and treats RFC 0005 inlined writes as first-class
+commit participants. The design is optimistic and single-writer-oriented:
+commits race on the head pointer under SlateDB’s transactional write-write
+conflict detection, disjoint concurrent commits retry internally, and
+genuine conflicts surface as a typed error for the caller — DuckLake or the
+application — to re-drive. The protocol has <strong>two front doors</strong> over one
+commit core: the verb/closure API of RFC 0003 (retryable internally,
+because moraine authors the mutations) and the staged-row path of RFC 0006
+(never retried internally, because DuckLake authors the rows — a lost race
+surfaces to DuckLake). The two paths have different retry rights, and
+keeping them distinct is load-bearing; this RFC specifies both.</p>
+<p><strong>Implemented.</strong> Both front doors land commits as one atomic SlateDB batch
+over the shared core. Multi-statement, cross-table ACID transactions work
+end to end through DuckLake: a <code dir="auto">BEGIN … COMMIT</code> spanning tables stages every
+statement’s writes into one moraine staged tx (opened lazily on the first
+write, reused across the transaction) and commits them as one snapshot;
+<code dir="auto">ROLLBACK</code> discards them and mints none. A lost write-write race aborts
+without internal retry on the staged-row path, the loser’s error carrying
+the <code dir="auto">conflict</code> substring DuckLake’s retry loop scans for. Verified live
+(<code dir="auto">ducklake_load.rs</code>’s <code dir="auto">ducklake_multi_statement_transaction_commits_atomically</code>,
+which pins that two writes across two tables advance the head by exactly one
+snapshot) and at the core (<code dir="auto">staged.rs</code>’s
+<code dir="auto">lost_race_is_not_retried_and_carries_conflict_text</code>). A genuine concurrent
+race is not reachable through DuckLake’s single serialized metadata
+connection — a second read-write attach fences rather than races (the
+single-writer topology below) — so that path is pinned at the core, not live.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="goals">Goals</h2><a class="sl-anchor-link" href="#goals"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Goals”</span></a></div>
+<ul>
+<li>Every commit is exactly one SlateDB <code dir="auto">WriteBatch</code> (RFC 0002). Snapshot
+allocation, id allocation, conflict detection, and the write itself all
+fit inside that envelope — no read-modify-write spanning batches.</li>
+<li>Inlined inserts/deletes (RFC 0005) ride the same batch as their catalog
+metadata. Inlining adds no round trips to the commit path.</li>
+<li>On the verb path (RFC 0003), concurrent commits touching disjoint tables
+— and concurrent pure appends to the <em>same</em> table — both succeed without
+caller involvement; incompatible commits resolve to a typed conflict. On
+the staged-row path (RFC 0006), every lost race surfaces to DuckLake.</li>
+<li>Commit latency floor is one durable WAL flush; the protocol enables group
+commit so throughput under a funnel of concurrent transactions is not
+one-flush-per-commit.</li>
+<li>Faithful to DuckLake’s own concurrency semantics — moraine implements
+DuckLake’s conflict model, it does not invent a stricter or looser one.</li>
+</ul>
+<p>Non-goals:</p>
+<ul>
+<li><strong>Multi-writer coordination.</strong> The supported topology is single-writer,
+many-readers (see Topology). Concurrent <em>commit coordination</em> across
+processes is out of scope; the escape hatch is funneling commits through
+one process.</li>
+<li><strong>Key layout and value codec</strong> — RFC 0002.</li>
+<li><strong>Inlined data record formats</strong> — RFC 0005. This RFC covers only how
+inlined writes participate in a commit.</li>
+<li><strong>Snapshot expiry / GC</strong> of <code dir="auto">history</code> and flushed inline data — RFC 0007.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="background">Background</h2><a class="sl-anchor-link" href="#background"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Background”</span></a></div>
+<p>RFC 0002 established the keyspace: <code dir="auto">sys/head</code> holds the latest committed
+<code dir="auto">snapshot_id</code>; the <code dir="auto">snapshot</code> subspace is append-only snapshot records; <code dir="auto">current</code>
+and <code dir="auto">history</code> split live from ended entity versions; commits are atomic
+<code dir="auto">WriteBatch</code> writes under a single fenced SlateDB writer.</p>
+<p>SlateDB (pinned at 0.14.x) provides the concrete primitives this protocol
+uses, verified against its source rather than assumed from prose:
+<code dir="auto">Db::begin(IsolationLevel::Snapshot)</code> opens a transaction whose commit
+performs <strong>write-write conflict detection</strong> on the keys it writes and fails
+with a typed <code dir="auto">TransactionConflict</code>; <code dir="auto">Db::snapshot()</code> gives a pinned
+consistent read handle (RFC 0009); <code dir="auto">DbReader</code> opens a store <strong>read-only</strong>
+without becoming a writer; and writer fencing is a monotonic
+<code dir="auto">writer_epoch</code> bumped by manifest CAS on <code dir="auto">Db::open</code>. There is no bespoke
+key-level compare-and-swap API, and none is needed — the “head CAS” in
+this RFC is realized as conflict detection on <code dir="auto">sys/head</code> (see the commit
+sequence).</p>
+<p>DuckLake allocates
+ids from counters: <code dir="auto">next_catalog_id</code> and <code dir="auto">next_file_id</code> live in the
+<code dir="auto">ducklake_snapshot</code> record; <code dir="auto">next_row_id</code> is <strong>per-table</strong> in
+<code dir="auto">ducklake_table_stats</code> (<code dir="auto">next_row_id += record_count</code> on insert), preserved
+across UPDATE and compaction for row lineage. The <code dir="auto">ducklake_snapshot</code> record
+also carries <code dir="auto">schema_version</code> — a counter DuckLake advances only when a
+commit changes the catalog <em>schema</em>, and that DuckDB uses as its
+schema-cache key. This RFC defines the protocol that maintains all of these
+under optimistic concurrency.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="design">Design</h2><a class="sl-anchor-link" href="#design"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Design”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="topology">Topology</h3><a class="sl-anchor-link" href="#topology"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Topology”</span></a></div>
+<p><strong>Single writer, many readers.</strong> Readers open the store through SlateDB’s
+<code dir="auto">DbReader</code> — a handle that follows the manifest, never becomes a writer,
+and never participates in fencing (only <code dir="auto">Db::open</code> and the compactor bump
+manifest epochs); there is no bound on their number. Writers are expected
+to be a single logical committer holding the one read-write <code dir="auto">Db</code>.</p>
+<p>One source-verified caveat keeps “read-only” from being oversimplified:
+<code dir="auto">DbReader::open</code> in latest mode <strong>writes a checkpoint into the manifest</strong>
+(a manifest CAS update) and maintains it from a background poller for the
+reader’s lifetime. So a reader does not fence and does not write data,
+but it <em>does</em> need write access to the manifest object and generates
+manifest traffic, and its checkpoint pins SSTs against SlateDB’s own GC
+for the checkpoint lifetime. The default “follow latest” mode trades that
+small manifest write for consistent WAL-inclusive reads.</p>
+<p>Deployments whose reader credentials cannot write at all open against an
+existing checkpoint instead. A checkpoint id given at open selects a
+<code dir="auto">DbReader</code> that resolves a fixed cut: it neither creates a checkpoint, nor
+replays WALs, nor polls the manifest, so the open and everything after it
+write nothing whatsoever — verified by opening one against a store that
+refuses every write and reading through it. The cost is the other half of
+the trade: a pinned reader never sees a commit made after its checkpoint,
+however long it stays open. Checkpoints are minted by the writer (which
+alone can write the manifest) and released explicitly or by their
+lifetime, since one that is neither pins the objects it references against
+SlateDB’s garbage collection for as long as it exists.</p>
+<p>Be precise about what fencing does, because its direction is the opposite
+of a lock: SlateDB’s <code dir="auto">writer_epoch</code> means <strong>the newest writer wins</strong>. A
+second process opening the store read-write bumps the epoch and <strong>fences
+the incumbent</strong> — the first writer’s next durable write fails, not the
+second’s. Safety is absolute (a fenced writer writes nothing, never
+corrupts — RFC 0011’s <code dir="auto">FencedWriterResumes</code>), but availability is not: two processes attaching
+read-write do not degrade to “second one fails,” they take turns killing
+each other’s committer. The operational rule follows: <strong>exactly one
+process attaches read-write; every other process attaches read-only</strong>
+(<code dir="auto">DbReader</code>), and RFC 0006 exposes a read-only attach option so a DuckDB
+process can opt into the reader role explicitly.</p>
+<p>This is a real product limitation relative to the multi-client SQL
+catalogs DuckLake otherwise uses — many DuckDB processes writing through
+one PostgreSQL catalog is the common lakehouse shape, and moraine does not
+support it: there is no funnel component in the DuckLake deployment model,
+so “run one long-lived committer process and route commits through it” is
+an escape hatch for embedding hosts, not something a fleet of independent
+DuckDB clients gets for free. This constraint is stated here once,
+surfaced in README-level documentation, and holds for the only implemented
+topology. RFC 0022 specifies an unimplemented replacement
+topology; no multi-writer mode exists in the current implementation.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="submission-outcomes">Submission outcomes</h3><a class="sl-anchor-link" href="#submission-outcomes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Submission outcomes”</span></a></div>
+<p>The coalescer distinguishes a forming batch from a submitted one. Dropping a
+forming batch proves that it wrote nothing; its members may retry. A submitted
+batch reports either an acknowledged commit or a rejected head race. A write
+error or a task that exits without acknowledgement returns
+<code dir="auto">Error::CommitOutcomeUnknown</code> to every member, without replaying their
+closures. A fenced writer retains the terminal <code dir="auto">Error::Fenced</code> result and
+must be reattached before it can write. The staged path returns the same error for an unacknowledged write.</p>
+<p>The caller must retain external files and reconcile the operation against
+catalog state before resubmitting an unknown outcome. There is no durable
+client operation id that makes arbitrary resubmission idempotent. A changed
+head alone does not resolve a particular operation’s fate. Cancellation of
+the waiting caller leaves a submitted batch running; RFC 0006 defines how
+that uncertainty crosses the C ABI.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="bootstrap--the-commit-that-creates-the-store">Bootstrap — the commit that creates the store</h3><a class="sl-anchor-link" href="#bootstrap--the-commit-that-creates-the-store"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Bootstrap — the commit that creates the store”</span></a></div>
+<p>Opening a store that has never been written is itself a commit-shaped
+operation and rides the same machinery. On open, the catalog reads
+<code dir="auto">sys/format</code> through a transaction:</p>
+<ul>
+<li><strong>Present</strong> → validate: an unknown format version is refused
+(<code dir="auto">Corruption</code> today; <code dir="auto">Migration</code> once RFC 0015’s variant exists), and a
+present <code dir="auto">sys/migration</code> marker is refused outright (RFC 0002 reserves
+that check from format v1).</li>
+<li><strong>Absent (empty store)</strong> → bootstrap: stage one atomic batch writing
+<code dir="auto">sys/format</code> (format version 1 plus the writing moraine version),
+snapshot <code dir="auto">0</code> (empty catalog: no entities, counters at their initial
+values so the first allocation yields id 0, <code dir="auto">schema_version</code> 0, empty
+<code dir="auto">changes_made</code>), and <code dir="auto">sys/head</code> → <code dir="auto">0</code> at batch count <code dir="auto">0</code>, then commit it under the same
+head conflict detection as any commit. A same-process race between two
+bootstrapping opens arbitrates on the head write like any other commit
+— the loser re-reads and finds the initialized store; across processes
+the single-writer topology and fencing already exclude a second writer.</li>
+</ul>
+<p>Bootstrap mints the default <code dir="auto">main</code> schema in the same batch, matching
+the initial catalog state a fresh DuckLake metadata store carries: a
+moraine store is DuckLake-attachable from birth, without a DuckLake-side
+bootstrap pass (whose exists-probe always succeeds against moraine — see
+the extension-surface RFC). The <code dir="auto">main</code> row’s id comes from the ordinary
+counter, so the first user allocation follows it.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="mutation-sized-verb-preparation">Mutation-sized verb preparation</h3><a class="sl-anchor-link" href="#mutation-sized-verb-preparation"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Mutation-sized verb preparation”</span></a></div>
+<p>Verb transactions clone the structurally shared <code dir="auto">CatalogSnapshot</code> maps.
+Mutations copy affected tree paths; untouched maps and nested subtrees remain
+shared with the premise and held readers. Group formation and folding use the
+same representation, so each member avoids copying unrelated catalog rows.</p>
+<p>The verb diff discovers changed ids through ordered-tree differences that
+skip shared nodes, descending into changed table-scoped maps. Those ids use
+the same history/version staging as the staged path’s explicit touched ids.
+Debug builds compare both paths against a whole-catalog diff to detect omitted
+writes. Inserts, deletes, cascades, and chained edits retain the existing write
+order and history semantics. No additional mutation journal is required.</p>
+<p>Use the <code dir="auto">imbl</code> 5 tree implementation: our tests reproduced a missing update in
+the 7.0.1 diff iterator at a shared-leaf boundary (64 sequential keys, then
+replace key 24). A missed diff would omit the entity write from a successful
+release-mode commit. This is a correctness constraint, not a performance choice.
+A saved property-test seed pins this failure for future dependency upgrades.</p>
+<p>Upstream <a href="https://github.com/jneem/imbl/issues/161">issue #161</a> reports the same
+failure on 7.0.0. Proposed <a href="https://github.com/jneem/imbl/pull/166">fix #166</a> also
+describes incorrect map equality and deletion results from the same cursor bug.
+As checked on 2026-09-07, the issue and fix are open and the fix is unmerged.
+An upgrade must pass the full-diff equivalence and shared-boundary regressions.</p>
+<p>Index maintenance resolves affected definitions through an in-memory
+index-id-to-table lookup. A known current format floor bypasses feature scans.
+These indexes and shared nodes are derived memory state, with no new on-disk
+encoding or migration. Commit conflict detection and WAL durability are unchanged.</p>
+<p>For a warm premise, a fixed metadata mutation pays for changed tree paths and
+its own encoded writes, rather than unrelated tables or files. Cold
+materialization, external refresh, explicit whole-table operations, large
+individual records, and projection readers retaining a copy-on-write dump are
+outside this bound. The release benchmark in
+<code dir="auto">crates/moraine/examples/verb_commit_bench.rs</code> varies unrelated tables and files
+while updating one table’s statistics. It reports process CPU, allocation calls
+and bytes, total latency, durability-phase latency, and object PUT time separately.
+Debug builds intentionally retain the full-diff correctness oracle.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="the-commit-sequence">The commit sequence</h3><a class="sl-anchor-link" href="#the-commit-sequence"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “The commit sequence”</span></a></div>
+<p>A commit takes a set of staged catalog mutations (entity inserts, entity
+ends, inlined writes) and lands them atomically:</p>
+<ol>
+<li><strong>Load head.</strong> Open the SlateDB transaction, then read <code dir="auto">sys/head</code> →
+snapshot id <code dir="auto">N</code>, the snapshot <code dir="auto">N</code> record for the global counters, and
+the <code dir="auto">tstat</code> records for any tables this commit inserts rows into — all
+<strong>through the transaction handle</strong>, so the premise view and the
+conflict-detection window share one start sequence and no commit can
+land unseen between them (RFC 0009, “Commit attempts materialize
+through the transaction”).</li>
+<li><strong>Allocate ids</strong> locally by bumping in-memory copies of the counters:
+<code dir="auto">next_catalog_id</code>/<code dir="auto">next_file_id</code> from the snapshot record, <code dir="auto">next_row_id</code>
+from each touched table’s <code dir="auto">tstat</code>. No store writes yet.</li>
+<li><strong>Stage the batch.</strong> Assemble one atomic write set:
+<ul>
+<li>new entity records into <code dir="auto">current</code> (and, for ended versions, delete the
+<code dir="auto">current</code> key + write the <code dir="auto">history</code> key — RFC 0002);</li>
+<li>inlined <code dir="auto">inline/insert</code> chunks and <code dir="auto">inline/inline_delete</code>/<code dir="auto">inline/file_delete</code> records
+(RFC 0005);</li>
+<li>updated <code dir="auto">tstat</code> records carrying advanced <code dir="auto">next_row_id</code>;</li>
+<li>the new <code dir="auto">snapshot</code> record <code dir="auto">N+1</code> with advanced global counters,
+<code dir="auto">schema_version</code> (bumped or carried forward per the rule below), and
+merged <code dir="auto">snapshot_changes</code>;</li>
+<li>the <code dir="auto">sys/head</code> update <code dir="auto">N → N+1</code>, with the batch count incremented.</li>
+</ul>
+</li>
+<li><strong>Commit under head conflict detection.</strong> The staged writes commit as
+one SlateDB transaction (<code dir="auto">begin(IsolationLevel::Snapshot)</code>) opened at
+step 1. <strong>Every batch writes <code dir="auto">sys/head</code></strong> — including a maintenance
+batch, which mints no snapshot and so reuses the standing id while still
+moving the batch count (RFC 0002) — so SlateDB’s write-write
+conflict detection on that one key <em>is</em> the head CAS: if a concurrent
+commit advanced the head since this transaction began, <code dir="auto">commit()</code>
+returns <code dir="auto">TransactionConflict</code> and nothing was written — go to conflict
+handling. If it lands, the commit is durable once the WAL flush lands —
+done. (This is deliberately not a bespoke compare-and-swap: SlateDB
+exposes no key-level CAS API, and the transaction primitive it does
+expose is exactly the required shape. A transaction’s write set is
+applied as one atomic batch, so RFC 0002’s one-commit-one-batch
+invariant is preserved verbatim. Two source-verified mechanics worth
+knowing: the conflict check runs inside SlateDB’s single batch-writer
+event loop immediately before the write is sequenced, so check and
+apply cannot interleave; and the detection state is <strong>in-process</strong> —
+which is sufficient precisely because the topology admits one writer
+process, with cross-process safety carried by fencing, not by conflict
+detection. Plain non-transactional writes are tracked too, modeled as
+single-op transactions, so a stray direct write cannot slip past a
+concurrent commit’s conflict check.)</li>
+</ol>
+<p>The read in step 1 is “load head,” not a lock; the write in step 4 is the
+whole commit. Nothing spans two batches. Within one process, concurrent
+commit attempts (multiple connections) may run steps 1–3 optimistically in
+parallel — the transaction conflict at step 4 arbitrates — or the
+committer may serialize them (see Group commit); across processes, the
+topology above guarantees there is no second writer to race.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="conflict-detection--table-level">Conflict detection — table-level</h3><a class="sl-anchor-link" href="#conflict-detection--table-level"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Conflict detection — table-level”</span></a></div>
+<p>The <code dir="auto">changes_made</code> field of the snaphot record is written in <strong>DuckLake’s
+own grammar</strong>, not a moraine dialect — the field is DuckLake-visible on
+the staged-row path (DuckLake re-parses it mid-retry, and its parser
+<em>throws</em> on unknown entry kinds), so the wire format is DuckLake’s to
+define. Source-verified (writer <code dir="auto">WriteSnapshotChanges</code> in
+<code dir="auto">ducklake_transaction_state.cpp</code>, parser <code dir="auto">ParseChangesMade</code> in
+<code dir="auto">ducklake_transaction_changes.cpp</code>): comma-separated <code dir="auto">kind:payload</code>
+entries; created entries carry SQL-quoted names (<code dir="auto">created_schema:"s"</code>,
+<code dir="auto">created_table:"s"."t"</code>, quotes doubled for embedded quotes), all other
+entries carry numeric ids (<code dir="auto">dropped_schema:1</code>, <code dir="auto">dropped_table:2</code>,
+<code dir="auto">altered_table:3</code>, <code dir="auto">inserted_into_table:4</code>, …). moraine emits entries in
+DuckLake’s writer order and, when <em>parsing</em>, treats any entry kind it
+does not model as an unclassifiable change — conservatively a true
+conflict — rather than erroring.</p>
+<p>The verb-path mapping for data-plane operations, chosen so every emitted
+kind is one DuckLake’s conflict matrix actually checks (the legacy
+<code dir="auto">compacted_table</code> kind is parse-only in DuckLake’s source and unchecked
+by its matrix — emitting it would make these commits invisible to a
+DuckLake retry): <code dir="auto">register_data_file</code> → <code dir="auto">inserted_into_table:&lt;id&gt;</code>;
+<code dir="auto">register_delete_file</code> → <code dir="auto">deleted_from_table:&lt;id&gt;</code>; <code dir="auto">expire_data_file</code> →
+<code dir="auto">merge_adjacent:&lt;id&gt;</code>; <code dir="auto">expire_delete_file</code> → <code dir="auto">rewrite_delete:&lt;id&gt;</code> (the
+two compaction kinds — an expiry’s conflict profile is a compaction’s:
+true against concurrent deletes, drops, and compaction of the table,
+benign against appends and alters). Statistics-only mutations emit no
+entry: stats are re-derived on retry and conflict with nothing.</p>
+<p>When the head conflict fires, the committer compares the set of
+<code dir="auto">table_id</code>s it touched against those touched by the intervening commits
+<code dir="auto">N+1 … N+k</code> (recoverable from their <code dir="auto">snapshot_changes</code>):</p>
+<ul>
+<li>
+<p><strong>Disjoint table sets → benign race.</strong> The concurrent commits do not
+invalidate this commit’s premise. Retry from step 1 against the new head
+(what a retry re-runs is defined in Conflict resolution below — on the
+verb path it includes re-running the caller’s closure, not just
+re-stamping ids). This is bounded internal retry inside <code dir="auto">transaction</code>; no caller
+involvement.</p>
+<p>Retries wait before re-running: the delay starts at 2ms, doubles, and
+caps at 50ms, with jitter of up to the base delay so two writers that
+just collided do not back off in lockstep and collide again. The whole
+budget spans a few hundred milliseconds. A commit that lands on its
+first attempt never waits, so the backoff costs the uncontended path
+nothing.</p>
+<p><strong>The budget is deliberately not DuckLake’s</strong>, whose own loop waits
+100 ms × 1.5ᵏ over 10 attempts. Two reasons, both consequences of what
+moraine’s races actually are. First, a benign race here clears in one
+WAL flush — the shape group commit made visible, where concurrent
+commits inside the process meet in a batch rather than racing at all,
+leaving only a staged-path commit colliding with a verb-path batch. A
+budget of ten attempts capped at 50 ms spans several flush intervals at
+the 100 ms default, which is several times more than the collision it
+waits out. Second, the two budgets <strong>compose</strong>: DuckLake re-drives a
+retryable moraine error up to ten times, so moraine’s own waits are
+multiplied by ten before an application sees anything. At DuckLake’s
+cadence that product is tens of seconds of invisible waiting; at
+moraine’s it is a few seconds worst case, and typically one retry that
+waits 2 ms. Ten attempts is kept: losing ten consecutive races requires
+a pathology the topology does not otherwise admit, and past that
+<code dir="auto">RetryBudgetExhausted</code> is the honest answer.</p>
+</li>
+<li>
+<p><strong>Overlapping table set → true conflict</strong> (subject to the append-append
+refinement below). A concurrent commit mutated a table this commit also
+mutated. The premise may be invalid (the table was dropped, a column
+altered, files this commit references were compacted away). Abort with a
+typed <code dir="auto">CommitConflict</code>.</p>
+</li>
+<li>
+<p><strong>Budget spent → terminal.</strong> A commit that loses <code dir="auto">MAX_COMMIT_ATTEMPTS</code>
+benign races in a row aborts with <code dir="auto">RetryBudgetExhausted</code>, not
+<code dir="auto">CommitConflict</code>. The distinction is a wire contract, not cosmetics:
+DuckLake decides retryability in <code dir="auto">DuckLakeTransaction::RetryOnError</code>, a
+<strong>substring match on the error message</strong> — it re-runs a failed commit
+iff the lowercased text contains <code dir="auto">primary key</code>, <code dir="auto">unique</code>, <code dir="auto">conflict</code>, or
+<code dir="auto">concurrent</code> — and <code dir="auto">CommitConflict</code>’s <code dir="auto">Display</code> carries <code dir="auto">conflict</code> in
+its prefix. The text moraine surfaces for a lost commit is part of the
+interface, not wording. A transient conflict <em>should</em> stay retryable and
+keeps that wording; an exhausted budget must not, or the two bounded
+loops compose into <code dir="auto">ducklake_max_retry_count</code> × <code dir="auto">MAX_COMMIT_ATTEMPTS</code>
+re-runs of a commit that already failed to settle ten times.
+<code dir="auto">RetryBudgetExhausted</code>’s text is therefore free of all four substrings,
+exactly as the equality-index uniqueness rejection already is. Every
+exhaustion is logged at <code dir="auto">warn</code> with the head it started from and the
+commits it lost to — without it the failure is a slow commit with no
+stated reason.</p>
+</li>
+</ul>
+<p><strong>Counter advancement is never, by itself, a conflict.</strong> Every commit reads
+and bumps <code dir="auto">next_catalog_id</code>/<code dir="auto">next_file_id</code>; that shared read is precisely
+what benign-race retry re-derives. Only overlapping <code dir="auto">table_id</code>s are a
+conflict. This is the rule that keeps table-level detection from collapsing
+into serialize-everything.</p>
+<p><strong>Append-append refinement.</strong> A same-table overlap is <em>not</em> automatically a
+true conflict when both sides touched the shared table only as <strong>pure
+appends</strong>: <code dir="auto">register_data_file</code> / <code dir="auto">inline_insert</code> records plus the <code dir="auto">tstat</code>
+counter/stat advance they imply. Data-file registrations are commutative —
+neither invalidates the other’s premise — and the <code dir="auto">next_row_id</code>/stats
+updates are mechanically re-derivable on retry exactly like the global
+counters. So append-append overlap classifies as <strong>benign</strong> on the verb
+path: retry re-reads the advanced <code dir="auto">next_row_id</code>, re-allocates row ids,
+re-merges stats, and re-commits.</p>
+<p>This mirrors DuckLake’s own conflict matrix, verified in its source
+(<code dir="auto">DuckLakeTransactionState::CheckForConflicts</code>,
+<code dir="auto">src/storage/ducklake_transaction_state.cpp</code>): an insert conflicts with a
+concurrent <strong>drop</strong>, <strong>alter</strong>, or <strong>delete</strong> on the same table — and with
+nothing else. Its <code dir="auto">tables_inserted_into</code> and <code dir="auto">tables_inserted_inlined</code> sets
+are checked against the dropped, altered, and deleted-from tables only,
+never against another transaction’s inserts, and an insert is likewise
+compatible with a concurrent inline <strong>flush</strong> or <strong>compaction</strong> of the same
+table (their file sets are disjoint: the insert’s new files are not the
+maintenance operation’s inputs). moraine’s verb path adopts the same
+classification: an append is benign against other appends, flushes, and
+compactions of its table; drop/alter/delete on that table are true
+conflicts, in both directions.</p>
+<p>The refinement is required for verb-path fidelity, not an optimization:
+plain table-grain overlap would call a same-table append pair a true
+conflict and make moraine strictly stricter than the catalog it serves.</p>
+<p>DuckLake is finer-grained in exactly one place — two transactions
+<em>deleting</em> from the same table conflict only if they touched the same
+<strong>data files</strong> (its <code dir="auto">CheckForConflicts</code> fetches the files deleted after
+the transaction’s snapshot and conflict-checks at <code dir="auto">data_file_id</code> grain) —
+and moraine matches it. A <code dir="auto">register_delete_file</code> records the data file it
+targets, and two commits deleting from one table classify benign when
+those targets are disjoint. The premise holds because moraine allows one
+live delete file per data file: disjoint targets write disjoint records,
+so neither commit invalidates the other’s.</p>
+<p>Two cases fall back to table grain, both because the file set is not
+knowable rather than as a policy choice. An <strong>inlined</strong> delete names a
+row, not a file. And a <strong>DuckLake-authored</strong> change set arrives through
+the <code dir="auto">changes_made</code> grammar, which carries <code dir="auto">deleted_from_table:&lt;id&gt;</code> and
+no file — so a commit whose file ids moraine did not author is treated as
+deleting from all of them. Since data-file ids are global, a shared id is
+a shared file and the comparison needs no table key; the file ids ride the
+snapshot record as moraine-internal state, exactly as
+<code dir="auto">schema_changed_table_ids</code> does, and are invisible to DuckLake.</p>
+<p><strong>Name collisions are invisible to id-set comparison.</strong> Two concurrent
+commits each creating a table named <code dir="auto">orders</code> in the same schema allocate
+fresh, <em>disjoint</em> table ids — the set comparison classifies the race
+benign. That is correct as classification (neither commit’s staged state is
+invalidated), but uniqueness must still be enforced: on the verb path it is
+the <strong>closure re-run</strong> on retry that catches it — the re-run resolves names
+against the new head, sees the winner’s table, and returns <code dir="auto">AlreadyExists</code>;
+on the staged-row path every lost head surfaces to DuckLake (below), which
+re-drives with full knowledge of the new catalog state. Set comparison
+alone never establishes name uniqueness; re-validation against the new head
+does. This is stated explicitly because it is the tempting shortcut: a
+purely mechanical re-stage-and-retry, with no re-validation, would commit
+duplicate names.</p>
+<p>One operation does not fit table grain and is handled at <strong>schema-list
+granularity</strong>: <code dir="auto">CREATE</code>/<code dir="auto">DROP SCHEMA</code> (mutates the set of schemas).
+Concurrent commits that both touch the schema list conflict with each
+other — matching DuckLake’s matrix, where created/dropped schemas
+conflict-check against each other and against creations inside a dropped
+schema. Rare enough that coarse handling costs nothing. Option changes
+need no grain at all: DuckLake neither versions nor conflict-detects them
+(<code dir="auto">set_option</code> writes <code dir="auto">ducklake_metadata</code> outside the snapshot protocol,
+last-write-wins — see Schema-version tracking); the verb path mirrors
+that, treating <code dir="auto">set_option</code>/<code dir="auto">unset_option</code> as non-conflicting overwrites.</p>
+<p>The benign/true classification is mechanical — set comparison over
+<code dir="auto">table_id</code>s and mutation kinds — but classification only decides <em>whether</em>
+to retry; the retry itself re-validates (next section). <code dir="auto">tx</code> still never
+needs to understand what SQL produced the mutations.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="conflict-resolution--abort-with-internal-benign-race-retry">Conflict resolution — abort, with internal benign-race retry</h3><a class="sl-anchor-link" href="#conflict-resolution--abort-with-internal-benign-race-retry"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Conflict resolution — abort, with internal benign-race retry”</span></a></div>
+<p><strong>What a benign-race retry re-runs (verb path).</strong> A retry is a full re-run
+of the commit cycle, exactly as RFC 0003 specifies for <code dir="auto">commit</code>: re-read a
+fresh <code dir="auto">CatalogSnapshot</code> at the new head, <strong>re-run the caller’s closure</strong>
+against it, re-allocate ids from the advanced counters, re-stage, re-commit.
+The closure re-run is load-bearing, not an implementation nicety: it is
+what re-resolves names and re-validates logical premises against the state
+that actually won (the name-collision case above), and it is why RFC 0003
+requires the closure to be pure and re-runnable. A retry that mechanically
+re-stamped ids onto the previously staged records — without re-running the
+closure — would be cheaper and wrong (see Alternatives).</p>
+<p>The core resolves benign races itself (bounded retry, above) and <strong>aborts
+true conflicts with a typed <code dir="auto">CommitConflict</code></strong>. It does not attempt to
+rebase a true conflict. Rebasing a true conflict means re-running the
+<em>DuckLake operation</em> — which <code dir="auto">moraine</code> cannot do, because by RFC 0001 the
+core is DuckLake-agnostic and never held the originating SQL. Re-driving a
+true conflict belongs to whoever authored the operation:</p>
+<ul>
+<li><strong>DuckLake</strong>, whose commit loop retries retryable conflict signals
+internally and re-checks its own conflict matrix (source-verified; see
+Staged-row commits), or</li>
+<li><strong>the application</strong>, re-running its statement when DuckLake classifies
+the conflict as true and throws — as a PostgreSQL <code dir="auto">SERIALIZABLE</code>
+transaction retries on a <code dir="auto">40001</code> serialization failure.</li>
+</ul>
+<p>The core’s responsibility ends at a truthful typed error.</p>
+<p>The internal benign-race retry is bounded (a small fixed attempt count);
+exceeding it returns <code dir="auto">CommitConflict</code> rather than looping unbounded, so a
+pathological write storm degrades to caller-visible conflicts instead of a
+hang.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="id-allocation">Id allocation</h3><a class="sl-anchor-link" href="#id-allocation"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Id allocation”</span></a></div>
+<ul>
+<li><strong><code dir="auto">next_catalog_id</code>, <code dir="auto">next_file_id</code></strong> — global, in the <code dir="auto">snapshot</code> record,
+matching DuckLake. Allocated by bumping the in-memory copy from head and
+writing the advanced value in the new snapshot record. Shared reads of
+these counters are benign (re-derived on retry), never conflicts.</li>
+<li><strong><code dir="auto">next_row_id</code></strong> — <strong>per-table, in the <code dir="auto">tstat</code> record</strong>, matching
+DuckLake’s <code dir="auto">ducklake_table_stats.next_row_id</code>. Because the counter lives
+in table-scoped state, bumping it <em>is</em> a mutation to that table and is
+inside the table’s conflict set: two commits inserting into different
+tables share no row-id counter, so they never contend; two inserting into
+the same table overlap on that <code dir="auto">table_id</code> — and resolve under the
+<strong>append-append refinement</strong> above: the shared counter read is
+re-derivable, so on the verb path both commits land via benign-race retry
+(the loser re-allocates its row ids from the winner’s advanced
+<code dir="auto">next_row_id</code>). Row ids stay dense per table for RFC 0005’s inlined
+chunks. Verified against the DuckLake spec; the e2e suite validates the
+increment mechanics (<code dir="auto">next_row_id += record_count</code>) and DuckLake’s own
+behavior under concurrent same-table inserts.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="schema-version-tracking">Schema-version tracking</h3><a class="sl-anchor-link" href="#schema-version-tracking"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Schema-version tracking”</span></a></div>
+<p><code dir="auto">schema_version</code> is a counter separate from the id counters: DuckLake
+advances it <strong>only when a commit changes the catalog schema</strong>, and carries
+it forward unchanged for data-only commits. DuckDB keys its schema-metadata
+cache on it, so getting this wrong is not a storage bug but a
+client-visible one — in both directions. <em>Always</em> incrementing defeats the
+cache: every <code dir="auto">INSERT</code> looks like a schema change and forces DuckDB to
+re-fetch every table’s columns, multiplying catalog read traffic on exactly
+the small-append workload moraine targets. <em>Never</em> incrementing serves a
+stale cache: after <code dir="auto">add_column</code>, DuckDB keeps using its cached column list
+and returns wrong results or errors on the schema mismatch.</p>
+<p>The committer tracks a <code dir="auto">schema_changed</code> flag over the staged mutations. On
+commit, the new snapshot record’s <code dir="auto">schema_version</code> is <code dir="auto">prev + 1</code> if the
+flag is set, else copied from snapshot <code dir="auto">N</code>. The flag is set by the
+structural mutators — those that alter the catalog’s shape rather than its
+data (RFC 0003 verb names):</p>
+<ul>
+<li><strong>Schema-changing</strong> (<code dir="auto">schema_version</code> bumps): create/drop schema;
+create/rename/drop table and move-to-schema; create/alter/rename/drop
+view; add/remove/rename column, column type change, default and
+null-constraint changes; set partition key; create/drop macros;
+comments and tags on tables and columns. The last of these bump despite
+changing no column: DuckLake models them as <code dir="auto">AlterEntry</code> variants, and
+the rewritten entry enters <code dir="auto">new_tables</code>.</li>
+<li><strong>Altered but not schema-versioned</strong>: set sort key. DuckLake marks the
+table altered — conflict detection sees the alter — but does not bump
+<code dir="auto">schema_version</code> (a sort change never invalidates cross-file
+compaction, so the <code dir="auto">ducklake_schema_versions</code> grouping is unaffected).</li>
+<li><strong>Data-only</strong> (<code dir="auto">schema_version</code> carried forward): <code dir="auto">register_data_file</code> /
+<code dir="auto">expire_data_file</code>, <code dir="auto">register_delete_file</code> / <code dir="auto">expire_delete_file</code>,
+statistics updates, column/name-mapping registration, and the RFC 0005
+inlined <code dir="auto">inline_insert</code> / <code dir="auto">inline_delete</code> / <code dir="auto">flush_inlined_data</code>.</li>
+<li><strong>Outside the snapshot protocol entirely</strong>: option changes.
+<code dir="auto">set_option</code> in DuckLake is an immediate check-then-write on
+<code dir="auto">ducklake_metadata</code> within the transaction’s metadata connection — it
+mints no snapshot, bumps no <code dir="auto">schema_version</code>, and is not recorded in
+<code dir="auto">snapshot_changes</code> (so it is invisible to conflict detection; options
+are last-write-wins). Both paths implement exactly that. On the
+staged-row path a <code dir="auto">ducklake_metadata</code> row translates to a write of the
+scope’s option record, and because such a commit carries no
+<code dir="auto">ducklake_snapshot</code> insert it takes the head-preserving path — the same
+one snapshot expiry and file cleanup take. So <code dir="auto">CALL &lt;lake&gt;.set_option(…)</code> lands the option and moves nothing else: no
+snapshot, no <code dir="auto">schema_version</code>, no <code dir="auto">snapshot_changes</code> entry, and so
+nothing for conflict detection to <em>classify</em>. It does still write
+<code dir="auto">sys/head</code> at the standing snapshot id with the batch count advanced, as
+every head-preserving batch does — that is the anchor a concurrent
+commit conflicts on, and the stamp that tells a reader the state moved
+under an unchanged snapshot id.</li>
+</ul>
+<p>This classification is source-verified against DuckLake
+(<code dir="auto">DuckLakeTransactionState::SchemaChangesMade</code>, which tests exactly the
+new/dropped table, schema, view, and macro sets; per-table alters route
+through <code dir="auto">GetTransactionTableChanges</code>, which decides per change type
+whether the alter also bumps <code dir="auto">schema_version</code> — <code dir="auto">SET_SORT_KEY</code> lands in
+<code dir="auto">altered_tables</code> only).</p>
+<p>The flag is an explicit property of the mutation set, not something
+inferred from the batch’s key set after the fact — an inference would
+misclassify (e.g. a stats-only touch of a table’s state) and silently
+re-introduce one of the two failure modes. The exact schema-mutating set is
+pinned against DuckLake’s own behaviour in the e2e suite.</p>
+<p>The flag machinery above belongs to the <strong>verb path only</strong>. On the
+staged-row path (next section) DuckLake computes <code dir="auto">schema_version</code> itself
+and writes it in the <code dir="auto">ducklake_snapshot</code> row it authors; moraine stores
+that value row-faithfully and neither tracks nor second-guesses a flag.
+The two paths must agree — the e2e schema-version matrix pins both.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="staged-row-commits--the-extension-path">Staged-row commits — the extension path</h3><a class="sl-anchor-link" href="#staged-row-commits--the-extension-path"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Staged-row commits — the extension path”</span></a></div>
+<p>RFC 0006’s extension surface does not call RFC 0003’s verbs. DuckLake
+drives moraine with row-level DML against the <code dir="auto">ducklake_*</code> tables: a
+DuckLake transaction stages row inserts/updates/deletes, and — critically —
+DuckLake itself authors the catalog mechanics. It reads <code dir="auto">next_catalog_id</code> /
+<code dir="auto">next_file_id</code> from the snapshot row, computes the new ids, computes
+<code dir="auto">schema_version</code>, and writes the new <code dir="auto">ducklake_snapshot</code> row, with the new
+snapshot id and <code dir="auto">begin_snapshot</code> values <strong>embedded in every row it
+stages</strong>. moraine’s job on this path is narrower and different from the
+verb path:</p>
+<ul>
+<li><strong>Translate, don’t author.</strong> moraine maps each staged row onto the
+RFC 0002 keyed layout — an INSERT becomes a <code dir="auto">current</code> record; an UPDATE that
+sets <code dir="auto">end_snapshot</code> becomes the end-version bookkeeping (delete <code dir="auto">current</code>
+key, write <code dir="auto">history</code> key); the snapshot row becomes the <code dir="auto">snapshot</code> record and
+the <code dir="auto">sys/head</code> advance. This begin/end-lifecycle translation is the one
+semantic convention moraine interprets (RFC 0006 states and bounds it);
+ids, counters, and <code dir="auto">schema_version</code> are DuckLake’s values, stored
+verbatim.</li>
+<li><strong>Same commit core.</strong> The translated records land through steps 3–4
+above: one transaction, one atomic batch, head conflict detection.
+Nothing about atomicity or durability differs between the paths.</li>
+<li><strong>No internal benign-race retry.</strong> A retry on the verb path re-runs the
+closure and re-stamps ids moraine allocated. On this path there is
+nothing moraine can safely re-run: the snapshot id, <code dir="auto">begin_snapshot</code>,
+counter values, and <code dir="auto">schema_version</code> are DuckLake-authored and embedded
+in row values moraine must carry faithfully — re-stamping them would be
+semantic surgery on another system’s data, the exact re-modeling RFC
+0006 forbids. Therefore <strong>every lost head on the staged-row path
+surfaces as a typed <code dir="auto">CommitConflict</code></strong> to DuckLake — benign-shaped or
+not — and this is exactly the composition DuckLake expects of its
+catalog, verified in its source: DuckLake’s <code dir="auto">RunCommitLoop</code> wraps every
+metadata-catalog commit in its own bounded retry (default
+<code dir="auto">ducklake_max_retry_count = 10</code>, jittered exponential backoff from
+<code dir="auto">ducklake_retry_wait_ms = 100</code> × <code dir="auto">ducklake_retry_backoff = 1.5</code>),
+re-checking its own conflict matrix against <code dir="auto">ducklake_snapshot_changes</code>
+before each re-attempt and re-staging with freshly derived ids. Those
+re-checks are catalog reads moraine must serve <em>between</em> attempts —
+DuckLake queries the snapshot list and <code dir="auto">ducklake_snapshot_changes</code> for
+everything committed after its transaction snapshot, so the read surface
+stays live while a commit of its own is in flight. Benign races are
+absorbed by <em>DuckLake’s</em> loop; true conflicts throw its
+<code dir="auto">TransactionException</code> to the application. The “disjoint concurrent
+commits both succeed without caller involvement” goal is thus a
+<strong>verb-path</strong> property; on the extension path the equivalent behavior
+is provided by DuckLake, one layer up, where it belongs.</li>
+</ul>
+<p>Two of the staged path’s read phases dominate its latency — the inline
+translation (chunk walks for flush-deletes and drops) and equality-index
+maintenance (scoped Parquet reads and entry staging) — and they run
+<strong>beside</strong> each other rather than in sequence. Both read the transaction’s
+pre-commit cut, so ordering could only matter through writes: index
+maintenance stages only <code dir="auto">index/*</code> keys as it streams — a subspace the
+inline translation never reads — and hands its chunk-directory repairs
+back unstaged, while the translation stages nothing at all. Neither can
+observe the other, so running them together is indistinguishable from
+running them in order. The head view resolves first (it is maintenance’s
+base input, and a warm handle answers it from memory); maintenance still
+completes before the batch is assembled, so a poisoned definition rides
+the writes it produces; and its directory repairs are ordered ahead of the
+batch’s own inline writes, so a flush draining a repaired chunk still
+deletes the locator the repair added.</p>
+<p>The two front doors share the commit core (staging, one-batch atomicity,
+head conflict detection, durability) and differ only in who authors the
+mutations and therefore who may retry. Keeping that split explicit is what
+lets the verb path be aggressive (closure re-run, append-append benign)
+without ever risking a silent rewrite of DuckLake-authored state.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="inlined-writes-as-commit-participants">Inlined writes as commit participants</h3><a class="sl-anchor-link" href="#inlined-writes-as-commit-participants"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Inlined writes as commit participants”</span></a></div>
+<p>Per RFC 0005, an inlined insert/delete is not a separate path: its
+<code dir="auto">inline/*</code> records are added to the same <code dir="auto">WriteBatch</code> in step 3, allocating
+row ids from the same per-table <code dir="auto">next_row_id</code> bump as a Parquet write
+would. An inline flush is itself a commit — Parquet PUTs first, then one
+batch that creates the <code dir="auto">file</code>/<code dir="auto">delfile</code> records and deletes the consumed
+<code dir="auto">inline/*</code> records outright (no <code dir="auto">history</code>; <code dir="auto">inline/*</code> is append-then-delete,
+not begin/end-versioned). Nothing about inlining changes the commit
+sequence or the conflict rules; it only adds record kinds to the batch.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="group-commit">Group commit</h3><a class="sl-anchor-link" href="#group-commit"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Group commit”</span></a></div>
+<p>Because the topology funnels concurrent transactions through one committer,
+the committer may batch several pending catalog commits into one WAL flush:
+allocate ids for each, stage their records into one <code dir="auto">WriteBatch</code>, one CAS,
+one durable flush. Per-commit latency stays one-PUT-bound (RFC 0002 /
+README); throughput under load stops being one-flush-per-commit and PUT
+costs amortize. Group commit is an optimization the protocol permits, not a
+correctness requirement — a batch of one is the normal path. Ordering
+within a group is the committer’s choice; conflicts <em>within</em> a group are
+impossible because a single committer serializes them before staging.</p>
+<p><strong>Implemented</strong> two ways over one core — a lone commit is a group of one,
+so there is one commit path, not two. <code dir="auto">Catalog::commit_group</code> batches what
+one caller hands it; concurrent callers of the ordinary <code dir="auto">Catalog::commit</code>
+are batched without asking. A commit that finds the store free opens a
+batch, one that finds a batch forming joins it, one that finds a batch
+being submitted waits for the next, and a batch seals as soon as no caller
+is on its way into it — so the submission in progress is the batching
+window and an uncontended commit waits for nobody. A batch also seals at a
+bounded member count, since under saturation the arrival count never falls
+to zero. Submission ends when the batch’s write is visible and folded into
+the projections, before it is durable: the store then admits the next
+batch, which forms and submits while the first awaits its flush, and the
+two share that flush under the pacing below. Every member still returns
+only once its own batch is durable.</p>
+<p>Steps 1–3 run once per member, against a premise folded forward from the
+member before it (the same fold that refreshes the cached head view), so
+member <em>i</em> allocates its ids and detects its name collisions against
+everything members <em>1..i</em> did. That is what makes intra-batch conflicts
+unreachable rather than unlikely. Step 4 then runs once.</p>
+<p>A batch batches commits; it does not merge them. Each member mints its own
+snapshot, which time travel resolves separately. What batching changes is
+durability granularity, not catalog shape.</p>
+<p>Measured, the coalescing is exact: a batch carries as many commits as there
+are concurrent committers, so throughput is <code dir="auto">concurrency / flush_interval</code>
+(the flush spacing, under which back-to-back batches each wait one spacing)
+with no overhead visible at any level, up to the member ceiling — where 128
+concurrent commits land as two full batches at the same rate 64 do
+(<code dir="auto">BENCHMARK.md</code>, “Commit throughput vs. concurrency”). The ceiling, not the
+flush cadence, is what binds first under saturation, and it is the lever if
+a workload ever needs past it.</p>
+<p>The single-commit floor is measured against AWS S3 as well as the local and
+injected-latency stores. From a worker in the bucket’s <code dir="auto">us-west-2</code> region,
+1 ms and 25 ms flush cadences both land at roughly 28–30 ms median, while a
+100 ms cadence lands at 101.9 ms (<code dir="auto">BENCHMARK.md</code>, “Durable-commit latency
+against a real endpoint”). The endpoint round trip therefore replaces the
+short cadence as the binding term; it does not add a second serial wait.</p>
+<p>The batch is the unit of failure. A member that fails discards the batch,
+and its other members re-run; a lost race re-runs every member, conflicting
+if any member’s change set does; a crash leaves every member committed or
+none (RFC 0011, <code dir="auto">GroupCommit</code>). A sealed batch commits on a task of its own
+rather than on whichever caller sealed it, because a host interrupt drops
+that caller’s future (RFC 0010) and the other members are owed an answer.</p>
+<p>Both front doors land through one function, so the durable write, the
+head-race classification, and the projection bookkeeping exist once. What
+the staged-row path does not do is <em>join</em> a batch: it commits its own
+transaction, because DuckLake authors its snapshot id against the head it
+read, and no fold onto a preceding member can re-derive that id. The id is
+therefore checked rather than trusted — a staged commit whose id does not
+advance the head it lands on is refused, where before it relied on the
+head-pointer race to catch the same disagreement. That refusal is a lost
+race and must be reported as one: it carries <code dir="auto">CommitConflict</code>’s text, the
+substring DuckLake re-drives on. Reporting it as corruption instead would
+be a wire-contract bug, not a wording one — DuckLake would abandon a
+transaction it could have re-run against the head that won.</p>
+<p>So batching is a verb-path property, and SQL through DuckLake reaches it
+only where a statement runs a verb (index DDL, maintenance). DuckLake’s own
+DML and DDL do not batch, and would gain nothing if they did: its metadata
+connection is serialized, so successive SQL transactions never overlap and
+there is nothing to batch them with. A <code dir="auto">BEGIN … COMMIT</code> still lands as one
+snapshot, but that is statements merged, not commits batched.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="sequence-numbers-are-the-stores-not-moraines">Sequence numbers are the store’s, not moraine’s</h3><a class="sl-anchor-link" href="#sequence-numbers-are-the-stores-not-moraines"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Sequence numbers are the store’s, not moraine’s”</span></a></div>
+<p>A commit writes with SlateDB’s generated sequence number; moraine never pins
+one. The knob exists — a non-zero <code dir="auto">WriteOptions::seqnum</code> overrides the
+generated value, and a write below the store’s current maximum is refused —
+so it reads at first like an exactly-once primitive: pin the same number on
+a re-drive and the duplicate is rejected.</p>
+<p>It is not one here, for two reasons. The sequence space is <strong>global to the
+store</strong>, not per catalog commit: index build steps, entry reclamation,
+inlined writes, and migration batches all advance it while minting no
+snapshot, so no function of a snapshot id stays in step with it, and any
+mapping moraine chose would be stale the moment a non-committing write
+landed. And the number moraine would need to pin does not exist at re-drive
+time anyway. A re-drive re-runs the caller’s closure against the <em>advanced</em>
+head, so it is a different logical commit computed from a different premise
+— there is nothing stable across the crash to pin <em>to</em>.</p>
+<p>Exactly-once across a process death needs a <strong>caller-supplied idempotency
+token</strong>, recorded in the commit and checked before staging. That is an API
+change this RFC does not make, and pinning <code dir="auto">seqnum</code> would not substitute for
+it. So a re-driven commit is an ordinary commit: guarded operations surface
+their guard, and a data-only re-drive lands a second time (RFC 0011,
+<code dir="auto">CommitDurableNotAcknowledged</code>).</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="reader-visibility-after-commit">Reader visibility after commit</h3><a class="sl-anchor-link" href="#reader-visibility-after-commit"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Reader visibility after commit”</span></a></div>
+<p>Step 4 makes a commit <strong>durable</strong>; a <em>separate</em> reader observing it is a
+second, distinct property. Readers are uncoordinated (Topology) and resolve
+snapshots by following the manifest from object storage. A reader that
+opened before the commit — or a fresh reader whose manifest view is a poll
+interval stale — therefore does not see snapshot <code dir="auto">N+1</code> the instant <code dir="auto">commit</code>
+returns.
+For moraine’s own committer this is a non-issue: it holds the advanced
+<code dir="auto">sys/head</code> in memory and reads its own writes. It matters at the boundary
+where another process must observe a just-returned commit —
+read-your-writes across processes, and writer takeover, where a new writer
+must publish the last committed state before it serves.</p>
+<p>The contract: <code dir="auto">commit</code> does not return success until the new snapshot is
+both durable and reflected in the manifest that readers follow, so a reader
+opened <em>after</em> <code dir="auto">commit</code> returns resolves <code dir="auto">N+1</code>. (A reader opened <em>before</em>
+may still lag by its manifest poll interval — that is ordinary snapshot
+isolation, not a violation.)</p>
+<p>SlateDB 0.16 returns a <code dir="auto">WriteHandle</code> once the transaction is visible in
+memory. Moraine then either flushes the WAL itself or awaits
+<code dir="auto">WriteHandle::await_durable()</code> on a flush another commit is performing,
+per the pacing below, before reporting success; an empty transaction
+returns no handle and needs no wait. Both routes retain shutdown and
+fencing errors and report stalls without abandoning the durability wait.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="flush-pacing">Flush pacing</h3><a class="sl-anchor-link" href="#flush-pacing"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Flush pacing”</span></a></div>
+<p>Every WAL flush is one object-store PUT, so the flush rate is the PUT rate
+a commit stream costs. The writer opens its store with SlateDB’s flush
+timer off and paces the flushes itself, under one setting,
+<code dir="auto">flush_interval</code>, read as the minimum spacing between two flushes:</p>
+<ul>
+<li>A commit that finds the spacing elapsed since the last flush flushes at
+once and waits only on its own PUT.</li>
+<li>A commit that finds the spacing running joins one flush deferred to the
+moment it elapses; the first such commit performs it, the rest await
+their handles on it.</li>
+<li>A commit that finds a flush in the air, and so not carrying it, schedules
+the next flush for when the spacing elapses from that flush’s start.</li>
+</ul>
+<p>So a lone commit costs one PUT of latency, a burst costs at most the
+spacing plus one PUT, and PUTs never exceed one per spacing. The timer is
+off rather than kept as a ceiling because a tick landing inside a spacing
+window would carry the pending commits early, one extra PUT per tick, and
+the cap would only be approximate; it is safe to turn off because every
+Moraine write reaches the WAL through a commit that waits for durability,
+so nothing is left for a timer to sweep up. <code dir="auto">flush_on_commit</code> is the same
+setting at zero. A store opened for a migration keeps the timer, since its
+few commits do not warrant pacing.</p>
+<p>Group commit and pacing compose: the coalescer batches concurrent commits
+into one write, a batch submitted while an earlier one awaits its deferred
+flush rides on that flush, and so under a burst every commit that lands
+inside one spacing is durable together at its end, in one PUT.</p>
+<p>The durability watcher advances only after the WAL reaches object storage.
+Both fresh-open paths — <code dir="auto">Db::open</code> and <code dir="auto">DbReader::open</code> in latest mode —
+replay WALs from object storage past the manifest state. So a handle opened
+after Moraine’s <code dir="auto">commit</code> returns resolves <code dir="auto">N+1</code> by construction.</p>
+<p>A validation test in the store harness (open <code dir="auto">object_store</code>, commit, open a
+<em>fresh</em> reader, assert <code dir="auto">N+1</code> is visible) pins that behavior against real
+SlateDB and measures its per-backend latency.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="test-obligations">Test obligations</h3><a class="sl-anchor-link" href="#test-obligations"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Test obligations”</span></a></div>
+<p>Per RFC 0001, integration tests exercise the protocol against real
+SlateDB on in-memory <code dir="auto">object_store</code> — no mocks of the store:</p>
+<ul>
+<li>Disjoint concurrent commits both succeed (benign-race retry).</li>
+<li>Concurrent pure appends to the same table both succeed (append-append
+refinement); the loser’s rows carry row ids re-allocated above the
+winner’s advanced <code dir="auto">next_row_id</code>, with no collision or gap.</li>
+<li>Concurrent deletes from the same table are benign when their target data
+files are disjoint and a conflict when they meet on one; an inlined
+delete, and a delete parsed from DuckLake’s grammar, fall back to table
+grain.</li>
+<li>Concurrent same-name creates (two commits each creating table <code dir="auto">orders</code>
+in one schema): exactly one succeeds; the other’s retry re-runs the
+closure and returns <code dir="auto">AlreadyExists</code> — never two live tables with one
+name.</li>
+<li>Incompatible overlapping concurrent commits: one wins, the other returns
+<code dir="auto">CommitConflict</code>.</li>
+<li>Staged-row commits never retry internally: a lost head on the extension
+path returns <code dir="auto">CommitConflict</code> with the store unchanged by the loser.</li>
+<li>Crash-shaped sequences: owned by RFC 0011 rather than restated here.
+<code dir="auto">CommitNotDurable</code> covers the batch whose flush never landed — the head
+does not move and no record of it is visible — and
+<code dir="auto">CommitDurableNotAcknowledged</code> the flush that landed before the process
+died, where the head and snapshot resolve consistently on reopen and a
+re-drive surfaces its guard.</li>
+<li>Counter monotonicity: <code dir="auto">next_catalog_id</code>/<code dir="auto">next_file_id</code>/per-table
+<code dir="auto">next_row_id</code> never regress or collide across concurrent commits.</li>
+<li>Bounded retry terminates: a forced write storm returns <code dir="auto">CommitConflict</code>
+rather than looping.</li>
+<li>Schema-version matrix: every schema-changing operation increments
+<code dir="auto">schema_version</code>; every data-only operation — including inline
+insert/delete, flush, and mapping registration — carries it forward;
+comment/tag changes increment; <code dir="auto">set_option</code> mints no snapshot and
+changes no version.</li>
+<li>Bootstrap: the first open of an empty store lands format stamp,
+snapshot 0, and head in one batch; a second open (concurrent or later)
+finds the initialized store rather than re-initializing; an
+unknown-format or mid-migration store is refused.</li>
+<li>Fresh-reader visibility: after <code dir="auto">commit</code> returns, a newly opened reader
+resolves the new snapshot (the store-harness validation above, run
+against real SlateDB on in-memory <code dir="auto">object_store</code>).</li>
+<li>Checkpoint readers: a reader pinned to a checkpoint serves the state at
+it and never a later commit; it opens, reads, and closes against a store
+that refuses every write, attempting none, where a latest-following
+reader on the same store writes; a writer refuses a checkpoint, a
+read-only catalog refuses to mint one, and a malformed, unknown, or
+deleted id is refused rather than silently followed.</li>
+<li>DuckLake-facing pins, differential against a stock DuckLake catalog fed
+the identical statements: row ids allocate as <code dir="auto">next_row_id += record_count</code> per table, stay dense, survive an UPDATE of other rows,
+and never contend across tables; <code dir="auto">schema_version</code> bumps for column DDL
+and for comments and tags, and is carried forward by inserts (file and
+inlined) and by name-mapping registration; and DuckLake’s retry budget
+(<code dir="auto">ducklake_max_retry_count</code> 10, <code dir="auto">ducklake_retry_wait_ms</code> 100,
+<code dir="auto">ducklake_retry_backoff</code> 1.5) is what the composed budget above assumes.
+A genuine concurrent DuckLake race needs more than one connection on one
+DuckDB instance, which the CLI cannot give: <code dir="auto">test/sql</code> drives DuckDB’s
+own sqllogictest runner for that, and pins the loop end to end — two
+overlapping DuckLake transactions where a compatible loser re-drives and
+lands (with row ids dense across the race), and an incompatible one
+throws. What a retry reads mid-flight is pinned alongside it: the
+<code dir="auto">ducklake_snapshot_changes</code> rows above a snapshot id, and the exact
+<code dir="auto">changes_made</code> entries moraine authors on the verb path.</li>
+<li>Options through the staged-row path: <code dir="auto">set_option</code> records the option,
+global or table-scoped, and mints no snapshot; a second write of one key
+wins over the first; a delete removes it and the scope resolves to its
+parent’s value again.</li>
+<li>Group commit: a group costs fewer object-store writes than the same
+members committed separately; every member mints its own consecutive
+snapshot and time travel resolves each one to that member’s state; a
+member stages against what the members before it left; a failing member
+aborts the group; a group that loses a disjoint race re-runs and lands
+every member.</li>
+<li>Coalescing: a burst of concurrent <code dir="auto">commit</code> calls costs fewer
+object-store writes than the same calls made one at a time, while each
+still mints its own snapshot; and a commit whose future is dropped part
+way — the shape a host interrupt takes, swept across the commit’s life —
+never strands the commits sharing its batch.</li>
+</ul>
+<p>E2E testing validates the protocol against real DuckLake SQL.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="alternatives-considered">Alternatives considered</h2><a class="sl-anchor-link" href="#alternatives-considered"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Alternatives considered”</span></a></div>
+<ul>
+<li><strong>Mechanical re-stage on benign-race retry</strong> (re-derive ids, re-stamp the
+previously staged records, re-commit — without re-running the closure).
+Rejected: cheaper per retry, but it re-validates nothing. Logical premises
+the closure established against the old head — name uniqueness above all —
+are never re-checked against the commits that won the race, so two
+concurrent same-name creates would both land. The closure re-run costs one
+in-memory pass and is the only retry form that is correct by construction.</li>
+<li><strong>Internal rebase of true conflicts (replay staged mutations against the
+new head).</strong> Rejected: replaying a true conflict requires re-running the
+DuckLake operation, which lives above the DuckLake-agnostic core. It
+would put DuckLake transaction semantics in the wrong layer and can
+silently produce wrong results if the replay logic is incomplete. Abort
+<ul>
+<li>typed error is honest; benign races — safely re-drivable because the
+verb path re-runs the caller’s closure against the new head — are the
+only thing retried internally.</li>
+</ul>
+</li>
+<li><strong>Snapshot-level conflict detection (any concurrent commit conflicts).</strong>
+Rejected: serializes all commits and defeats the benign-race retry —
+disjoint-table writers would falsely conflict. The single-<code dir="auto">WriteBatch</code>
+CAS already serializes the physical write; there is no reason to also
+serialize logically-disjoint commits.</li>
+<li><strong>Entity-level conflict detection (per-file/column) everywhere.</strong>
+Rejected, but with one exception now built. DuckLake’s matrix is
+operation-grained over tables everywhere except delete-vs-delete on one
+table, which it checks at <code dir="auto">data_file_id</code> grain — and moraine reproduces
+exactly that one check (above), because a delete already names its
+target file and carrying the id costs a set comparison. Generalizing the
+idea to columns or to per-file inserts is what stays rejected: it buys
+no concurrency the append-append refinement does not already give, and
+it would put entity-shaped knowledge in a classifier whose whole virtue
+is not needing any.</li>
+<li><strong>Global <code dir="auto">next_row_id</code> in the snapshot record.</strong> Rejected: contradicts
+DuckLake (<code dir="auto">next_row_id</code> is per-table in <code dir="auto">ducklake_table_stats</code>) and would
+make every insert into any table contend on one counter, turning benign
+cross-table concurrency into counter churn. Per-table placement aligns
+allocation with conflict granularity.</li>
+<li><strong>Pessimistic locking (a lease/lock record in <code dir="auto">system</code> a writer must hold).</strong>
+Rejected: reintroduces coordination state and a liveness problem (crashed
+lock-holder) that the optimistic head-CAS avoids. SlateDB fencing already
+provides the safety a lock would; optimism provides the concurrency.</li>
+</ul>
+</div><script type="module">var e=class extends HTMLElement{constructor(){super()}connectedCallback(){let e=()=>{let e=t===`ready`?`<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></g></svg>`:`<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/></svg>`;this.innerHTML=`<span class="w-full h-full block [&_svg]:w-full [&_svg]:h-full">`+e+`</span>`},t=`ready`;e(),this.addEventListener(`click`,()=>{if(t===`ready`){t=`success`,e();let n=this.dataset.code||``;navigator.clipboard.writeText(n),setTimeout(()=>{t=`ready`,e()},1500)}})}};customElements.define(`nova-code-copy-button`,e);</script><script type="module" src="/_astro/MarkdownContent.astro_astro_type_script_index_0_lang.x0CmCSF8.js"></script><footer class="sl-flex astro-xhxjzfa7"><div class="meta sl-flex astro-xhxjzfa7"></div><div class="flex min-w-full flex-row items-stretch justify-between gap-2 px-1 pt-0 pb-6 print:hidden" dir="ltr"><a href="/rfcs/0003-public-api-shape/" rel="prev" data-side="left" class="group m-0 flex items-center justify-end gap-2 rounded-xl p-2 font-medium text-(--sl-color-gray-2) no-underline transition hover:text-(--sl-color-white) md:text-lg [[rel='next']]:flex-row [[rel='prev']]:flex-row-reverse"><span>0003: Public API shape of the moraine core</span><svg width="1em" height="1em" viewBox="0 0 24 24" class="block min-h-5 min-w-5 transition group-hover:-translate-x-1"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18l-6-6l6-6" /></svg></a><div class="flex-1"></div><a href="/rfcs/0005-data-inlining/" rel="next" data-side="right" class="group m-0 flex items-center justify-end gap-2 rounded-xl p-2 font-medium text-(--sl-color-gray-2) no-underline transition hover:text-(--sl-color-white) md:text-lg [[rel='next']]:flex-row [[rel='prev']]:flex-row-reverse"><span>0005: Data inlining on SlateDB</span><svg width="1em" height="1em" viewBox="0 0 24 24" class="block min-h-5 min-w-5 transition group-hover:translate-x-1"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6" /></svg></a></div></footer></div></div></main></div></div></div></div></body></html>

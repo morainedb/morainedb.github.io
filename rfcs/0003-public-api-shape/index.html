@@ -1,0 +1,691 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-vdxcvpsm"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>RFC 0003: Public API shape of the moraine core | moraine</title><link rel="canonical" href="https://morainedb.github.io/rfcs/0003-public-api-shape/"/><link rel="sitemap" href="/sitemap-index.xml"/><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.1.4"/><meta name="generator" content="Starlight v0.41.4"/><meta property="og:title" content="RFC 0003: Public API shape of the moraine core"/><meta property="og:type" content="article"/><meta property="og:url" content="https://morainedb.github.io/rfcs/0003-public-api-shape/"/><meta property="og:locale" content="en"/><meta property="og:description" content="A DuckLake catalog that lives in your bucket — SlateDB-backed, serverless, nothing to operate."/><meta property="og:site_name" content="moraine"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="A DuckLake catalog that lives in your bucket — SlateDB-backed, serverless, nothing to operate."/><script>
+"use strict";(()=>{(()=>{let t="theme-toggle",n;function r(){return window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}function l(){let e=localStorage.getItem(t);return e==="dark"||e==="light"?e:null}function m(){return n||l()||r()}function s(e){e===r()?localStorage.removeItem(t):localStorage.setItem(t,e)}function h(e){let o=document.documentElement;o.classList.toggle("dark",e==="dark"),o.dataset.theme=e,o.style.colorScheme=e}function a(e){n=e,s(e),h(e)}function c(){a(m())}c(),document.addEventListener("astro:after-swap",c),window.astroThemeToggle={setTheme:a,getTheme:m}})();})();
+</script><link rel="stylesheet" href="/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/_astro/common.DJmCPQrT.css"><style>@layer starlight.components{.card:where(.astro-zts4jgjd){--sl-card-border:var(--sl-color-purple);--sl-card-bg:var(--sl-color-purple-low);border:1px solid var(--sl-color-gray-5);background-color:var(--sl-color-black);flex-direction:column;gap:clamp(.5rem,.125rem + 1vw,1rem);padding:clamp(1rem,.125rem + 3vw,2.5rem)}.card:where(.astro-zts4jgjd):nth-child(4n+1){--sl-card-border:var(--sl-color-orange);--sl-card-bg:var(--sl-color-orange-low)}.card:where(.astro-zts4jgjd):nth-child(4n+3){--sl-card-border:var(--sl-color-green);--sl-card-bg:var(--sl-color-green-low)}.card:where(.astro-zts4jgjd):nth-child(4n+4){--sl-card-border:var(--sl-color-red);--sl-card-bg:var(--sl-color-red-low)}.card:where(.astro-zts4jgjd):nth-child(4n+5){--sl-card-border:var(--sl-color-blue);--sl-card-bg:var(--sl-color-blue-low)}.title:where(.astro-zts4jgjd){font-weight:600;font-size:var(--sl-text-h4);color:var(--sl-color-white);line-height:var(--sl-line-height-headings);align-items:center;gap:1rem}.card:where(.astro-zts4jgjd) .icon:where(.astro-zts4jgjd){border:1px solid var(--sl-card-border);background-color:var(--sl-card-bg);border-radius:.25rem;flex-shrink:0;padding:.2em}.card:where(.astro-zts4jgjd) .body:where(.astro-zts4jgjd){font-size:clamp(var(--sl-text-sm), calc(.5rem + 1vw), var(--sl-text-body));margin:0}.card-grid:where(.astro-lmor3ela){grid-template-columns:100%;gap:1rem;display:grid}.card-grid:where(.astro-lmor3ela)>*{margin-top:0!important}@media (width>=50rem){.card-grid:where(.astro-lmor3ela){grid-template-columns:1fr 1fr;gap:1.5rem}.stagger:where(.astro-lmor3ela){--stagger-height:5rem;padding-bottom:var(--stagger-height)}.stagger:where(.astro-lmor3ela)>:nth-child(2n){transform:translateY(var(--stagger-height))}}}
+@layer starlight.components{svg:where(.astro-n5k4ipy7){color:var(--sl-icon-color);font-size:var(--sl-icon-size,1em);width:1em;height:1em}}
+</style><script type="module" src="/_astro/page.LAbJoB63.js"></script></head><body class="astro-vdxcvpsm"><a class="sl-skip-link astro-vxeigawq" href="#_top">Skip to content</a><div class="flex min-h-screen flex-col astro-3iko6sul"><header class="fixed inset-0 z-(--sl-z-index-navbar) box-border h-(--sl-nav-height) w-full border-0 border-b border-solid border-(--sl-color-hairline) bg-(--sl-color-bg-nav) px-(--sl-nav-pad-x) py-(--sl-nav-pad-y) backdrop-blur astro-3iko6sul"><div class="box-border flex h-full items-center gap-2"><div class="-m-3 overflow-clip p-3 flex min-w-0"><span class="-m-1.5 rounded-md p-1.5 **:text-lg **:font-semibold **:text-(--sl-color-text) focus-visible:outline-offset-0"><a href="/" class="site-title sl-flex astro-clw6ags5"><img class="light:sl-hidden print:hidden astro-clw6ags5" alt src="/_astro/moraine-dark.CEVNFCXz.svg" width="128" height="128"><img class="dark:sl-hidden print:block astro-clw6ags5" alt src="/_astro/moraine.B97P_dWh.svg" width="128" height="128"><span class="astro-clw6ags5" translate="no">moraine</span></a></span></div><nav class="flex flex-1 flex-row gap-4 overflow-x-auto py-3 pr-4 pl-4 text-sm font-medium max-md:**:hidden xl:gap-6 xl:pl-6"></nav><div class="flex md:max-w-60 md:flex-1 print:hidden"><site-search class=" astro-hdulihjd" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"><button class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90 md:h-9 md:w-full md:max-w-88 md:rounded-md md:border md:border-solid md:border-(--sl-color-gray-5) md:p-2 md:text-(--sl-color-text) md:transition-colors md:hover:bg-gray-400/10 astro-hdulihjd" data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4 astro-hdulihjd"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m21 21l-4.34-4.34" /><circle cx="11" cy="11" r="8" /></g></svg><span class="sl-hidden md:sl-block astro-hdulihjd" aria-hidden="true">Search</span><kbd class="sl-hidden md:sl-flex astro-hdulihjd" style="display: none;"><kbd class="astro-hdulihjd">Ctrl</kbd><kbd class="astro-hdulihjd">K</kbd></kbd></button><dialog style="padding:0" aria-label="Search" class="astro-hdulihjd"><div class="dialog-frame sl-flex astro-hdulihjd"><button data-close-modal class="sl-flex md:sl-hidden astro-hdulihjd">Cancel</button><div class="search-container astro-hdulihjd"><div id="starlight__search" class="astro-hdulihjd"></div></div></div></dialog></site-search><script>
+  ;(() => {
+    const openBtn = document.querySelector('button[data-open-modal]')
+    const shortcut = openBtn?.querySelector('kbd')
+    if (!openBtn || !(shortcut instanceof HTMLElement)) return
+    const platformKey = shortcut.querySelector('kbd')
+    if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+      platformKey.textContent = '⌘'
+      openBtn.setAttribute('aria-keyshortcuts', 'Meta+K')
+    }
+    shortcut.style.display = ''
+  })()
+</script><script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.vTFUHulS.js"></script></div><div class="hidden items-center gap-2 md:flex print:hidden"><a href="https://github.com/morainedb/moraine" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">GitHub</span><svg aria-hidden="true" class=" astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script><div class="size-8 overflow-visible"><astro-theme-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><div class="astro-theme-toggle-icon-light"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 19a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1m-4.95-2.05a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0m11.314 0l1.414 1.414a1 1 0 0 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 1.414-1.414m-5.049-9.836a5 5 0 1 1-2.532 9.674a5 5 0 0 1 2.532-9.674M4 11a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zm18 0a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM5.636 4.222L7.05 5.636A1 1 0 0 1 5.636 7.05L4.222 5.636a1 1 0 0 1 1.414-1.414m14.142 0a1 1 0 0 1 0 1.414L18.364 7.05a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0M12 1a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1" /></svg></div><div class="astro-theme-toggle-icon-dark"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 1.992a10 10 0 1 0 9.236 13.838c.341-.82-.476-1.644-1.298-1.31a6.5 6.5 0 0 1-6.864-10.787l.077-.08c.551-.63.113-1.653-.758-1.653h-.266l-.068-.006z" /></svg></div></astro-theme-toggle><script type="module">function e(){return typeof window>`u`?`light`:window.astroThemeToggle?.getTheme?.()||`light`}function t(e){typeof window>`u`||window.astroThemeToggle?.setTheme?.(e)}function n(){t(e()===`light`?`dark`:`light`)}var r=`astro-theme-toggle-temporary-styles`;function i(){document.getElementById(r)?.remove()}function a(){i();let e=document.createElement(`style`);e.id=r,e.textContent=`::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }`,document.head.appendChild(e)}async function o(e,t,n){let r=document;if(typeof r.startViewTransition!=`function`){e();return}a();let o=r.startViewTransition(()=>{e()});await o?.ready,o?.finished?.then(i);let s=.7,c=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><defs><radialGradient id="toggle-theme-gradient"><stop offset="${s}"/><stop offset="1" stop-opacity="0"/></radialGradient></defs><circle cx="4" cy="4" r="4" fill="url(#toggle-theme-gradient)"/></svg>`,l=`data:image/svg+xml;base64,${window.btoa(c)}`,u=window.innerWidth,d=window.innerHeight,f=Math.ceil(Math.hypot(Math.max(t,u-t),Math.max(n,d-n))/s);document.documentElement.animate({maskImage:[`url('${l}')`,`url('${l}')`],maskRepeat:[`no-repeat`,`no-repeat`],maskPosition:[`${t}px ${n}px`,`${t-f}px ${n-f}px`],maskSize:[`0`,`${2*f}px`]},{duration:500,easing:`ease-in`,pseudoElement:`::view-transition-new(root)`})}function s(e){o(n,e.clientX,e.clientY)}var c=class extends HTMLElement{connectedCallback(){this.hasAttribute(`tabindex`)||this.setAttribute(`tabindex`,`0`),this.hasAttribute(`role`)||this.setAttribute(`role`,`button`),this.addEventListener(`click`,s),this.addEventListener(`keydown`,e=>{if(e.key===`Enter`||e.key===` `){e.preventDefault();let t=this.getBoundingClientRect();s({clientX:t.left+t.width/2,clientY:t.top+t.height/2})}})}};customElements.define(`astro-theme-toggle`,c);</script></div></div><div class="flex items-center gap-2 md:hidden print:hidden"><nova-mobile-menu-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90 print:hidden" aria-label="Menu" aria-controls="starlight__sidebar"><div class="transition-transform [body[data-mobile-menu-expanded]_&amp;]:rotate-90"><svg width="1em" height="1em" viewBox="0 0 24 24" class="block [body[data-mobile-menu-expanded]_&amp;]:hidden"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16M4 12h16M4 19h16" /></svg><svg width="1em" height="1em" viewBox="0 0 24 24" class="hidden [body[data-mobile-menu-expanded]_&amp;]:block"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12" /></svg></div></nova-mobile-menu-toggle><script type="module" src="/_astro/MobileMenuToggle.astro_astro_type_script_index_0_lang.Bg4YKcfM.js"></script></div></div></header><nav class="sidebar print:hidden astro-3iko6sul" aria-label="Main" id="nova-sidebar-nav"><div id="starlight__sidebar" class="nova-scroll-container invisible md:visible [body[data-mobile-menu-expanded]_&amp;]:max-md:visible fixed top-(--sl-nav-height) bottom-0 left-0 z-(--sl-z-index-menu) overflow-y-auto border-0 border-solid border-(--sl-color-hairline) bg-(--sl-color-black) max-md:w-full md:w-(--sl-sidebar-width) md:border-r astro-3iko6sul"><div class="sidebar-content flex h-full min-h-max flex-col px-(--sl-sidebar-pad-x) py-4 astro-3iko6sul"><sl-sidebar-state-persist data-hash="05ix94y" class="astro-f5yvicm7"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-ojxuodky"><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Guide</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/guide/what-is-moraine/" class="astro-ojxuodky"><span class="astro-ojxuodky">What is moraine?</span></a></li><li class="astro-ojxuodky"><a href="/guide/getting-started/" class="astro-ojxuodky"><span class="astro-ojxuodky">Getting started</span></a></li><li class="astro-ojxuodky"><a href="/guide/architecture/" class="astro-ojxuodky"><span class="astro-ojxuodky">Architecture</span></a></li><li class="astro-ojxuodky"><a href="/guide/embedding/" class="astro-ojxuodky"><span class="astro-ojxuodky">Embedding the core</span></a></li><li class="astro-ojxuodky"><a href="/guide/operating/" class="astro-ojxuodky"><span class="astro-ojxuodky">Operating a lake</span></a></li></ul></details></li><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Design (RFCs)</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/rfcs/0001-repository-structure-and-conventions/" class="astro-ojxuodky"><span class="astro-ojxuodky">0001: Repository structure and conventions</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0002-slatedb-key-encoding/" class="astro-ojxuodky"><span class="astro-ojxuodky">0002: SlateDB key encoding for DuckLake catalog state</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0003-public-api-shape/" aria-current="page" class="astro-ojxuodky"><span class="astro-ojxuodky">0003: Public API shape of the moraine core</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0004-commit-protocol/" class="astro-ojxuodky"><span class="astro-ojxuodky">0004: Commit and transaction protocol</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0005-data-inlining/" class="astro-ojxuodky"><span class="astro-ojxuodky">0005: Data inlining on SlateDB</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0006-extension-surface/" class="astro-ojxuodky"><span class="astro-ojxuodky">0006: Extension surface</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0007-snapshot-expiry-and-gc/" class="astro-ojxuodky"><span class="astro-ojxuodky">0007: Snapshot expiry and garbage collection</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0008-compaction/" class="astro-ojxuodky"><span class="astro-ojxuodky">0008: Maintenance operations — compaction and delete-file consolidation</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0009-reader-consistency-and-caching/" class="astro-ojxuodky"><span class="astro-ojxuodky">0009: Reader consistency and snapshot caching</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0010-async-sync-bridge/" class="astro-ojxuodky"><span class="astro-ojxuodky">0010: Async↔sync bridge: mechanism, runtime, threading, and cancellation</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0011-crash-recovery/" class="astro-ojxuodky"><span class="astro-ojxuodky">0011: Crash recovery</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0012-schema-evolution-and-versioning/" class="astro-ojxuodky"><span class="astro-ojxuodky">0012: Schema evolution and versioning</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0013-partitioning-sorting-and-pruning/" class="astro-ojxuodky"><span class="astro-ojxuodky">0013: Partitioning, sorting, and pruning</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0014-encryption/" class="astro-ojxuodky"><span class="astro-ojxuodky">0014: Catalog and data encryption</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0015-format-migration/" class="astro-ojxuodky"><span class="astro-ojxuodky">0015: On-disk format migration</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0016-equality-indexes/" class="astro-ojxuodky"><span class="astro-ojxuodky">0016: Equality and range indexes</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0017-read-write-and-read-only-attach/" class="astro-ojxuodky"><span class="astro-ojxuodky">0017: Read-write and read-only attach paths</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0018-column-and-name-mapping/" class="astro-ojxuodky"><span class="astro-ojxuodky">0018: Column and name mapping for externally written Parquet</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0019-macros/" class="astro-ojxuodky"><span class="astro-ojxuodky">0019: Scalar and table macros</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0020-change-data-feed/" class="astro-ojxuodky"><span class="astro-ojxuodky">0020: Change data feed</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0021-maintenance-model/" class="astro-ojxuodky"><span class="astro-ojxuodky">0021: Maintenance orchestration</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0022-commit-log-and-leader-role/" class="astro-ojxuodky"><span class="astro-ojxuodky">0022: The commit log and the leader role</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="flex items-center justify-end gap-2 py-4 print:hidden"><a href="https://github.com/morainedb/moraine" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">GitHub</span><svg aria-hidden="true" class=" astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><div class="size-8 overflow-visible"><astro-theme-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><div class="astro-theme-toggle-icon-light"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 19a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1m-4.95-2.05a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0m11.314 0l1.414 1.414a1 1 0 0 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 1.414-1.414m-5.049-9.836a5 5 0 1 1-2.532 9.674a5 5 0 0 1 2.532-9.674M4 11a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zm18 0a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM5.636 4.222L7.05 5.636A1 1 0 0 1 5.636 7.05L4.222 5.636a1 1 0 0 1 1.414-1.414m14.142 0a1 1 0 0 1 0 1.414L18.364 7.05a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0M12 1a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1" /></svg></div><div class="astro-theme-toggle-icon-dark"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 1.992a10 10 0 1 0 9.236 13.838c.341-.82-.476-1.644-1.298-1.31a6.5 6.5 0 0 1-6.864-10.787l.077-.08c.551-.63.113-1.653-.758-1.653h-.266l-.068-.006z" /></svg></div></astro-theme-toggle></div></div></div></div></div></nav><div class="main-frame astro-3iko6sul"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-nrnkqug2"><aside class="right-sidebar-container print:hidden astro-nrnkqug2"><div class="right-sidebar astro-nrnkqug2"><div class="lg:sl-hidden astro-q5mffni3"><div class="[&amp;_nav]:backdrop-blur [&amp;_summary]:border-b-(--sl-color-hairline)"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-5ulgm6bh"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-5ulgm6bh"><details id="starlight__mobile-toc" class="astro-5ulgm6bh"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-5ulgm6bh"><span class="toggle sl-flex astro-5ulgm6bh">On this page<svg aria-hidden="true" class="caret astro-5ulgm6bh astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-5ulgm6bh"></span></summary><div class="dropdown astro-5ulgm6bh"><ul class="isMobile astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#summary" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Summary</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#goals" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Goals</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#background" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Background</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#design" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Design</span></a><ul class="isMobile astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#types-and-layering" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Types and layering</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#front-door" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Front door</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#reads" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Reads</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#observability" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Observability</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#writes-closure-with-retry" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Writes: closure-with-retry</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#error-taxonomy" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Error taxonomy</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#domain-types" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Domain types</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#operation-enumeration" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Operation enumeration</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#testing-obligations" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Testing obligations</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#alternatives-considered" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Alternatives considered</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.BcSo_yiZ.js"></script></div></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-q5mffni3"><div class="sl-container astro-q5mffni3"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#summary" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Summary</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#goals" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Goals</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#background" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Background</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#design" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Design</span></a><ul class="astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#types-and-layering" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Types and layering</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#front-door" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Front door</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#reads" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Reads</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#observability" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Observability</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#writes-closure-with-retry" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Writes: closure-with-retry</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#error-taxonomy" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Error taxonomy</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#domain-types" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Domain types</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#operation-enumeration" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Operation enumeration</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#testing-obligations" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Testing obligations</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#alternatives-considered" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Alternatives considered</span></a></li></ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.Csloo1VZ.js"></script></div></div></div></aside><div class="main-pane astro-nrnkqug2"><main data-pagefind-body class="astro-vdxcvpsm" lang="en" dir="ltr"><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><h1 id="_top" class="astro-2sm4b3ln">RFC 0003: Public API shape of the moraine core</h1></div></div><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><div class="sl-markdown-content"><ul>
+<li><strong>Date:</strong> 2026-07-09</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="summary">Summary</h2><a class="sl-anchor-link" href="#summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Summary”</span></a></div>
+<p>Defines the public API of the <code dir="auto">moraine</code> core crate: how a host opens a
+catalog, reads it, and commits changes to it. This is the third
+expensive-to-reverse decision the project requires an RFC for (key layout —
+RFC 0002/0005; commit protocol — RFC 0004; public API shape — here). The
+surface is four types — <code dir="auto">Catalog</code> (the read-write handle), <code dir="auto">ReadOnlyCatalog</code>
+(the read surface a read-only attach gets, which <code dir="auto">Catalog</code> derefs to),
+<code dir="auto">CatalogSnapshot</code> (an immutable materialized read view), and <code dir="auto">Transaction</code>
+(the mutation handle passed to a commit closure) — over an error taxonomy with one variant per failure domain.
+Writes go through a closure-with-retry model so the RFC 0002 single-<code dir="auto">WriteBatch</code>
+atomicity invariant and conflict-retry loop live in the core, not duplicated in
+every host. SlateDB never appears in a public signature: the substrate is an
+implementation detail behind <code dir="auto">object_store</code> plus moraine’s own options type.
+The operation set is enumerated in full, grounded in DuckLake v1.0 catalog
+semantics.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="goals">Goals</h2><a class="sl-anchor-link" href="#goals"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Goals”</span></a></div>
+<ul>
+<li>One read API, usable both standalone (<code dir="auto">catalog.snapshot()</code>) and inside a
+commit (the <code dir="auto">Transaction</code> handed to the closure exposes the same accessors). A host
+learns the accessors once.</li>
+<li>The atomicity invariant (RFC 0002: one catalog commit is exactly one SlateDB
+<code dir="auto">WriteBatch</code>) and the conflict-retry loop are the core’s responsibility.</li>
+<li>SlateDB is an implementation detail. No <code dir="auto">slatedb::</code> type crosses the public
+boundary, so the substrate’s version churn stays out of moraine’s semver
+surface</li>
+<li>The <code dir="auto">prost</code>-generated value types (RFC 0002) stay private to <code dir="auto">store</code>.</li>
+<li>Every DuckLake v1.0 catalog mutation the entities in RFC 0002 imply has a
+named, DuckLake-shaped operation on <code dir="auto">Transaction</code>. The version and <code dir="auto">current</code>↔<code dir="auto">history</code>
+bookkeeping is internal.</li>
+<li>Errors are matchable per failure domain, so the DuckDB bridge maps each to a
+DuckDB error code without parsing strings.</li>
+</ul>
+<p>Non-goals:</p>
+<ul>
+<li>The commit protocol itself — conflict detection, snapshot allocation, group
+commit, the CAS/fencing discipline on <code dir="auto">sys/head</code>. That is RFC 0004.</li>
+<li>The DuckDB extension entry points (RFC 0006) and the sync↔async bridge
+(RFC 0010). This RFC defines the async core surface that bridge wraps.</li>
+<li>Snapshot expiry / <code dir="auto">history</code> garbage collection — RFC 0007. No public verb is
+reserved for it here.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="background">Background</h2><a class="sl-anchor-link" href="#background"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Background”</span></a></div>
+<p>Moraine’s core is a plain Rust library any tokio host can embed (README).
+Its first and defining consumer is <code dir="auto">crates/moraine-duckdb</code>, a cdylib that is
+thin by policy: if logic accumulates there it belongs in the core. That
+charter is only honorable if the core surface is drawn so the bridge has
+nothing left to do but translate sync↔async and map errors. In particular,
+the bridge must not host a conflict-retry loop or assemble writes — those are
+core concerns.</p>
+<p>SlateDB is async (tokio). The core surface is therefore <code dir="auto">async</code>; the core
+spawns no runtime and no threads of its own — the caller drives it, and the
+DuckDB bridge owns the sync↔async translation. It does spawn <em>tasks</em> onto the
+runtime already driving it, which is how a commit’s durable write survives its
+caller being cancelled (RFC 0010); that needs no runtime of its own.</p>
+<p>RFC 0002 establishes the read model this API exposes: a client builds an
+in-memory catalog by scanning the <code dir="auto">current</code> subspace at attach; the live catalog
+is small by design, name→id resolution happens against that in-memory
+snapshot, and the hot path never scans history. This RFC turns that model into
+types.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="design">Design</h2><a class="sl-anchor-link" href="#design"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Design”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="types-and-layering">Types and layering</h3><a class="sl-anchor-link" href="#types-and-layering"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Types and layering”</span></a></div>
+<p>Three public types map onto the existing private modules (<code dir="auto">catalog</code>, <code dir="auto">store</code>,
+<code dir="auto">transaction</code>). <code dir="auto">store</code> stays entirely private; <code dir="auto">lib.rs</code> re-exports the public types
+alongside <code dir="auto">Error</code>/<code dir="auto">Result</code>.</p>
+<ul>
+<li>
+<p><strong><code dir="auto">ReadOnlyCatalog</code></strong> — the read surface, and the whole of it. Every read
+is defined here once; it carries no mutator at all. Lives in <code dir="auto">catalog</code>.</p>
+</li>
+<li>
+<p><strong><code dir="auto">Catalog</code></strong> — the read-write handle. Owns the store handle (private
+field), constructed via <code dir="auto">open</code>, cheap to clone (an <code dir="auto">Arc</code> internally). It
+adds the mutators and reaches the reads through
+<code dir="auto">Deref&lt;Target = ReadOnlyCatalog&gt;</code>, so a writer serves the whole read
+surface without restating a method of it.</p>
+<p><strong>The mode is in the type.</strong> <code dir="auto">Catalog::open_read_only</code> returns a
+<code dir="auto">ReadOnlyCatalog</code>, so <code dir="auto">commit</code> on a read-only handle is a compile error
+rather than a runtime <code dir="auto">Error::Constraint</code> — a <code dir="auto">compile_fail</code> doctest on
+<code dir="auto">ReadOnlyCatalog</code> pins that, and the tests that used to assert the runtime
+refusal are gone with it. The runtime check survives in exactly one place,
+the extension shim, because a C ABI has one handle type and no types of
+its own to refuse with; that is the boundary where a type argument ends.</p>
+</li>
+<li>
+<p><strong><code dir="auto">CatalogSnapshot</code></strong> — an immutable, materialized read view built by
+scanning <code dir="auto">current</code> (or <code dir="auto">current</code> + the relevant <code dir="auto">history</code> ranges, for time travel) per
+RFC 0002. All accessors are in-memory; after construction it never touches
+the store. Lives in <code dir="auto">catalog</code>.</p>
+</li>
+<li>
+<p><strong><code dir="auto">Transaction</code></strong> — the mutation handle passed to the commit closure. It <code dir="auto">Deref</code>s to
+<code dir="auto">CatalogSnapshot</code>, so every read accessor is available inside a commit for
+name→id resolution and validation, and adds the mutators. The commit
+machinery (retry, <code dir="auto">WriteBatch</code> assembly, <code dir="auto">current</code>↔<code dir="auto">history</code> bookkeeping) lives in
+<code dir="auto">transaction</code>; <code dir="auto">Transaction</code> is its public face.</p>
+</li>
+</ul>
+<p>Public catalog instants use <code dir="auto">Timestamp</code>, a signed microsecond count from the
+Unix epoch. <code dir="auto">SnapshotInfo::time</code>, <code dir="auto">ScheduledDeletion::schedule_start</code>, and
+maintenance status pass start times carry that type so pre-epoch values and
+the full persisted <code dir="auto">i64</code> range cross the core API unchanged. Storage records
+and host ABIs keep the raw microsecond count and convert only at the boundary.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="front-door">Front door</h3><a class="sl-anchor-link" href="#front-door"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Front door”</span></a></div>
+<div data-nova-code-container="" class="not-content relative overflow-hidden [&amp;_pre]:relative [&amp;_nova-code-copy-button]:opacity-0 [&amp;:hover_nova-code-copy-button]:opacity-100 border border-solid border-(--sl-color-gray-5) rounded-md"><pre class="astro-code astro-code-themes one-light github-dark-dimmed" style="--shiki-light:#383A42;--shiki-dark:#adbac7;--shiki-light-bg:#FAFAFA;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="rust" dir="ltr"><code dir="auto"><span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">use</span><span style="--shiki-light:#383A42;--shiki-dark:#F69D50"> std</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">::</span><span style="--shiki-light:#383A42;--shiki-dark:#F69D50">sync</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">::</span><span style="--shiki-light:#0184BC;--shiki-dark:#F69D50">Arc</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">use</span><span style="--shiki-light:#383A42;--shiki-dark:#F69D50"> object_store</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">::</span><span style="--shiki-light:#0184BC;--shiki-dark:#F69D50">ObjectStore</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">let</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7"> object_store</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">:</span><span style="--shiki-light:#0184BC;--shiki-dark:#F69D50"> Arc</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">&lt;</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">dyn</span><span style="--shiki-light:#0184BC;--shiki-dark:#F69D50"> ObjectStore</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">&gt; </span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">=</span><span style="--shiki-light:#A0A1A7;--shiki-light-font-style:italic;--shiki-dark:#768390;--shiki-dark-font-style:inherit"> /* bucket + credentials */</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">let</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7"> catalog</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#0184BC;--shiki-dark:#F69D50"> Catalog</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">::</span><span style="--shiki-light:#4078F2;--shiki-dark:#DCBDFB">open</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7">object_store</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#383A42;--shiki-dark:#F69D50">CatalogOptions</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">::</span><span style="--shiki-light:#4078F2;--shiki-dark:#DCBDFB">default</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">())</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">.</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">await</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">?</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">;</span></span></code></pre><nova-code-copy-button type="button" data-code="use std::sync::Arc;
+use object_store::ObjectStore;
+
+let object_store: Arc<dyn ObjectStore> = /* bucket + credentials */;
+let catalog = Catalog::open(object_store, CatalogOptions::default()).await?;" title="Copy code" aria-label="Copy code" class="absolute top-2 right-2 m-0 size-6 rounded border border-solid border-(--sl-color-gray-5) bg-gray-100/30 p-1 text-black backdrop-blur-sm transition hover:bg-gray-200/50 active:scale-90 dark:bg-gray-600/30 dark:text-white hover:dark:bg-gray-500/50"></nova-code-copy-button></div>
+<p><code dir="auto">object_store</code> is the only substrate primitive in the signature — it is the
+deployment unit the README already sells (“a deployment is a bucket and
+credentials”). <code dir="auto">CatalogOptions</code> surfaces deliberate SlateDB/WAL tuning (e.g.
+WAL bucket, flush cadence) through moraine’s own type, so no <code dir="auto">slatedb::</code> name
+appears publicly and options can be documented and evolved on moraine’s terms.
+It also carries the store’s path within the bucket, defaulting to the bucket
+root — the default deployment stays “a bucket and credentials”, and a prefix
+is opt-in for hosts sharing a bucket.</p>
+<p><code dir="auto">Catalog::open_read_only</code> is the reader’s door onto the same store, and takes
+the same options. One of them selects <em>which</em> kind of reader:
+<code dir="auto">CatalogOptions::checkpoint</code> pins the open to an existing checkpoint id
+instead of following the latest state, which is the difference between a
+reader that writes the manifest and one that writes nothing at all (RFC
+0004, Topology). Checkpoints are minted through <code dir="auto">Catalog::create_checkpoint</code>
+on a writer and released through <code dir="auto">Catalog::delete_checkpoint</code>, which — like
+<code dir="auto">Catalog::migrate</code> — is free-standing because it touches only the manifest
+and so runs against a live catalog without fencing it. The id crosses the
+API as a <code dir="auto">String</code>, matching how every other identifier of SlateDB’s that
+moraine hands out is spelled, so no <code dir="auto">slatedb::</code> or <code dir="auto">uuid::</code> name appears
+publicly.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="reads">Reads</h3><a class="sl-anchor-link" href="#reads"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Reads”</span></a></div>
+<div data-nova-code-container="" class="not-content relative overflow-hidden [&amp;_pre]:relative [&amp;_nova-code-copy-button]:opacity-0 [&amp;:hover_nova-code-copy-button]:opacity-100 border border-solid border-(--sl-color-gray-5) rounded-md"><pre class="astro-code astro-code-themes one-light github-dark-dimmed" style="--shiki-light:#383A42;--shiki-dark:#adbac7;--shiki-light-bg:#FAFAFA;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="rust" dir="ltr"><code dir="auto"><span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">let</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7"> snaphot</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7"> catalog</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">.</span><span style="--shiki-light:#4078F2;--shiki-dark:#DCBDFB">snapshot</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">()</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">.</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">await</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">?</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">;                 </span><span style="--shiki-light:#A0A1A7;--shiki-light-font-style:italic;--shiki-dark:#768390;--shiki-dark-font-style:inherit">// current catalog</span></span>
+<span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">let</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7"> past</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7"> catalog</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">.</span><span style="--shiki-light:#4078F2;--shiki-dark:#DCBDFB">snapshot_at</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7">snapshot_id</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">)</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">.</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">await</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">?</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">;   </span><span style="--shiki-light:#A0A1A7;--shiki-light-font-style:italic;--shiki-dark:#768390;--shiki-dark-font-style:inherit">// time travel</span></span></code></pre><nova-code-copy-button type="button" data-code="let snaphot = catalog.snapshot().await?;                 // current catalog
+let past = catalog.snapshot_at(snapshot_id).await?;   // time travel" title="Copy code" aria-label="Copy code" class="absolute top-2 right-2 m-0 size-6 rounded border border-solid border-(--sl-color-gray-5) bg-gray-100/30 p-1 text-black backdrop-blur-sm transition hover:bg-gray-200/50 active:scale-90 dark:bg-gray-600/30 dark:text-white hover:dark:bg-gray-500/50"></nova-code-copy-button></div>
+<p>Both return <code dir="auto">Arc&lt;CatalogSnapshot&gt;</code>. <code dir="auto">snapshot()</code> serves the handle’s cached
+view when it already stands at head (RFC 0009) and scans <code dir="auto">current</code> when it
+does not; <code dir="auto">snapshot_at(S)</code> always scans, additionally reading the relevant
+<code dir="auto">history</code> ranges and filtering by begin/end per RFC 0002.</p>
+<p>The <code dir="auto">Arc</code> is what makes a warm read genuinely cheap. The view is immutable
+and often large, so handing back a shared pointer lets the handle and every
+caller name the same materialization; returning it by value would copy the
+whole catalog on each read and give back most of what the cache saves.
+Callers who want an owned copy can still clone through the <code dir="auto">Arc</code>.</p>
+<p>Accessors (all in-memory, name→id resolved internally):</p>
+<table>
+<thead>
+<tr>
+<th>Accessor</th>
+<th>Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code dir="auto">schemas()</code></td>
+<td>all live schemas</td>
+</tr>
+<tr>
+<td><code dir="auto">schema_by_name(name)</code> / <code dir="auto">schema_by_id(id)</code></td>
+<td>one schema</td>
+</tr>
+<tr>
+<td><code dir="auto">tables_in(schema)</code></td>
+<td>tables of a schema</td>
+</tr>
+<tr>
+<td><code dir="auto">table_by_name(schema, name)</code> / <code dir="auto">table_by_id(id)</code></td>
+<td>one table</td>
+</tr>
+<tr>
+<td><code dir="auto">views_in(schema)</code> / <code dir="auto">view_by_name</code> / <code dir="auto">view_by_id</code></td>
+<td>views</td>
+</tr>
+<tr>
+<td><code dir="auto">columns_of(table)</code></td>
+<td>ordered columns (tags embedded)</td>
+</tr>
+<tr>
+<td><code dir="auto">partitioning_of(table)</code></td>
+<td>partition spec, if any</td>
+</tr>
+<tr>
+<td><code dir="auto">sorting_of(table)</code></td>
+<td>sort spec, if any</td>
+</tr>
+<tr>
+<td><code dir="auto">data_files_of(table)</code></td>
+<td>live data files (incl. inlined chunks, RFC 0005)</td>
+</tr>
+<tr>
+<td><code dir="auto">delete_files_of(table)</code></td>
+<td>live delete files (incl. inlined deletes)</td>
+</tr>
+<tr>
+<td><code dir="auto">table_stats(table)</code> / <code dir="auto">column_stats(table, column)</code></td>
+<td>statistics</td>
+</tr>
+<tr>
+<td><code dir="auto">option(scope, key)</code></td>
+<td>resolved option value</td>
+</tr>
+<tr>
+<td><code dir="auto">current_snapshot()</code></td>
+<td>snapshot id + metadata of this view</td>
+</tr>
+</tbody>
+</table>
+<p>Reads issue no store I/O after the snapshot is built — a <code dir="auto">CatalogSnapshot</code> is a
+value, not a cursor.</p>
+<p>Inlined rows (RFC 0005) are the one read the snapshot does <strong>not</strong> serve.
+<code dir="auto">recent_rows(table)</code>, <code dir="auto">recent_rows_at(table, snapshot)</code> and
+<code dir="auto">recent_row(table, row_id)</code> are <code dir="auto">Catalog</code> methods, each one contiguous range
+scan of the <code dir="auto">inline</code> subspace — at head, or, for <code dir="auto">recent_rows_at</code>, at the
+snapshot named. That id resolves through the rule <code dir="auto">snapshot_at</code> uses, so an
+unminted id and an expired one are refused the same way whichever read is
+asking. They are row
+data, not catalog metadata: an inlined chunk carries the table’s actual values
+as an Arrow IPC body, so materializing them into every <code dir="auto">CatalogSnapshot</code> would
+put unbounded row bytes behind an accessor the whole catalog shares and break
+the “the live catalog is small by design” premise the materialized view rests
+on. Rows of one chunk share one body and rows of one schema version share one
+schema, so each set of bytes is read and returned once however many rows
+reference it.</p>
+<p><code dir="auto">warm_tables(&amp;[table])</code> is the one read that returns nothing: it pulls the
+<code dir="auto">index</code> and <code dir="auto">inline</code> ranges a lookup on those tables probes into the block
+cache (RFC 0009), for a host that knows which tables a query is about to
+touch. The same pass runs on its own, in the background, the first time a
+handle serves a lookup or inline read for a table.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="observability">Observability</h3><a class="sl-anchor-link" href="#observability"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Observability”</span></a></div>
+<p>Two read-side counters sit beside the reads, both plain <code dir="auto">Copy</code> structs
+marked <code dir="auto">#[non_exhaustive]</code> so fields can be added without a break:</p>
+<ul>
+<li><code dir="auto">cache_status()</code> (free function): the process-shared caches’ capacity,
+occupancy, and evictions. Its <code dir="auto">row_summaries: RowSummaryOccupancy</code>
+splits the auxiliary allowance’s file row-id summaries out from the
+Parquet footers they share it with — <code dir="auto">range</code>, <code dir="auto">roaring</code>, and <code dir="auto">sorted</code>
+counts of resident summaries by shape, and their <code dir="auto">bytes</code> together, the
+summary share of <code dir="auto">auxiliary_metadata_occupancy_bytes</code>.</li>
+<li><code dir="auto">ReadOnlyCatalog::object_store_tally()</code>: physical requests this handle
+has issued since it attached. <code dir="auto">main_*</code> and <code dir="auto">wal_*</code> count what SlateDB
+sent for the catalog store; <code dir="auto">data_gets</code> and <code dir="auto">data_bytes</code> count the byte
+ranges the handle read from the data store — footers, row-id columns,
+delete files, and scoped reads under <code dir="auto">locate_row_ids</code>,
+<code dir="auto">warm_row_summaries</code>, backfill, index build, and commit-time index
+maintenance. A footer or summary served from cache adds nothing.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="writes-closure-with-retry">Writes: closure-with-retry</h3><a class="sl-anchor-link" href="#writes-closure-with-retry"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Writes: closure-with-retry”</span></a></div>
+<div data-nova-code-container="" class="not-content relative overflow-hidden [&amp;_pre]:relative [&amp;_nova-code-copy-button]:opacity-0 [&amp;:hover_nova-code-copy-button]:opacity-100 border border-solid border-(--sl-color-gray-5) rounded-md"><pre class="astro-code astro-code-themes one-light github-dark-dimmed" style="--shiki-light:#383A42;--shiki-dark:#adbac7;--shiki-light-bg:#FAFAFA;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="rust" dir="ltr"><code dir="auto"><span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">let</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7"> new_snapshot</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">:</span><span style="--shiki-light:#0184BC;--shiki-dark:#F69D50"> SnapshotId</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7"> catalog</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">.</span><span style="--shiki-light:#4078F2;--shiki-dark:#DCBDFB">commit</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">|</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7">tx</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">|</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7"> {</span></span>
+<span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">    let</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7"> s</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7"> tx</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">.</span><span style="--shiki-light:#4078F2;--shiki-dark:#DCBDFB">create_schema</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#50A14F;--shiki-dark:#96D0FF">"sales"</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">)</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">?</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">    let</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7"> t</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7"> tx</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">.</span><span style="--shiki-light:#4078F2;--shiki-dark:#DCBDFB">create_table</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7">s</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#50A14F;--shiki-dark:#96D0FF">"orders"</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7">columns</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">)</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">?</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7">    tx</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">.</span><span style="--shiki-light:#4078F2;--shiki-dark:#DCBDFB">register_data_file</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7">t</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7">data_file</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">)</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">?</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"><span style="--shiki-light:#C18401;--shiki-dark:#F69D50">    Ok</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">(())</span></span>
+<span class="line"><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">})</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">.</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">await</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">?</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">;</span></span></code></pre><nova-code-copy-button type="button" data-code="let new_snapshot: SnapshotId = catalog.commit(|tx| {
+    let s = tx.create_schema(&quot;sales&quot;)?;
+    let t = tx.create_table(s, &quot;orders&quot;, columns)?;
+    tx.register_data_file(t, data_file)?;
+    Ok(())
+}).await?;" title="Copy code" aria-label="Copy code" class="absolute top-2 right-2 m-0 size-6 rounded border border-solid border-(--sl-color-gray-5) bg-gray-100/30 p-1 text-black backdrop-blur-sm transition hover:bg-gray-200/50 active:scale-90 dark:bg-gray-600/30 dark:text-white hover:dark:bg-gray-500/50"></nova-code-copy-button></div>
+<p><code dir="auto">commit</code> reads a fresh <code dir="auto">CatalogSnapshot</code>, constructs a <code dir="auto">Tx</code> over it, runs the
+closure to accumulate mutations, assembles exactly one <code dir="auto">WriteBatch</code> (RFC 0002
+atomicity invariant), and commits it under the protocol of RFC 0004. On a
+transient write-write race it retries the whole cycle — including re-reading
+the snapshot and re-running the closure — up to a bounded budget. On a logical
+error it aborts immediately.</p>
+<p>Because the closure may run more than once, it must be pure and idempotent:
+its only effects are the <code dir="auto">Transaction</code> mutators it calls and the value it returns.
+This is documented on <code dir="auto">commit</code> and is the single most important contract of
+the API. The re-run is not merely permitted, it is load-bearing: RFC 0004’s
+benign-race retry re-runs the closure against the fresh snapshot precisely
+so that logical premises (name uniqueness, entity existence) are
+re-validated against the state that won the race — a mechanical re-stage
+without the closure would commit duplicate names. Two Rust-shape
+consequences follow and are part of the contract, not incidental: the
+closure is <strong><code dir="auto">Fn</code>, not <code dir="auto">FnOnce</code></strong> (it cannot consume captured values — move
+clones in, or stage owned data on the <code dir="auto">Transaction</code>), and it is <strong>synchronous</strong> (no
+I/O of its own; name→id resolution and staging run against the in-memory
+snapshot, and anything slow — writing Parquet, say — happens <em>before</em>
+<code dir="auto">commit</code>, per the RFC 0005 data-before-metadata order). Snapshot allocation
+is implicit — a successful <code dir="auto">commit</code> produces one new snapshot; there is no
+explicit <code dir="auto">begin_snapshot</code> verb.</p>
+<p><code dir="auto">commit_group</code> is the same surface for several closures at once:</p>
+<div data-nova-code-container="" class="not-content relative overflow-hidden [&amp;_pre]:relative [&amp;_nova-code-copy-button]:opacity-0 [&amp;:hover_nova-code-copy-button]:opacity-100 border border-solid border-(--sl-color-gray-5) rounded-md"><pre class="astro-code astro-code-themes one-light github-dark-dimmed" style="--shiki-light:#383A42;--shiki-dark:#adbac7;--shiki-light-bg:#FAFAFA;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="rust" dir="ltr"><code dir="auto"><span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">let</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7"> ids</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">:</span><span style="--shiki-light:#0184BC;--shiki-dark:#F69D50"> Vec</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">&lt;</span><span style="--shiki-light:#0184BC;--shiki-dark:#F69D50">SnapshotId</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">&gt; </span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">=</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7"> catalog</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">.</span><span style="--shiki-light:#4078F2;--shiki-dark:#DCBDFB">commit_group</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">&amp;</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">[</span></span>
+<span class="line"><span style="--shiki-light:#383A42;--shiki-dark:#F47067">    &amp;|</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7">tx</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">:</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067"> &amp;</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">mut</span><span style="--shiki-light:#0184BC;--shiki-dark:#F69D50"> Transaction</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">|</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7"> tx</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">.</span><span style="--shiki-light:#4078F2;--shiki-dark:#DCBDFB">create_schema</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#50A14F;--shiki-dark:#96D0FF">"sales"</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">)</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">.</span><span style="--shiki-light:#4078F2;--shiki-dark:#DCBDFB">map</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">|</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7">_</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">|</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7"> ()),</span></span>
+<span class="line"><span style="--shiki-light:#383A42;--shiki-dark:#F47067">    &amp;|</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7">tx</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">:</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067"> &amp;</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">mut</span><span style="--shiki-light:#0184BC;--shiki-dark:#F69D50"> Transaction</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">|</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7"> tx</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">.</span><span style="--shiki-light:#4078F2;--shiki-dark:#DCBDFB">create_schema</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#50A14F;--shiki-dark:#96D0FF">"ops"</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">)</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">.</span><span style="--shiki-light:#4078F2;--shiki-dark:#DCBDFB">map</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">|</span><span style="--shiki-light:#E45649;--shiki-dark:#ADBAC7">_</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">|</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7"> ()),</span></span>
+<span class="line"><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">])</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">.</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">await</span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">?</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">;</span></span></code></pre><nova-code-copy-button type="button" data-code="let ids: Vec<SnapshotId> = catalog.commit_group(&amp;[
+    &amp;|tx: &amp;mut Transaction| tx.create_schema(&quot;sales&quot;).map(|_| ()),
+    &amp;|tx: &amp;mut Transaction| tx.create_schema(&quot;ops&quot;).map(|_| ()),
+]).await?;" title="Copy code" aria-label="Copy code" class="absolute top-2 right-2 m-0 size-6 rounded border border-solid border-(--sl-color-gray-5) bg-gray-100/30 p-1 text-black backdrop-blur-sm transition hover:bg-gray-200/50 active:scale-90 dark:bg-gray-600/30 dark:text-white hover:dark:bg-gray-500/50"></nova-code-copy-button></div>
+<p>Members are <code dir="auto">CommitMember</code>: a trait object, so one call can pass closures
+that do different things, and <code dir="auto">Sync</code>, so a grouped commit is as spawnable
+as a lone one. Every contract above holds per member, purity included — a
+lost race re-runs the whole group. One snapshot id comes back per member,
+in member order.</p>
+<p>This is the explicit half of RFC 0004’s group commit. The implicit half
+needs no API, since concurrent <code dir="auto">commit</code> callers are batched without asking;
+either way the batching is invisible in what is returned here.</p>
+<p>This closure/verb surface is the <strong>embedding API</strong> — one of RFC 0004’s two
+commit front doors. The DuckDB extension (RFC 0006) does not call it: that
+path commits DuckLake-authored row mutations through RFC 0004’s staged-row
+protocol, which never retries internally. The retry contract described here
+is a verb-path property.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="error-taxonomy">Error taxonomy</h3><a class="sl-anchor-link" href="#error-taxonomy"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Error taxonomy”</span></a></div>
+<p><code dir="auto">Error</code> is <code dir="auto">#[non_exhaustive]</code>, one variant per failure domain:</p>
+<table>
+<thead>
+<tr>
+<th>Variant</th>
+<th>Meaning</th>
+<th>Retried?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code dir="auto">CommitConflict</code></td>
+<td>write-write race, retry budget exhausted</td>
+<td>(internal retries preceded it)</td>
+</tr>
+<tr>
+<td><code dir="auto">NotFound</code></td>
+<td>operation references a missing entity</td>
+<td>no — abort</td>
+</tr>
+<tr>
+<td><code dir="auto">AlreadyExists</code> / <code dir="auto">Constraint</code></td>
+<td>logical conflict (duplicate name, constraint violation)</td>
+<td>no — abort</td>
+</tr>
+<tr>
+<td><code dir="auto">Store(#[source])</code></td>
+<td>underlying object-store / SlateDB I/O failure</td>
+<td>no</td>
+</tr>
+<tr>
+<td><code dir="auto">Corruption</code></td>
+<td>value decode failure or unknown <code dir="auto">sys/format</code> version (RFC 0002)</td>
+<td>no</td>
+</tr>
+<tr>
+<td><code dir="auto">Unsupported</code></td>
+<td>a DuckLake feature moraine does not yet implement (e.g. VARIANT inlining, RFC 0005)</td>
+<td>no</td>
+</tr>
+<tr>
+<td><code dir="auto">SnapshotExpired</code></td>
+<td>a held/requested snapshot fell below the RFC 0007 retention horizon (RFC 0009) — re-resolve from head</td>
+<td>no</td>
+</tr>
+<tr>
+<td><code dir="auto">Interrupted</code></td>
+<td>operation cancelled or interrupted before it could report a result</td>
+<td>no</td>
+</tr>
+<tr>
+<td><code dir="auto">CommitOutcomeUnknown</code></td>
+<td>a submitted commit was not acknowledged; retain external files and reconcile the operation before resubmitting (RFC 0010)</td>
+<td>no</td>
+</tr>
+<tr>
+<td><code dir="auto">Migration</code></td>
+<td>store requires, is undergoing, or is newer than a structural format the binary supports (RFC 0015)</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<p>The conflict split follows from closure-with-retry: transient races
+(another writer advanced <code dir="auto">sys/head</code>) are retried internally and only surface
+as <code dir="auto">CommitConflict</code> when the budget is exhausted; logical conflicts
+(<code dir="auto">AlreadyExists</code>, <code dir="auto">NotFound</code>) surface immediately because re-running the
+closure against fresher state cannot resolve them. Source errors are preserved
+via <code dir="auto">thiserror</code> <code dir="auto">#[source]</code>, so the DuckDB bridge maps each variant to a
+DuckDB error code without inspecting message text.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="domain-types">Domain types</h3><a class="sl-anchor-link" href="#domain-types"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Domain types”</span></a></div>
+<p>The public surface is hand-written domain types, decoupled from the
+<code dir="auto">prost</code>-generated messages that <code dir="auto">store</code> uses on disk:</p>
+<ul>
+<li><strong>Newtype ids</strong> (wrapping the DuckLake-allocated <code dir="auto">u64</code>s of RFC 0002):
+<code dir="auto">SchemaId</code>, <code dir="auto">TableId</code>, <code dir="auto">ViewId</code>, <code dir="auto">MacroId</code>, <code dir="auto">MappingId</code>, <code dir="auto">ColumnId</code>,
+<code dir="auto">DataFileId</code>, <code dir="auto">DeleteFileId</code>, <code dir="auto">PartitionId</code>, <code dir="auto">SortId</code>, <code dir="auto">SnapshotId</code>.</li>
+<li><strong>Value structs:</strong> <code dir="auto">TableInfo</code>, <code dir="auto">ViewInfo</code>, <code dir="auto">MacroInfo</code>, <code dir="auto">MappingInfo</code>,
+<code dir="auto">ColumnDef</code>, <code dir="auto">DataFile</code>, <code dir="auto">DeleteFile</code>, <code dir="auto">PartitionSpec</code>, <code dir="auto">PartitionColumnDef</code>,
+<code dir="auto">SortSpec</code>, <code dir="auto">SortKeyDef</code>, <code dir="auto">ColumnStats</code>, <code dir="auto">TableStats</code>, <code dir="auto">OptionScope</code>,
+<code dir="auto">TagTarget</code>, <code dir="auto">InlineChunk</code>, <code dir="auto">FlushedDataFile</code>, <code dir="auto">RecentRow</code>.</li>
+<li><strong><code dir="auto">DataStore</code>:</strong> the <code dir="auto">DATA_PATH</code> object store every data-file read takes
+(<code dir="auto">locate_row_ids</code>, <code dir="auto">warm_row_summaries</code>, backfill, index build, staged
+transactions), wrapping the <code dir="auto">Arc&lt;dyn ObjectStore&gt;</code> with the identity the
+footer and row-summary caches key on. Built once per store and cloned:
+<code dir="auto">DataStore::new</code> assigns an isolated random identity, regardless of the
+store’s <code dir="auto">Display</code>. <code dir="auto">DataStore::with_cache_identity</code> accepts a caller-supplied
+<code dir="auto">CacheIdentity</code> to share entries across handles and restarts.</li>
+<li><strong><code dir="auto">CacheIdentity</code>:</strong> an opaque object-namespace identity. <code dir="auto">Default</code> generates
+an isolated identity; <code dir="auto">new(namespace)</code> deterministically hashes an explicit
+namespace; <code dir="auto">local(&amp;LocalFileSystem)</code> names the resolved filesystem root.
+Equal identities assert that equal object paths name the same immutable
+contents. Custom stores must include backend, endpoint, bucket/root,
+wrapper prefixes, and any other routing context in their namespace.
+Credentials and human-readable display names do not establish equivalence.
+Replacing a store’s contents requires a new namespace or clearing its cache.
+<code dir="auto">CatalogOptions::cache_identity</code> applies the same contract to catalog block
+caches; the catalog path is included separately. <code dir="auto">None</code> isolates each open.</li>
+</ul>
+<p>Keeping these separate from the wire types is what lets RFC 0002’s protobuf
+field evolution stay an internal change instead of a public breaking one.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="operation-enumeration">Operation enumeration</h3><a class="sl-anchor-link" href="#operation-enumeration"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Operation enumeration”</span></a></div>
+<p>Every mutator is a method on <code dir="auto">Transaction</code>. Operations read as DuckLake catalog verbs,
+not as low-level “put entity version” primitives; the <code dir="auto">current</code>↔<code dir="auto">history</code> version
+bookkeeping of RFC 0002 is internal to each. Grounded in DuckLake v1.0
+semantics and the entities RFC 0002 maps:</p>
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Operations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Schemas</strong></td>
+<td><code dir="auto">create_schema</code>, <code dir="auto">drop_schema</code> (no rename verb — DuckLake models no schema rename: <code dir="auto">ducklake_schema</code> is one row per id under a primary key, and its alter path handles tables and views only)</td>
+</tr>
+<tr>
+<td><strong>Tables</strong></td>
+<td><code dir="auto">create_table</code>, <code dir="auto">rename_table</code>, <code dir="auto">set_table_schema</code> (move to another schema), <code dir="auto">drop_table</code></td>
+</tr>
+<tr>
+<td><strong>Views</strong></td>
+<td><code dir="auto">create_view</code>, <code dir="auto">alter_view</code>, <code dir="auto">drop_view</code></td>
+</tr>
+<tr>
+<td><strong>Macros</strong> (RFC 0019)</td>
+<td><code dir="auto">create_macro</code>, <code dir="auto">drop_macro</code> (no alter verb — DuckLake models macro replacement as drop + create under a fresh <code dir="auto">macro_id</code>; macro names collide with live macros in the schema only, not with tables/views)</td>
+</tr>
+<tr>
+<td><strong>Columns</strong></td>
+<td><code dir="auto">add_column</code>, <code dir="auto">rename_column</code>, <code dir="auto">alter_column</code> (type / default / nullability), <code dir="auto">drop_column</code></td>
+</tr>
+<tr>
+<td><strong>Partitioning</strong></td>
+<td><code dir="auto">set_partitioning</code>, <code dir="auto">clear_partitioning</code></td>
+</tr>
+<tr>
+<td><strong>Sorting</strong> (RFC 0013)</td>
+<td><code dir="auto">set_sorting</code>, <code dir="auto">clear_sorting</code></td>
+</tr>
+<tr>
+<td><strong>Data files</strong></td>
+<td><code dir="auto">register_data_file</code> (carries its file column stats), <code dir="auto">expire_data_file</code></td>
+</tr>
+<tr>
+<td><strong>Delete files</strong></td>
+<td><code dir="auto">register_delete_file</code>, <code dir="auto">expire_delete_file</code></td>
+</tr>
+<tr>
+<td><strong>Statistics</strong></td>
+<td><code dir="auto">update_table_stats</code>, <code dir="auto">update_column_stats</code></td>
+</tr>
+<tr>
+<td><strong>Tags</strong></td>
+<td><code dir="auto">set_tag</code>, <code dir="auto">remove_tag</code> (on a schema, table, or view; column tags travel on the column record and have no verb)</td>
+</tr>
+<tr>
+<td><strong>Options</strong></td>
+<td><code dir="auto">set_option</code>, <code dir="auto">unset_option</code> (global / schema / table scopes)</td>
+</tr>
+<tr>
+<td><strong>Inlined data</strong> (RFC 0005)</td>
+<td><code dir="auto">inline_insert</code>, <code dir="auto">inline_delete</code>, <code dir="auto">flush_inlined_data</code></td>
+</tr>
+<tr>
+<td><strong>Maintenance</strong> (RFC 0021)</td>
+<td><code dir="auto">maintain</code> — reclaims the entry ranges of indexes no longer live; <code dir="auto">store_census</code> — what each subspace weighs, from the manifest, plus an opt-in live count; <code dir="auto">compact_store</code> — merges a subspace’s sorted runs into one, reclaiming superseded versions and tombstones. None is a <code dir="auto">Transaction</code> mutator: all three are <code dir="auto">Catalog</code> verbs, since none mints a snapshot. <code dir="auto">store_census</code> is the one maintenance verb a read-only catalog serves — it reads, and the compactor that executes a merge runs inside the writer</td>
+</tr>
+<tr>
+<td><strong>Format migration</strong> (RFC 0015)</td>
+<td><code dir="auto">migrate</code> — rewrites the store to the newest structural format the binary understands. Not a <code dir="auto">Transaction</code> mutator and not even a <code dir="auto">Catalog</code> method: an associated function taking the object store, because the stores it exists to act on are the ones an ordinary attach refuses</td>
+</tr>
+</tbody>
+</table>
+<p>Notes:</p>
+<ul>
+<li><code dir="auto">ducklake_files_scheduled_for_deletion</code> (RFC 0002 <code dir="auto">gcfile</code>) has no public
+verb, and the <code dir="auto">expire_*</code> operations do <strong>not</strong> write it: expiring a file
+only ends its live version into history — historical snapshots still
+reference the bytes, so scheduling physical deletion belongs to the
+RFC 0007 expiry commit, which writes <code dir="auto">gcfile</code> records when it prunes the
+<code dir="auto">history</code> records below the retention horizon.</li>
+<li><code dir="auto">alter_column</code> is one verb taking an optional change per attribute, rather
+than three verbs, because DuckLake models a column alteration as a single
+new column version regardless of which attributes changed.</li>
+<li>Sorting and partitioning are twins in shape and differ in two ways the
+verbs must carry. A sort change marks the table altered without bumping
+the schema version — a sort spec constrains writes and never invalidates
+a cross-file compaction, so DuckLake does not bump, and neither does the
+verb path. And a sort key names its column inside a verbatim SQL
+expression rather than by field id, so <code dir="auto">set_sorting</code> has no column to
+resolve and validates none: what a rename or a drop does to a sorted
+column is DuckLake’s binder’s business, and moraine records what
+committed (RFC 0013). <code dir="auto">clear_sorting</code> is a genuine clear, unlike
+<code dir="auto">clear_partitioning</code>, whose DuckLake counterpart lands a live spec with
+no columns.</li>
+<li>Every verb that puts a column type into the catalog — <code dir="auto">create_table</code>,
+<code dir="auto">add_column</code>, <code dir="auto">alter_column</code> — enforces the RFC 0005 type policy and raises
+<code dir="auto">Unsupported</code> for a type moraine cannot store. The rule is the core’s, and
+the staged path enforces the same one at the same boundary, so a <code dir="auto">VARIANT</code>
+column is refused where it enters the catalog rather than at the first
+insert that would need it. The shim keeps its own refusal at the Arrow
+conversion, and it is not redundant: DuckLake builds the inlined data table
+while flushing the <code dir="auto">CREATE TABLE</code>, <em>before</em> the <code dir="auto">ducklake_column</code> rows the
+core validates reach a commit, so removing it leaves the user with DuckDB’s
+bare “Unsupported Arrow type VARIANT”. Measured by deleting it and running
+the e2e suite. This is also why <code dir="auto">register_data_file</code> carries no variant
+statistics: <code dir="auto">ducklake_file_variant_stats</code> describes the shredded paths of
+a <code dir="auto">VARIANT</code> column, and no such column can reach the catalog to have any.
+The field stays in the stored record for row-faithfulness, and arrives on
+the verb surface with <code dir="auto">VARIANT</code> support or not at all.</li>
+<li><code dir="auto">flush_inlined_data</code> registers the files it drains into, rather than leaving
+them to <code dir="auto">register_data_file</code>. A flushed file is not an ordinary
+registration: its rows keep the ids they were inlined under and its record
+is backdated to the earliest snapshot among them, neither of which
+<code dir="auto">register_data_file</code> can express. Keeping that inside the flush verb is why
+the core needs no general row-id-preserving registration: compaction is the
+only other operation of that shape, and it is DuckLake’s own — it reaches
+the store through the staged-row path, never through this surface. A verb
+is added if an embedding consumer ever writes a rewritten file itself
+(additive).</li>
+<li>A registered file carries the partition it falls in — one value per key
+of the table’s live spec, in key order, verbatim text. The spec is
+resolved rather than named by the caller: a file is written under the one
+in force, and a registration racing a repartition already conflicts as
+append-versus-alter, so passing an id could only ever name the spec the
+commit is about to be arbitrated against. A partitioned table requires
+its values and an unpartitioned one refuses any, on the same reasoning as
+the index-entry rule — a file silently landing in no partition is a file
+no pruning scan can place.</li>
+<li>A flushed file additionally carries <code dir="auto">partial_max</code>, the newest snapshot
+among its rows, whenever a drain sweeps up rows inlined at several. Both
+bounds are needed and neither is derivable from the other: the record is
+live from the earliest so pre-flush time travel finds it, and a reader at
+a snapshot inside the span filters the file’s rows per row against its
+own snapshot column rather than taking all of them. It is validated to
+sit at or above the backdated snapshot and below this commit’s, the same
+window the backdating check enforces from the other side.</li>
+<li>One commit may both inline into a table and flush it. The drain reads the
+store as it stood before the commit, so the chunk the commit stages is not
+among the chunks it drains — those rows stay inlined for the next flush.
+What the drain reads is also what bounds the file: a flushed file’s rows
+must lie below the row ids the table had allocated when the commit began,
+since the caller wrote its Parquet before calling <code dir="auto">commit</code> and so cannot
+have put a row this commit mints into it. The pairing that does <em>not</em>
+compose is tombstoning a row the same commit flushes: the file carries that
+row as live and the drain removes the chunk the tombstone hangs off, so the
+delete would vanish. It is refused, and a delete file against the id
+<code dir="auto">flush_inlined_data</code> returns expresses it instead.</li>
+<li>Column/name mappings (RFC 0018) have <strong>no verb</strong>, and this is settled
+rather than deferred. A mapping exists only to resolve the columns of
+<em>foreign</em> Parquet — a file written without DuckLake’s field ids — and
+moraine does not expect to serve one. DuckLake creates mappings as a side
+effect of <code dir="auto">ducklake_add_data_files</code>, which a user can still issue through
+the extension; the staged path carries those rows verbatim and always
+will. What is settled is the verb surface: no <code dir="auto">create_mapping</code>, and
+<code dir="auto">register_data_file</code> leaves <code dir="auto">mapping_id</code> unset, because a file this
+surface registers is one the host wrote against the table’s own
+columns.</li>
+<li>Snapshot expiry / <code dir="auto">history</code> GC has no verb (deferred, per non-goals).
+RFC 0021’s <code dir="auto">maintain</code> is not one: it reclaims moraine’s own orphaned
+index entries and nothing else — it computes no retention policy, and
+adds no substrate step, the SlateDB store collecting its own superseded
+objects unprompted. RFC 0021 <em>does</em> orchestrate DuckLake’s expiry and
+cleanup functions, but from the DuckDB shim, which can issue SQL — never
+from this surface, which cannot.</li>
+<li>This table covers the entities the core models today. The extension
+contract that once gated the full set is settled: RFC 0005 maps every
+DuckLake statement the shim issues onto a store record, and none of them
+needs a verb this table lacks — the extension rides the staged-row path,
+not this surface. What is left is the DuckLake v1.0 spec’s remaining
+tables; as e2e reaches them, operations are added here — this RFC is
+updated, not diverged from.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="testing-obligations">Testing obligations</h3><a class="sl-anchor-link" href="#testing-obligations"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Testing obligations”</span></a></div>
+<p>Per RFC 0001:</p>
+<ul>
+<li>Integration tests exercise the public API only, against real SlateDB on an
+in-memory <code dir="auto">object_store</code> (the existing <code dir="auto">tests/smoke.rs</code> pattern) — no mocks
+of the store layer.</li>
+<li><code dir="auto">Catalog::open</code> and <code dir="auto">commit</code> carry doctests that teach by worked example.</li>
+<li>The <code dir="auto">crates/moraine/examples/</code> program on the ROADMAP (“first runnable
+example once the API exists”) becomes the crate-root worked example the RFC
+0001 docs rule asks for.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="alternatives-considered">Alternatives considered</h2><a class="sl-anchor-link" href="#alternatives-considered"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Alternatives considered”</span></a></div>
+<ul>
+<li>
+<p><strong>Explicit <code dir="auto">begin</code>/<code dir="auto">commit</code> transactions</strong> (<code dir="auto">let mut tx = catalog.begin().await?; …; tx.commit().await?</code>): gives the host full
+control of the retry loop, but pushes retry boilerplate to every call site —
+including inside the DuckDB bridge, exactly where “thin by policy” forbids
+it. Rejected: the conflict-retry loop and the atomicity invariant belong in
+the core, and a closure is how the core keeps ownership of them.</p>
+</li>
+<li>
+<p><strong>Build-a-changeset, then <code dir="auto">apply</code></strong> (host constructs an inspectable data
+value describing all mutations, then <code dir="auto">catalog.apply(changeset).await?</code>):
+maximally decoupled and testable, but pushes read and name→id resolution
+onto the host and reads least like DuckLake DDL/DML. Rejected: the <code dir="auto">Transaction</code>
+closure already gives an inspectable, testable unit while keeping resolution
+in the core where the in-memory snapshot lives.</p>
+</li>
+<li>
+<p><strong>Lazy read handle</strong> (accessors issue store scans on demand, nothing
+materialized): contradicts RFC 0002’s “scan <code dir="auto">current</code> at attach” model and
+reintroduces the hot-path history-filtering cost the <code dir="auto">current</code>/<code dir="auto">history</code> split
+exists to avoid. Rejected: <code dir="auto">CatalogSnapshot</code> is materialized because the
+live catalog is small by design.</p>
+</li>
+<li>
+<p><strong>Caller provides a <code dir="auto">slatedb::Db</code></strong>: exposes the substrate in the public
+API, ties moraine’s semver to SlateDB’s, and contradicts keeping <code dir="auto">store</code>
+internal. Rejected: <code dir="auto">object_store</code> is the right primitive to expose;
+the KV engine is not.</p>
+</li>
+<li>
+<p><strong>Exposing the <code dir="auto">prost</code> value types directly</strong>: would save the hand-written
+domain layer, but turns every RFC 0002 protobuf field change into a public
+breaking change and leaks the codec into the API. Rejected: the domain
+layer is what preserves RFC 0002’s evolution promise.</p>
+</li>
+<li>
+<p><strong>Coarse two-variant error type</strong> (<code dir="auto">Conflict</code> + <code dir="auto">Backend(source)</code> with
+stringly-typed detail): simpler enum, but forces the DuckDB bridge (and any
+host) to parse message text to react. Rejected: one variant per failure
+domain is a small, non-exhaustive enum that maps cleanly to DuckDB error
+codes.</p>
+</li>
+<li>
+<p><strong>Structural-shape-only scope</strong> (define the types and models, leave the
+operation set to fill in later): considered and rejected in favor of the
+full enumeration above, grounding the operation set in DuckLake v1.0
+semantics rather than in the extension contract, which was unresolved when
+this was written. The bet paid: the contract settled (RFC 0005) without
+moving a verb, and the surface was legible throughout.</p>
+</li>
+</ul>
+</div><script type="module">var e=class extends HTMLElement{constructor(){super()}connectedCallback(){let e=()=>{let e=t===`ready`?`<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></g></svg>`:`<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/></svg>`;this.innerHTML=`<span class="w-full h-full block [&_svg]:w-full [&_svg]:h-full">`+e+`</span>`},t=`ready`;e(),this.addEventListener(`click`,()=>{if(t===`ready`){t=`success`,e();let n=this.dataset.code||``;navigator.clipboard.writeText(n),setTimeout(()=>{t=`ready`,e()},1500)}})}};customElements.define(`nova-code-copy-button`,e);</script><script type="module" src="/_astro/MarkdownContent.astro_astro_type_script_index_0_lang.x0CmCSF8.js"></script><footer class="sl-flex astro-xhxjzfa7"><div class="meta sl-flex astro-xhxjzfa7"></div><div class="flex min-w-full flex-row items-stretch justify-between gap-2 px-1 pt-0 pb-6 print:hidden" dir="ltr"><a href="/rfcs/0002-slatedb-key-encoding/" rel="prev" data-side="left" class="group m-0 flex items-center justify-end gap-2 rounded-xl p-2 font-medium text-(--sl-color-gray-2) no-underline transition hover:text-(--sl-color-white) md:text-lg [[rel='next']]:flex-row [[rel='prev']]:flex-row-reverse"><span>0002: SlateDB key encoding for DuckLake catalog state</span><svg width="1em" height="1em" viewBox="0 0 24 24" class="block min-h-5 min-w-5 transition group-hover:-translate-x-1"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18l-6-6l6-6" /></svg></a><div class="flex-1"></div><a href="/rfcs/0004-commit-protocol/" rel="next" data-side="right" class="group m-0 flex items-center justify-end gap-2 rounded-xl p-2 font-medium text-(--sl-color-gray-2) no-underline transition hover:text-(--sl-color-white) md:text-lg [[rel='next']]:flex-row [[rel='prev']]:flex-row-reverse"><span>0004: Commit and transaction protocol</span><svg width="1em" height="1em" viewBox="0 0 24 24" class="block min-h-5 min-w-5 transition group-hover:translate-x-1"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6" /></svg></a></div></footer></div></div></main></div></div></div></div></body></html>

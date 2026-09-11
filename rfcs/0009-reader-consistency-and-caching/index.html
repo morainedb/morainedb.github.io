@@ -1,0 +1,1496 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-vdxcvpsm"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>RFC 0009: Reader consistency and snapshot caching | moraine</title><link rel="canonical" href="https://morainedb.github.io/rfcs/0009-reader-consistency-and-caching/"/><link rel="sitemap" href="/sitemap-index.xml"/><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.1.4"/><meta name="generator" content="Starlight v0.41.4"/><meta property="og:title" content="RFC 0009: Reader consistency and snapshot caching"/><meta property="og:type" content="article"/><meta property="og:url" content="https://morainedb.github.io/rfcs/0009-reader-consistency-and-caching/"/><meta property="og:locale" content="en"/><meta property="og:description" content="A DuckLake catalog that lives in your bucket — SlateDB-backed, serverless, nothing to operate."/><meta property="og:site_name" content="moraine"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="A DuckLake catalog that lives in your bucket — SlateDB-backed, serverless, nothing to operate."/><script>
+"use strict";(()=>{(()=>{let t="theme-toggle",n;function r(){return window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}function l(){let e=localStorage.getItem(t);return e==="dark"||e==="light"?e:null}function m(){return n||l()||r()}function s(e){e===r()?localStorage.removeItem(t):localStorage.setItem(t,e)}function h(e){let o=document.documentElement;o.classList.toggle("dark",e==="dark"),o.dataset.theme=e,o.style.colorScheme=e}function a(e){n=e,s(e),h(e)}function c(){a(m())}c(),document.addEventListener("astro:after-swap",c),window.astroThemeToggle={setTheme:a,getTheme:m}})();})();
+</script><link rel="stylesheet" href="/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/_astro/common.DJmCPQrT.css"><style>@layer starlight.components{.card:where(.astro-zts4jgjd){--sl-card-border:var(--sl-color-purple);--sl-card-bg:var(--sl-color-purple-low);border:1px solid var(--sl-color-gray-5);background-color:var(--sl-color-black);flex-direction:column;gap:clamp(.5rem,.125rem + 1vw,1rem);padding:clamp(1rem,.125rem + 3vw,2.5rem)}.card:where(.astro-zts4jgjd):nth-child(4n+1){--sl-card-border:var(--sl-color-orange);--sl-card-bg:var(--sl-color-orange-low)}.card:where(.astro-zts4jgjd):nth-child(4n+3){--sl-card-border:var(--sl-color-green);--sl-card-bg:var(--sl-color-green-low)}.card:where(.astro-zts4jgjd):nth-child(4n+4){--sl-card-border:var(--sl-color-red);--sl-card-bg:var(--sl-color-red-low)}.card:where(.astro-zts4jgjd):nth-child(4n+5){--sl-card-border:var(--sl-color-blue);--sl-card-bg:var(--sl-color-blue-low)}.title:where(.astro-zts4jgjd){font-weight:600;font-size:var(--sl-text-h4);color:var(--sl-color-white);line-height:var(--sl-line-height-headings);align-items:center;gap:1rem}.card:where(.astro-zts4jgjd) .icon:where(.astro-zts4jgjd){border:1px solid var(--sl-card-border);background-color:var(--sl-card-bg);border-radius:.25rem;flex-shrink:0;padding:.2em}.card:where(.astro-zts4jgjd) .body:where(.astro-zts4jgjd){font-size:clamp(var(--sl-text-sm), calc(.5rem + 1vw), var(--sl-text-body));margin:0}.card-grid:where(.astro-lmor3ela){grid-template-columns:100%;gap:1rem;display:grid}.card-grid:where(.astro-lmor3ela)>*{margin-top:0!important}@media (width>=50rem){.card-grid:where(.astro-lmor3ela){grid-template-columns:1fr 1fr;gap:1.5rem}.stagger:where(.astro-lmor3ela){--stagger-height:5rem;padding-bottom:var(--stagger-height)}.stagger:where(.astro-lmor3ela)>:nth-child(2n){transform:translateY(var(--stagger-height))}}}
+@layer starlight.components{svg:where(.astro-n5k4ipy7){color:var(--sl-icon-color);font-size:var(--sl-icon-size,1em);width:1em;height:1em}}
+</style><script type="module" src="/_astro/page.LAbJoB63.js"></script></head><body class="astro-vdxcvpsm"><a class="sl-skip-link astro-vxeigawq" href="#_top">Skip to content</a><div class="flex min-h-screen flex-col astro-3iko6sul"><header class="fixed inset-0 z-(--sl-z-index-navbar) box-border h-(--sl-nav-height) w-full border-0 border-b border-solid border-(--sl-color-hairline) bg-(--sl-color-bg-nav) px-(--sl-nav-pad-x) py-(--sl-nav-pad-y) backdrop-blur astro-3iko6sul"><div class="box-border flex h-full items-center gap-2"><div class="-m-3 overflow-clip p-3 flex min-w-0"><span class="-m-1.5 rounded-md p-1.5 **:text-lg **:font-semibold **:text-(--sl-color-text) focus-visible:outline-offset-0"><a href="/" class="site-title sl-flex astro-clw6ags5"><img class="light:sl-hidden print:hidden astro-clw6ags5" alt src="/_astro/moraine-dark.CEVNFCXz.svg" width="128" height="128"><img class="dark:sl-hidden print:block astro-clw6ags5" alt src="/_astro/moraine.B97P_dWh.svg" width="128" height="128"><span class="astro-clw6ags5" translate="no">moraine</span></a></span></div><nav class="flex flex-1 flex-row gap-4 overflow-x-auto py-3 pr-4 pl-4 text-sm font-medium max-md:**:hidden xl:gap-6 xl:pl-6"></nav><div class="flex md:max-w-60 md:flex-1 print:hidden"><site-search class=" astro-hdulihjd" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"><button class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90 md:h-9 md:w-full md:max-w-88 md:rounded-md md:border md:border-solid md:border-(--sl-color-gray-5) md:p-2 md:text-(--sl-color-text) md:transition-colors md:hover:bg-gray-400/10 astro-hdulihjd" data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4 astro-hdulihjd"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m21 21l-4.34-4.34" /><circle cx="11" cy="11" r="8" /></g></svg><span class="sl-hidden md:sl-block astro-hdulihjd" aria-hidden="true">Search</span><kbd class="sl-hidden md:sl-flex astro-hdulihjd" style="display: none;"><kbd class="astro-hdulihjd">Ctrl</kbd><kbd class="astro-hdulihjd">K</kbd></kbd></button><dialog style="padding:0" aria-label="Search" class="astro-hdulihjd"><div class="dialog-frame sl-flex astro-hdulihjd"><button data-close-modal class="sl-flex md:sl-hidden astro-hdulihjd">Cancel</button><div class="search-container astro-hdulihjd"><div id="starlight__search" class="astro-hdulihjd"></div></div></div></dialog></site-search><script>
+  ;(() => {
+    const openBtn = document.querySelector('button[data-open-modal]')
+    const shortcut = openBtn?.querySelector('kbd')
+    if (!openBtn || !(shortcut instanceof HTMLElement)) return
+    const platformKey = shortcut.querySelector('kbd')
+    if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+      platformKey.textContent = '⌘'
+      openBtn.setAttribute('aria-keyshortcuts', 'Meta+K')
+    }
+    shortcut.style.display = ''
+  })()
+</script><script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.vTFUHulS.js"></script></div><div class="hidden items-center gap-2 md:flex print:hidden"><a href="https://github.com/morainedb/moraine" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">GitHub</span><svg aria-hidden="true" class=" astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script><div class="size-8 overflow-visible"><astro-theme-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><div class="astro-theme-toggle-icon-light"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 19a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1m-4.95-2.05a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0m11.314 0l1.414 1.414a1 1 0 0 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 1.414-1.414m-5.049-9.836a5 5 0 1 1-2.532 9.674a5 5 0 0 1 2.532-9.674M4 11a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zm18 0a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM5.636 4.222L7.05 5.636A1 1 0 0 1 5.636 7.05L4.222 5.636a1 1 0 0 1 1.414-1.414m14.142 0a1 1 0 0 1 0 1.414L18.364 7.05a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0M12 1a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1" /></svg></div><div class="astro-theme-toggle-icon-dark"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 1.992a10 10 0 1 0 9.236 13.838c.341-.82-.476-1.644-1.298-1.31a6.5 6.5 0 0 1-6.864-10.787l.077-.08c.551-.63.113-1.653-.758-1.653h-.266l-.068-.006z" /></svg></div></astro-theme-toggle><script type="module">function e(){return typeof window>`u`?`light`:window.astroThemeToggle?.getTheme?.()||`light`}function t(e){typeof window>`u`||window.astroThemeToggle?.setTheme?.(e)}function n(){t(e()===`light`?`dark`:`light`)}var r=`astro-theme-toggle-temporary-styles`;function i(){document.getElementById(r)?.remove()}function a(){i();let e=document.createElement(`style`);e.id=r,e.textContent=`::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }`,document.head.appendChild(e)}async function o(e,t,n){let r=document;if(typeof r.startViewTransition!=`function`){e();return}a();let o=r.startViewTransition(()=>{e()});await o?.ready,o?.finished?.then(i);let s=.7,c=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><defs><radialGradient id="toggle-theme-gradient"><stop offset="${s}"/><stop offset="1" stop-opacity="0"/></radialGradient></defs><circle cx="4" cy="4" r="4" fill="url(#toggle-theme-gradient)"/></svg>`,l=`data:image/svg+xml;base64,${window.btoa(c)}`,u=window.innerWidth,d=window.innerHeight,f=Math.ceil(Math.hypot(Math.max(t,u-t),Math.max(n,d-n))/s);document.documentElement.animate({maskImage:[`url('${l}')`,`url('${l}')`],maskRepeat:[`no-repeat`,`no-repeat`],maskPosition:[`${t}px ${n}px`,`${t-f}px ${n-f}px`],maskSize:[`0`,`${2*f}px`]},{duration:500,easing:`ease-in`,pseudoElement:`::view-transition-new(root)`})}function s(e){o(n,e.clientX,e.clientY)}var c=class extends HTMLElement{connectedCallback(){this.hasAttribute(`tabindex`)||this.setAttribute(`tabindex`,`0`),this.hasAttribute(`role`)||this.setAttribute(`role`,`button`),this.addEventListener(`click`,s),this.addEventListener(`keydown`,e=>{if(e.key===`Enter`||e.key===` `){e.preventDefault();let t=this.getBoundingClientRect();s({clientX:t.left+t.width/2,clientY:t.top+t.height/2})}})}};customElements.define(`astro-theme-toggle`,c);</script></div></div><div class="flex items-center gap-2 md:hidden print:hidden"><nova-mobile-menu-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90 print:hidden" aria-label="Menu" aria-controls="starlight__sidebar"><div class="transition-transform [body[data-mobile-menu-expanded]_&amp;]:rotate-90"><svg width="1em" height="1em" viewBox="0 0 24 24" class="block [body[data-mobile-menu-expanded]_&amp;]:hidden"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16M4 12h16M4 19h16" /></svg><svg width="1em" height="1em" viewBox="0 0 24 24" class="hidden [body[data-mobile-menu-expanded]_&amp;]:block"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12" /></svg></div></nova-mobile-menu-toggle><script type="module" src="/_astro/MobileMenuToggle.astro_astro_type_script_index_0_lang.Bg4YKcfM.js"></script></div></div></header><nav class="sidebar print:hidden astro-3iko6sul" aria-label="Main" id="nova-sidebar-nav"><div id="starlight__sidebar" class="nova-scroll-container invisible md:visible [body[data-mobile-menu-expanded]_&amp;]:max-md:visible fixed top-(--sl-nav-height) bottom-0 left-0 z-(--sl-z-index-menu) overflow-y-auto border-0 border-solid border-(--sl-color-hairline) bg-(--sl-color-black) max-md:w-full md:w-(--sl-sidebar-width) md:border-r astro-3iko6sul"><div class="sidebar-content flex h-full min-h-max flex-col px-(--sl-sidebar-pad-x) py-4 astro-3iko6sul"><sl-sidebar-state-persist data-hash="05ix94y" class="astro-f5yvicm7"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-ojxuodky"><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Guide</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/guide/what-is-moraine/" class="astro-ojxuodky"><span class="astro-ojxuodky">What is moraine?</span></a></li><li class="astro-ojxuodky"><a href="/guide/getting-started/" class="astro-ojxuodky"><span class="astro-ojxuodky">Getting started</span></a></li><li class="astro-ojxuodky"><a href="/guide/architecture/" class="astro-ojxuodky"><span class="astro-ojxuodky">Architecture</span></a></li><li class="astro-ojxuodky"><a href="/guide/embedding/" class="astro-ojxuodky"><span class="astro-ojxuodky">Embedding the core</span></a></li><li class="astro-ojxuodky"><a href="/guide/operating/" class="astro-ojxuodky"><span class="astro-ojxuodky">Operating a lake</span></a></li></ul></details></li><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Design (RFCs)</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/rfcs/0001-repository-structure-and-conventions/" class="astro-ojxuodky"><span class="astro-ojxuodky">0001: Repository structure and conventions</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0002-slatedb-key-encoding/" class="astro-ojxuodky"><span class="astro-ojxuodky">0002: SlateDB key encoding for DuckLake catalog state</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0003-public-api-shape/" class="astro-ojxuodky"><span class="astro-ojxuodky">0003: Public API shape of the moraine core</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0004-commit-protocol/" class="astro-ojxuodky"><span class="astro-ojxuodky">0004: Commit and transaction protocol</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0005-data-inlining/" class="astro-ojxuodky"><span class="astro-ojxuodky">0005: Data inlining on SlateDB</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0006-extension-surface/" class="astro-ojxuodky"><span class="astro-ojxuodky">0006: Extension surface</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0007-snapshot-expiry-and-gc/" class="astro-ojxuodky"><span class="astro-ojxuodky">0007: Snapshot expiry and garbage collection</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0008-compaction/" class="astro-ojxuodky"><span class="astro-ojxuodky">0008: Maintenance operations — compaction and delete-file consolidation</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0009-reader-consistency-and-caching/" aria-current="page" class="astro-ojxuodky"><span class="astro-ojxuodky">0009: Reader consistency and snapshot caching</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0010-async-sync-bridge/" class="astro-ojxuodky"><span class="astro-ojxuodky">0010: Async↔sync bridge: mechanism, runtime, threading, and cancellation</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0011-crash-recovery/" class="astro-ojxuodky"><span class="astro-ojxuodky">0011: Crash recovery</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0012-schema-evolution-and-versioning/" class="astro-ojxuodky"><span class="astro-ojxuodky">0012: Schema evolution and versioning</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0013-partitioning-sorting-and-pruning/" class="astro-ojxuodky"><span class="astro-ojxuodky">0013: Partitioning, sorting, and pruning</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0014-encryption/" class="astro-ojxuodky"><span class="astro-ojxuodky">0014: Catalog and data encryption</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0015-format-migration/" class="astro-ojxuodky"><span class="astro-ojxuodky">0015: On-disk format migration</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0016-equality-indexes/" class="astro-ojxuodky"><span class="astro-ojxuodky">0016: Equality and range indexes</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0017-read-write-and-read-only-attach/" class="astro-ojxuodky"><span class="astro-ojxuodky">0017: Read-write and read-only attach paths</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0018-column-and-name-mapping/" class="astro-ojxuodky"><span class="astro-ojxuodky">0018: Column and name mapping for externally written Parquet</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0019-macros/" class="astro-ojxuodky"><span class="astro-ojxuodky">0019: Scalar and table macros</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0020-change-data-feed/" class="astro-ojxuodky"><span class="astro-ojxuodky">0020: Change data feed</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0021-maintenance-model/" class="astro-ojxuodky"><span class="astro-ojxuodky">0021: Maintenance orchestration</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0022-commit-log-and-leader-role/" class="astro-ojxuodky"><span class="astro-ojxuodky">0022: The commit log and the leader role</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="flex items-center justify-end gap-2 py-4 print:hidden"><a href="https://github.com/morainedb/moraine" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">GitHub</span><svg aria-hidden="true" class=" astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><div class="size-8 overflow-visible"><astro-theme-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><div class="astro-theme-toggle-icon-light"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 19a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1m-4.95-2.05a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0m11.314 0l1.414 1.414a1 1 0 0 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 1.414-1.414m-5.049-9.836a5 5 0 1 1-2.532 9.674a5 5 0 0 1 2.532-9.674M4 11a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zm18 0a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM5.636 4.222L7.05 5.636A1 1 0 0 1 5.636 7.05L4.222 5.636a1 1 0 0 1 1.414-1.414m14.142 0a1 1 0 0 1 0 1.414L18.364 7.05a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0M12 1a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1" /></svg></div><div class="astro-theme-toggle-icon-dark"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 1.992a10 10 0 1 0 9.236 13.838c.341-.82-.476-1.644-1.298-1.31a6.5 6.5 0 0 1-6.864-10.787l.077-.08c.551-.63.113-1.653-.758-1.653h-.266l-.068-.006z" /></svg></div></astro-theme-toggle></div></div></div></div></div></nav><div class="main-frame astro-3iko6sul"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-nrnkqug2"><aside class="right-sidebar-container print:hidden astro-nrnkqug2"><div class="right-sidebar astro-nrnkqug2"><div class="lg:sl-hidden astro-q5mffni3"><div class="[&amp;_nav]:backdrop-blur [&amp;_summary]:border-b-(--sl-color-hairline)"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-5ulgm6bh"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-5ulgm6bh"><details id="starlight__mobile-toc" class="astro-5ulgm6bh"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-5ulgm6bh"><span class="toggle sl-flex astro-5ulgm6bh">On this page<svg aria-hidden="true" class="caret astro-5ulgm6bh astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-5ulgm6bh"></span></summary><div class="dropdown astro-5ulgm6bh"><ul class="isMobile astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#summary" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Summary</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#goals" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Goals</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#background" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Background</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#design" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Design</span></a><ul class="isMobile astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#consistency-of-lookup-and-inline-operations" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Consistency of lookup and inline operations</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#materialization-rests-on-one-read-point" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Materialization rests on one read point</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#a-read-only-handle-validates-its-cut-rather-than-pinning-one" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">A read-only handle validates its cut rather than pinning one</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#a-read-write-handle-resolves-the-head-without-reading-it" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">A read-write handle resolves the head without reading it</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#snapshot-isolation-is-free" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Snapshot isolation is free</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#incremental-refresh-from-the-changelog" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Incremental refresh from the changelog</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#committer-read-your-writes" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Committer read-your-writes</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#validity-window-and-expiry-reaction" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Validity window and expiry reaction</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#a-ducklake-transaction-reads-one-materialization-per-metadata-table" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">A DuckLake transaction reads one materialization per metadata table</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#caching-is-per-handle-in-memory-logical" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Caching is per-handle, in-memory, logical</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#maintained-served-projections" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Maintained served projections</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#store-facts-outlive-view-invalidation" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Store facts outlive view invalidation</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#the-stack-named-end-to-end" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">The stack, named end to end</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#shared-budget-separate-cache-engines" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Shared budget, separate cache engines</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#one-owned-store-scan-loop" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">One owned store scan loop</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#one-scan-pair-per-head" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">One scan pair per head</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#a-reader-that-cannot-match-an-ended-version-does-not-read-them" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">A reader that cannot match an ended version does not read them</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#the-stamp-crosses-the-abi" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">The stamp crosses the ABI</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#ducklakes-caches-sit-on-top-and-the-stamps-compose" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">DuckLake’s caches sit on top, and the stamps compose</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#one-block-cache-two-priorities-one-budget" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">One block cache: two priorities, one budget</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#the-query-data-path-is-duckdbs-index-upkeep-reads-scoped-metadata" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">The query data path is DuckDB’s; index upkeep reads scoped metadata</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#test-obligations" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Test obligations</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#alternatives-considered" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Alternatives considered</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.BcSo_yiZ.js"></script></div></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-q5mffni3"><div class="sl-container astro-q5mffni3"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#summary" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Summary</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#goals" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Goals</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#background" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Background</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#design" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Design</span></a><ul class="astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#consistency-of-lookup-and-inline-operations" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Consistency of lookup and inline operations</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#materialization-rests-on-one-read-point" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Materialization rests on one read point</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#a-read-only-handle-validates-its-cut-rather-than-pinning-one" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">A read-only handle validates its cut rather than pinning one</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#a-read-write-handle-resolves-the-head-without-reading-it" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">A read-write handle resolves the head without reading it</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#snapshot-isolation-is-free" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Snapshot isolation is free</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#incremental-refresh-from-the-changelog" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Incremental refresh from the changelog</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#committer-read-your-writes" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Committer read-your-writes</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#validity-window-and-expiry-reaction" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Validity window and expiry reaction</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#a-ducklake-transaction-reads-one-materialization-per-metadata-table" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">A DuckLake transaction reads one materialization per metadata table</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#caching-is-per-handle-in-memory-logical" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Caching is per-handle, in-memory, logical</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#maintained-served-projections" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Maintained served projections</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#store-facts-outlive-view-invalidation" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Store facts outlive view invalidation</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#the-stack-named-end-to-end" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">The stack, named end to end</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#shared-budget-separate-cache-engines" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Shared budget, separate cache engines</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#one-owned-store-scan-loop" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">One owned store scan loop</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#one-scan-pair-per-head" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">One scan pair per head</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#a-reader-that-cannot-match-an-ended-version-does-not-read-them" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">A reader that cannot match an ended version does not read them</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#the-stamp-crosses-the-abi" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">The stamp crosses the ABI</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#ducklakes-caches-sit-on-top-and-the-stamps-compose" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">DuckLake’s caches sit on top, and the stamps compose</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#one-block-cache-two-priorities-one-budget" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">One block cache: two priorities, one budget</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#the-query-data-path-is-duckdbs-index-upkeep-reads-scoped-metadata" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">The query data path is DuckDB’s; index upkeep reads scoped metadata</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#test-obligations" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Test obligations</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#alternatives-considered" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Alternatives considered</span></a></li></ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.Csloo1VZ.js"></script></div></div></div></aside><div class="main-pane astro-nrnkqug2"><main data-pagefind-body class="astro-vdxcvpsm" lang="en" dir="ltr"><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><h1 id="_top" class="astro-2sm4b3ln">RFC 0009: Reader consistency and snapshot caching</h1></div></div><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><div class="sl-markdown-content"><ul>
+<li><strong>Date:</strong> 2026-07-09</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="summary">Summary</h2><a class="sl-anchor-link" href="#summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Summary”</span></a></div>
+<p>RFC 0003 defines <code dir="auto">CatalogSnapshot</code> as “an immutable, materialized read view
+built by scanning <code dir="auto">current</code> (or <code dir="auto">current</code> + <code dir="auto">history</code>)” that “touches the store never”
+after construction. It does not say how that view is built <em>consistently</em>
+while a committer writes concurrently, how a long-lived reader learns of new
+commits, or what happens to a held view when RFC 0007 reclaims the files it
+references. This RFC fills those gaps: a <code dir="auto">CatalogSnapshot</code> is built at a
+<strong>single read point</strong> so its scans are mutually consistent — pinned on a
+read-write handle, validated against a per-batch head stamp on a read-only
+one; it is <strong>refreshed incrementally</strong> from a changelog of the keys each
+commit wrote rather than rematerialized; it observes <strong>snapshot isolation</strong>
+(a fixed catalog snapshot <code dir="auto">S</code>, never a torn mix); and it carries a
+<strong>validity window</strong> tied to RFC 0007’s retention horizon, past which a
+reader must re-resolve from head. This is the read-side companion to RFC
+0004’s write-side commit protocol.</p>
+<p>It also names the cache stack end to end, assigns every byte to one tier,
+and collapses the catalog’s physical tier to one process-shared block
+cache — SST metadata pinned in memory, data blocks tiered to disk — under
+one budget. Data bytes get no moraine cache: they are the engine’s to
+hold, and the fact that DuckLake does not yet hold them is upstream’s to
+close rather than moraine’s to work around.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="goals">Goals</h2><a class="sl-anchor-link" href="#goals"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Goals”</span></a></div>
+<ul>
+<li><strong>Consistent materialization.</strong> The <code dir="auto">current</code> / <code dir="auto">history</code> / <code dir="auto">snapshot</code> scans that build
+one <code dir="auto">CatalogSnapshot</code> observe a single, consistent store state — never a mix
+of pre- and post-commit records torn by a concurrent commit.</li>
+<li><strong>Snapshot isolation for reads.</strong> Every accessor on a <code dir="auto">CatalogSnapshot</code>
+reflects exactly the catalog at one snapshot id <code dir="auto">S</code>. Reads never block
+writes and a concurrent commit never mutates a held view (RFC 0004
+append-only + immutable <code dir="auto">snapshot</code>).</li>
+<li><strong>Cheap refresh.</strong> Advancing a long-lived reader from <code dir="auto">S</code> to head costs work
+proportional to <em>churn</em> (the entities changed between <code dir="auto">S</code> and head), not to
+live catalog size — replaying the <code dir="auto">current</code> keys each commit in the gap
+recorded in its <code dir="auto">snapshot</code> record (RFC 0002).</li>
+<li><strong>Committer read-your-writes.</strong> The single committer (RFC 0004) advances its
+own view by folding in the batch it just committed, without a re-read.</li>
+<li><strong>A defined validity window.</strong> A held <code dir="auto">CatalogSnapshot</code> is valid only within
+RFC 0007’s retention window; a reader that outlives it gets a typed error and
+re-resolves, never a silent dereference of reclaimed files.</li>
+<li><strong>No new coordination.</strong> All of this holds under RFC 0004’s single-writer /
+many-uncoordinated-readers topology. Readers learn of commits by reading
+<code dir="auto">sys/head</code>, never by being notified. Nothing pushes a commit to a reader,
+so a read-only catalog’s freshness is bounded by how often it polls —
+an explicit, configurable property of the handle rather than an accident
+of the store layer’s default.</li>
+<li><strong>One cache per byte, one budget per host.</strong> Catalog bytes live in one
+shared block cache with explicit memory and disk budgets; data bytes in
+DuckDB’s external-file cache under <code dir="auto">memory_limit</code>. No tier duplicates
+another, and no cache is invisible to sizing.</li>
+<li><strong>One store scan per head.</strong> At a given head stamp, <code dir="auto">current</code> (and
+<code dir="auto">history</code> when needed) is scanned and decoded at most once; every
+logical cache derives from the shared record set.</li>
+</ul>
+<p>Non-goals:</p>
+<ul>
+<li><strong>The read <em>API</em></strong> — <code dir="auto">CatalogSnapshot</code>, its accessors, <code dir="auto">snapshot()</code> /
+<code dir="auto">snapshot_at()</code> — RFC 0003. This RFC is the machinery behind them.</li>
+<li><strong>The physical <code dir="auto">current</code> / <code dir="auto">history</code> layout and the current-vs-time-travel split</strong>
+— RFC 0002. This RFC consumes that layout; it does not change it.</li>
+<li><strong>Reclamation policy</strong> — RFC 0007. This RFC defines only how a reader
+<em>reacts</em> to a view falling outside the retention window.</li>
+<li><strong>The sync↔async / runtime model</strong> under the DuckDB extension — RFC 0010.</li>
+<li><strong>The attach-option surface</strong> that configures the cache tiers — RFC
+0006. This RFC defines the machinery those options drive.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="background">Background</h2><a class="sl-anchor-link" href="#background"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Background”</span></a></div>
+<p>RFC 0002 makes the current-catalog load a scan of <code dir="auto">current</code> and time travel a scan
+of <code dir="auto">current</code> + the relevant <code dir="auto">history</code> ranges; it merges <code dir="auto">ducklake_snapshot</code> and
+<code dir="auto">ducklake_snapshot_changes</code> into one immutable <code dir="auto">snapshot</code> record per snapshot, and
+notes that <code dir="auto">snapshot</code> is append-only and <code dir="auto">sys/head</code> holds the latest committed
+<code dir="auto">snapshot_id</code>. It also chose <em>not</em> to maintain a persistent name index —
+name→id resolution runs “against the in-memory catalog snapshot that a client
+builds by scanning <code dir="auto">current</code> at attach.”</p>
+<p>RFC 0004 fixes the topology: readers attach through read-only handles
+(SlateDB <code dir="auto">DbReader</code>) that follow the manifest with no coordination and no
+bound on their number, and a commit is one atomic batch that advances
+<code dir="auto">sys/head</code> under transactional write-write conflict detection.</p>
+<p>RFC 0003 makes <code dir="auto">CatalogSnapshot</code> an immutable value — “Reads issue no store
+I/O after the snapshot is built; a <code dir="auto">CatalogSnapshot</code> is a value, not a cursor”
+— and has <code dir="auto">commit</code> read a <em>fresh</em> <code dir="auto">CatalogSnapshot</code> on every attempt.</p>
+<p>RFC 0007 introduces the retention horizon <code dir="auto">H</code> (snapshots <code dir="auto">&lt; H</code> are reclaimed)
+and the grace window <code dir="auto">G</code> (bytes survive <code dir="auto">G</code> past scheduling), and states the
+operator contract that the retention window must exceed the maximum reader
+duration. This RFC honors that contract on the reader side.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="design">Design</h2><a class="sl-anchor-link" href="#design"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Design”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="consistency-of-lookup-and-inline-operations">Consistency of lookup and inline operations</h3><a class="sl-anchor-link" href="#consistency-of-lookup-and-inline-operations"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Consistency of lookup and inline operations”</span></a></div>
+<p>Equality, IN, range, and NULL index lookups, full inline scans, and requested
+inline-row lookups guard the entire operation, including definition checks,
+tombstones, chunk bodies, and schema reads. Manifest readers compare the full
+head stamp before and after the operation. An error is returned only after
+that comparison: a missing chunk during a refresh may be a torn pass rather
+than stored corruption. An unchanged pass preserves its original error.</p>
+<p>A changed pass is retried at most eight times. If every pass changes, the
+operation returns <code dir="auto">RetryBudgetExhausted</code>; it must not fall back to an
+unguarded scan. Writer-backed isolated transactions run the operation once.
+This boundary covers a single call, not several independent API calls.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="materialization-rests-on-one-read-point">Materialization rests on one read point</h3><a class="sl-anchor-link" href="#materialization-rests-on-one-read-point"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Materialization rests on one read point”</span></a></div>
+<p>The correctness foundation: building a <code dir="auto">CatalogSnapshot</code> issues <em>many</em> store
+reads (a <code dir="auto">current</code> range scan, <code dir="auto">history</code> ranges for time travel, the <code dir="auto">snapshot</code> record,
+<code dir="auto">sys/head</code>). These must observe one consistent store state, or a commit
+landing mid-build could yield a view that has a table’s new <code dir="auto">column</code> record
+but not its new <code dir="auto">file</code> record — a torn read.</p>
+<p>So materialization <strong>issues every get and scan against one read point</strong>.
+On a read-write handle that read point is a SlateDB primitive, not a
+hoped-for one: the pinned SlateDB version (0.14.x) exposes both
+<code dir="auto">Db::snapshot()</code> — a <code dir="auto">DbSnapshot</code> fixed at a sequence number, with the same
+<code dir="auto">get</code>/<code dir="auto">scan</code>/<code dir="auto">scan_prefix</code> surface as the live handle — and a
+<code dir="auto">DbTransaction</code>, which reads the MVCC view at its own start sequence and is
+what a commit attempt uses (see below). The moraine snapshot id <code dir="auto">S</code> is the
+<code dir="auto">sys/head</code> value read <em>under the same handle</em>. The result: the entire
+<code dir="auto">CatalogSnapshot</code> is a consistent cut at <code dir="auto">S</code>, immune to concurrent commits,
+with no lock or reader/writer coordination — the consistency is inherited
+from SlateDB’s read isolation, not re-implemented. The handle is released
+once the in-memory view is built; per RFC 0003 the finished
+<code dir="auto">CatalogSnapshot</code> touches the store never again.</p>
+<p>A read-only handle has no such primitive; the next section is what it does
+instead.</p>
+<p>Holding a read-snapshot is cheap: a <code dir="auto">DbSnapshot</code> is a <code dir="auto">(uuid, started_seq)</code>
+pair registered with an in-process snapshot manager, so open and drop are
+O(1) with no store I/O and no manifest write. The one holding cost is
+version retention — the manager’s <code dir="auto">min_active_seq</code> feeds SlateDB’s flush
+and compaction paths, so a live snapshot keeps pre-snapshot versions from
+being reclaimed in-process for as long as it is held. moraine holds one
+only for the duration of a single materialization and releases it before
+the <code dir="auto">CatalogSnapshot</code> is returned, so the retention window is one
+materialization long.</p>
+<p>Materialization also reads the <strong><code dir="auto">sys/migration</code> marker</strong> (RFC 0002 /
+RFC 0015) under the same handle. If the marker is present, a structural
+migration is rewriting the keyspace and any scan of it may be missing
+records mid-move; materialization fails loudly with the typed <code dir="auto">Migration</code>
+error (RFC 0003) rather than returning a silently partial catalog. This
+check is part of every materialization and refresh from format version 1
+onward — it must predate the first migration ever run, or old readers
+would have no way to know to refuse (RFC 0015).</p>
+<p><code dir="auto">snapshot_at(S')</code> (time travel) pins the same way, reads <code dir="auto">sys/head</code> only to
+validate <code dir="auto">S'</code> is resolvable (≥ RFC 0007’s horizon <code dir="auto">H</code>), and materializes from
+<code dir="auto">current</code> + <code dir="auto">history</code> filtered by begin/end per RFC 0002.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="a-read-only-handle-validates-its-cut-rather-than-pinning-one">A read-only handle validates its cut rather than pinning one</h3><a class="sl-anchor-link" href="#a-read-only-handle-validates-its-cut-rather-than-pinning-one"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “A read-only handle validates its cut rather than pinning one”</span></a></div>
+<p>The paragraph above holds for a read-write handle, which materializes
+through a <code dir="auto">DbTransaction</code> (or could open a <code dir="auto">DbSnapshot</code>) and so reads at one
+sequence by construction. A <strong>read-only</strong> handle has neither. SlateDB
+0.14’s <code dir="auto">DbReader</code> offers exactly two modes and neither is a live consistent
+cut: pinned to an explicit <code dir="auto">checkpoint_id</code> it never spawns a manifest
+poller, so its state is fixed and no later commit is ever visible; with no
+checkpoint it polls, and every <code dir="auto">get</code>/<code dir="auto">scan</code> takes a fresh clone of whatever
+state the poller last installed. Two reads of one materialization can
+therefore straddle a refresh.</p>
+<p>Validating optimistically on <code dir="auto">DbReader::manifest()</code> does not work, and this
+is worth stating because it is the obvious thing to try: the reader’s
+WAL-replay path rebuilds its state carrying <code dir="auto">manifest: current.manifest .clone()</code>, so the manifest id is <em>unchanged</em> by exactly the refresh that
+makes a new commit visible. A manifest-id check would validate every read
+it needed to reject. <code dir="auto">DbStatus::durable_seq</code> does move on both refresh
+paths, but it is advanced <em>before</em> the state is installed, so a reader can
+observe the new sequence and then read the old state.</p>
+<p>So moraine does not look for the answer in SlateDB’s metadata; it puts a
+stamp in its own keyspace. <strong><code dir="auto">sys/head</code> carries a batch count alongside the
+snapshot id, and every batch writes the record and increments the count</strong> —
+a maintenance batch that reuses the snapshot id included (RFC 0004). The
+pair therefore changes whenever any committed state does. A read-only
+materialization reads the head record, runs its scans, reads it again, and
+accepts the result only if the stamp did not move; a pass that straddled a
+refresh is discarded and re-run. The reader’s state advances only when its
+manifest poller runs, not on every commit, so a pass that loses one round
+very rarely loses the next, and a bounded budget of them ends in a typed
+error rather than a torn view.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="a-read-write-handle-resolves-the-head-without-reading-it">A read-write handle resolves the head without reading it</h3><a class="sl-anchor-link" href="#a-read-write-handle-resolves-the-head-without-reading-it"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “A read-write handle resolves the head without reading it”</span></a></div>
+<p>The stamp above is what a <em>read-only</em> handle needs, because it follows
+another process’s commits and cannot know when one landed. A <strong>read-write</strong>
+handle is in the opposite position: it holds the writer epoch, so it is the
+store’s only writer and nothing can move <code dir="auto">sys/head</code> under it. Reading the
+record back to learn where head is asks the store a question the handle
+already knows the answer to — and that point read is on every catalog
+read, every metadata dump, and so under every DuckLake statement.</p>
+<p>So a read-write handle resolves the head from <strong>the view it already
+holds</strong>: a <code dir="auto">CatalogSnapshot</code> carries the snapshot id and batch count it was
+built at, which on a sole writer <em>is</em> the head. The premise is that a held
+view is never behind the store, and that rests on four rules, all in the
+commit path:</p>
+<ul>
+<li>A head-advancing batch folds the view forward as it lands, or drops it if
+the fold cannot be applied faithfully.</li>
+<li>A head-preserving batch drops the view <em>before</em> its write becomes
+visible, since it reuses the snapshot id and only the batch count would
+give it away.</li>
+<li>A durable write that fails for any reason other than a lost race drops
+the view: a lost race provably did not land, and everything else leaves
+that open.</li>
+<li>A durable write whose task never reports back drops it too, for the same
+reason.</li>
+</ul>
+<p>The held view is only ever a <strong>lookup key</strong>, never an answer inferred in
+place of one. A dump whose projection does not stand at that stamp falls
+through to the ordinary session path and reads the head there, so rows are
+never installed under a stamp the store did not supply.</p>
+<p>An index lookup, and the inline membership check under a row location, go
+one step further on a warm read-write handle: they open <strong>no session</strong>. The
+definition each needs is in the held view, and what each then reads is a
+set of live-only keys, so the probes run as plain reads against the
+writer’s <code dir="auto">Db</code> rather than through a <code dir="auto">DbTransaction</code>. Opening a transaction
+takes SlateDB’s transaction manager lock — a global write lock, measured
+in <code dir="auto">BENCHMARK.md</code> as the ceiling on concurrent lookups — and on this
+handle it bought nothing: the store’s only writer is the handle itself, so
+the only commit that can land during a probe is its own, and a lookup is
+head-only by contract. The pass re-reads the held view after its probes;
+if a commit replaced it in between, the pass is discarded and re-run
+under a session, so a result served warm is one a session at that view
+would have returned. The inline check takes this path only for a table
+whose chunk directory has already been verified complete — the
+verification needs an isolated session, and the locator-only walk the
+warm pass uses rests on it. A read-only handle keeps the session path for
+both: it follows another process’s commits, and only a session gives it a
+cut.</p>
+<p>What a warm read does not skip is the fence check, because a handle that
+served its cache past its own displacement would answer from a catalog the
+store has moved on from, and quietly. It does not open a session to perform
+it: SlateDB reports a close by setting it on a status channel the handle
+subscribes to at open, so the check is a watch borrow — no store read, no
+manifest copy, and no entry in the transaction manager, which is what
+opening a session takes a global write lock to make. The reach is identical,
+since closing the <code dir="auto">Db</code> is what the fence does. The difference is that a
+watch borrow shares between readers and the lock does not: measured, warm
+throughput plateaus where it used to fall away (<code dir="auto">BENCHMARK.md</code>).</p>
+<p>What a warm read <em>does</em> skip, on a writer only, is the <code dir="auto">sys/migration</code>
+refusal a session otherwise carries. The marker exists to stop a scan of a keyspace
+being rewritten, and a read served from the held view performs no scan —
+but the deeper reason is that on a read-write handle the probe was never
+the guard. A migrator takes the writer epoch before it writes anything, so
+a handle it displaces is fenced before a marker exists, and a fenced handle
+reads its own state, which that marker never reached: it reports <code dir="auto">Fenced</code>,
+never <code dir="auto">Migration</code>. The probe fires on a writer only for a marker written
+through that handle’s <em>own</em> transaction, which no migrator does. The fence
+check is the guard, and that is the one the session still performs.</p>
+<p>A <strong>read-only</strong> handle is the one a migration can start under — a migrator
+fences a writer but leaves a reader following the store — so every session
+it opens re-establishes the marker’s absence, and its cold-open refuses a
+store already carrying a marker. A writer establishes it while cold too,
+which is what catches a migration a crashed predecessor left behind.</p>
+<p>What re-establishing costs, though, is no longer a marker read per
+session. The marker is an absent key on every store that is not
+mid-migration, and an absent key is the store’s most expensive read — a
+bloom filter answers “might be present”, never “absent”, so the read walks
+every level before it can say no. Warm-cache microbenchmarks made that
+walk look free (6.4 µs, no object-store GET — <code dir="auto">BENCHMARK.md</code>); production
+flush telemetry showed it as a fixed cache-missing term under every commit
+and every read session. So a handle keys the marker’s absence on the
+<strong>head it observed it at</strong>: a session whose head matches the recorded
+stamp opens without re-reading the marker, and one whose head moved
+re-reads and re-stamps. Soundness comes from the start batch, not the
+cache — a migration start moves the head in the same batch as the marker,
+and <code dir="auto">migration::start</code> is the marker’s only writer (RFC 0015), so a marker
+cannot appear under an unmoved head. A committer maintains the stamp from
+the other side without any read at all: winning the head CAS proves no
+batch — a migration start included — landed since its base, so a landed
+commit records its own resulting head as marker-free.</p>
+<p>Carrying the migration state as a field on the head record would buy the
+same skip, and that design stays <strong>rejected</strong>, because the encoding is the
+easy half and the version gate is not. A reader may trust such a field
+only if every migration maintains it, so a durable field means nothing
+until a format bump forces every writer onto it — a one-way door, taken by
+default, closing the store to yesterday’s binary. The head-keyed stamp
+needs no gate: it is an in-memory judgment each handle re-derives from
+reads it was making anyway, and the start-batch invariant it rests on has
+no legacy violations to grandfather (no released binary has ever written
+the marker — RFC 0015).</p>
+<p>Making the head write unconditional has a second effect the design wants:
+<code dir="auto">sys/head</code> becomes the one key every batch touches, so SlateDB’s
+write-write detection makes it the single conflict anchor. A maintenance
+batch staged against a base another commit has since moved now loses its
+race and re-drives, where before it could land on stale premises.</p>
+<p><strong>Commit attempts materialize through the transaction, not a
+read-snapshot.</strong> SlateDB’s write-write conflict detection sees only commits
+that land after the transaction’s start sequence. If a commit attempt
+materialized its planning <code dir="auto">CatalogSnapshot</code> from a <code dir="auto">DbSnapshot</code> pinned at
+sequence <code dir="auto">X</code> and then opened its <code dir="auto">DbTransaction</code> at sequence <code dir="auto">Y &gt; X</code>, a
+concurrent commit landing in the <code dir="auto">X → Y</code> gap would invalidate the attempt’s
+premises <em>without</em> tripping conflict detection — the attempt’s <code dir="auto">sys/head</code>
+write only conflicts with writes after <code dir="auto">Y</code>. The commit would land on stale
+premises: a silent lost update. So the rule is: a <code dir="auto">CatalogSnapshot</code> built
+for a commit attempt (RFC 0003 <code dir="auto">commit</code>, each retry included) is
+materialized <strong>through the <code dir="auto">DbTransaction</code> itself</strong> — SlateDB transactions
+expose the same <code dir="auto">get</code>/<code dir="auto">scan</code>/<code dir="auto">scan_prefix</code> surface, reading the MVCC view
+at the transaction’s own start sequence — so the premise view and the
+conflict-detection window are anchored to the same sequence number by
+construction, and no gap exists. Concretely, materialization is generic
+over its read source: <code dir="auto">DbSnapshot</code> (or <code dir="auto">DbReader</code>) for plain readers,
+<code dir="auto">DbTransaction</code> for commit attempts. The finished <code dir="auto">CatalogSnapshot</code> is
+identical in both cases; only the handle it was built through differs.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="snapshot-isolation-is-free">Snapshot isolation is free</h3><a class="sl-anchor-link" href="#snapshot-isolation-is-free"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Snapshot isolation is free”</span></a></div>
+<p>Because <code dir="auto">snapshot</code> is immutable and every entity version is append-only with an
+<code dir="auto">end_snapshot</code> that is only ever <em>set once, at commit</em> (RFC 0002/0004), the set
+of records visible at <code dir="auto">S</code> never changes after <code dir="auto">S</code> exists. A concurrent commit
+<code dir="auto">S+1</code> adds records and ends others <em>for <code dir="auto">S+1</code></em>, but nothing it does alters what
+<code dir="auto">begin ≤ S &lt; end</code> selects. A held <code dir="auto">CatalogSnapshot</code> is therefore a stable
+snapshot-isolated view for its whole lifetime with no defensive copying beyond
+the initial materialization — this is why RFC 0003 can promise “no store I/O
+after build.”</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="incremental-refresh-from-the-changelog">Incremental refresh from the changelog</h3><a class="sl-anchor-link" href="#incremental-refresh-from-the-changelog"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Incremental refresh from the changelog”</span></a></div>
+<p>A long-lived reader advances from <code dir="auto">S</code> to a newer head <code dir="auto">S+k</code> without
+rescanning <code dir="auto">current</code>:</p>
+<ol>
+<li>Read the head stamp and the <code dir="auto">sys/migration</code> marker (refusing with
+<code dir="auto">Migration</code> if the marker is present, as in materialization). If the
+stamp is unchanged, done — the cached view is current.</li>
+<li>Otherwise read <code dir="auto">changelog/{S+1 .. head}</code>. Each record holds the
+<strong><code dir="auto">current</code> keys its batch wrote</strong> — moraine’s own entity-grained
+changelog, recorded from the write set the commit already assembled.</li>
+<li>Point-read the union of those keys, still under the same handle — a
+refresh, like a materialization, is one consistent cut. Each key’s value
+at head is that entity’s new state and an absent key is one that ended,
+which is precisely the shape of a staged write set, so the replay is
+applied by the same fold the committer uses on its own batch. Stamp the
+view with head’s snapshot record and batch count.</li>
+</ol>
+<p>Entity maps use structurally shared ordered trees (<code dir="auto">imbl::OrdMap</code>), including
+both levels of table-scoped maps. Name and index-owner lookups use persistent
+hash maps. <code dir="auto">imbl</code> 5 brings the unmaintained transitive <code dir="auto">bitmaps</code> crate
+(<a href="https://rustsec.org/advisories/RUSTSEC-2026-0247">RUSTSEC-2026-0247</a>);
+<code dir="auto">deny.toml</code> records a narrow exception for this maintenance advisory, to revisit
+on dependency upgrades. Cloning a view shares these trees; applying a change copies only
+the affected paths, preserving held readers. The snapshot record itself is
+copied. Replay work scales with changed records and tree height. The churn
+heuristic reads the base entity count in constant time: flat maps retain their
+lengths, and snapshot mutators maintain one total for nested records. Replacements
+leave that total unchanged; removals and cascades subtract only records actually
+removed, including staged statistics deletions. Historical mappings and file
+statistics retained by a table cascade remain counted. No step restates entity rules: the changelog is encoded
+keys and application uses the existing fold.</p>
+<p>The changelog lives in a subspace of its own rather than in the snapshot
+record. Measured in the record it grew snapshot rows 6.8× and slowed their
+scan 1.45× (<code dir="auto">BENCHMARK.md</code>), and snapshot rows are read by DuckLake at every
+transaction — a cost on the hot path for a benefit only a refresh takes.
+Moved out, the serve path pays nothing. Storage is bounded without help from
+expiry or a sweep: each commit writes its own record and deletes the one a
+fixed window back, so the subspace is flat at the window size whatever the
+commit count.</p>
+<p>DuckLake’s <code dir="auto">snapshot_changes</code> grammar is deliberately <em>not</em> the changelog
+here. It names tables, not entities; it carries created relations by name
+rather than id; and moraine’s own stats-only and schema-tag commits produce
+no entry in it at all, so replaying it would silently miss writes. The
+keys the batch wrote miss nothing by construction.</p>
+<p><strong>Fallback to full rematerialization</strong> when incremental is impossible or not
+worth it:</p>
+<ul>
+<li><strong>A batch in the gap minted no snapshot.</strong> Maintenance reclaims state
+under a reused snapshot id (RFC 0007, RFC 0008) and so writes no
+changelog. The head stamp’s batch count still records that it landed:
+when the count moves further than the gap has snapshots, part of the gap
+is unrecorded and the reader rematerializes.</li>
+<li><strong><code dir="auto">S</code> fell below the horizon</strong> (<code dir="auto">S &lt; H</code>, RFC 0007). This needs no rule of
+its own: the retained changelog window is far shorter than any retention
+horizon, so a base that old lost its changelogs long before it lost its
+snapshots and reaches the fallback above. (If the reader specifically
+wanted the <em>old</em> <code dir="auto">S</code>, that snapshot is gone — see validity window.)</li>
+<li><strong>The changelog is not there.</strong> Either the commit declined to record one
+— it wrote more keys than the cap — or later commits swept it out of the
+retained window. Both read as an absent record and both mean rescan. The
+cap (4,096 keys) bounds the record, not the replay decision, and it is
+sized generously on purpose: a commit that records nothing forces every
+reader behind it to rematerialize, which costs far more than the
+changelog it declined to write, so an ordinary bulk flush — production
+showed one at 259 keys — must land inside it. The churn threshold below
+still decides whether a replay pays; the cap only decides whether the
+choice exists.</li>
+<li><strong>The gap is large</strong> relative to catalog size: a full <code dir="auto">current</code> rescan is
+cheaper than replaying a huge changelog. The crossover is measured, not
+reasoned — it sits at a churn share of <strong>~0.57</strong> of the live entity count
+(<code dir="auto">BENCHMARK.md</code> → Changelog replay vs. rematerialization) — and the
+threshold is set at <strong>half</strong>, declining just before replay stops paying.
+The two paths produce identical views, so the choice is purely a cost
+optimization.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="committer-read-your-writes">Committer read-your-writes</h3><a class="sl-anchor-link" href="#committer-read-your-writes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Committer read-your-writes”</span></a></div>
+<p>The single committer (RFC 0004) holds a planning <code dir="auto">CatalogSnapshot</code>. After it
+commits <code dir="auto">N → N+1</code>, it must see its own write to plan the next commit. It does
+<strong>not</strong> re-read: it already assembled the <code dir="auto">WriteBatch</code>, so it folds the exact
+staged mutations into its in-memory view and stamps it <code dir="auto">N+1</code>. This is strictly
+cheaper than incremental refresh (no <code dir="auto">snapshot</code> scan, no re-read) and is always
+correct because the committer <em>is</em> the source of the delta. Under RFC 0004
+group commit, the committer folds in the whole committed group at once. A
+committer that loses the CAS and retries simply rebuilds from the new head like
+any reader.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="validity-window-and-expiry-reaction">Validity window and expiry reaction</h3><a class="sl-anchor-link" href="#validity-window-and-expiry-reaction"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Validity window and expiry reaction”</span></a></div>
+<p>A held <code dir="auto">CatalogSnapshot</code> at <code dir="auto">S</code> names object-store files (<code dir="auto">data_files_of</code>,
+<code dir="auto">delete_files_of</code>). RFC 0007 may schedule those files for deletion once <code dir="auto">S</code>
+passes below the horizon and delete their bytes after the grace window <code dir="auto">G</code>. So
+a view is safe to <em>use for data access</em> only while <code dir="auto">S</code> remains within the
+retention window.</p>
+<p>This RFC states the reader-side contract that RFC 0007’s operator obligation
+implies:</p>
+<ul>
+<li>A <code dir="auto">CatalogSnapshot</code> whose <code dir="auto">S</code> is still <code dir="auto">≥ H</code> is fully valid.</li>
+<li>A reader that tries to materialize or refresh at an <code dir="auto">S</code> that has fallen below
+<code dir="auto">H</code> — detected because its <code dir="auto">snapshot</code>/<code dir="auto">history</code> range is no longer resolvable —
+receives a typed <strong><code dir="auto">SnapshotExpired</code></strong> error (RFC 0003 error taxonomy, one
+variant per failure domain) and must re-resolve from head.</li>
+<li>The safety margin is the retention window minus the reader’s lifetime; RFC
+0007 sizes the window to exceed the maximum reader duration, so a
+well-behaved reader that refreshes faster than <code dir="auto">G</code> never observes expiry.</li>
+</ul>
+<p><strong>What “maximum reader duration” means under DuckLake</strong> is one explicit
+transaction, not one statement. DuckLake holds a single catalog snapshot
+per <code dir="auto">DuckLakeTransaction</code>: it is resolved lazily on the first catalog
+access (<code dir="auto">DuckLakeTransaction::GetSnapshot</code>, one <code dir="auto">SELECT ... WHERE snapshot_id = (SELECT MAX(snapshot_id) ...)</code>), cached under a lock for the
+transaction’s whole life, and never re-read per statement — the only reset
+is the commit-retry path. In autocommit mode DuckDB builds a fresh
+transaction per statement, so there the snapshot is per statement. So the
+retention window must exceed the longest open <code dir="auto">BEGIN … COMMIT</code>, which a
+user controls and moraine cannot bound; the statement-length reading would
+size it far too tightly.</p>
+<p>The reader never silently dereferences a reclaimed file: either its <code dir="auto">S</code> is
+still retained (files present) or materialization/refresh fails loudly with
+<code dir="auto">SnapshotExpired</code>.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="a-ducklake-transaction-reads-one-materialization-per-metadata-table">A DuckLake transaction reads one materialization per metadata table</h3><a class="sl-anchor-link" href="#a-ducklake-transaction-reads-one-materialization-per-metadata-table"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “A DuckLake transaction reads one materialization per metadata table”</span></a></div>
+<p>Everything above concerns a reader holding a <code dir="auto">CatalogSnapshot</code>. DuckLake
+holds none: it reads the synthesized <code dir="auto">ducklake_*</code> tables (RFC 0006) as
+SQL, and each scan of one is a separate dump served at whatever <code dir="auto">sys/head</code>
+is when it runs. The <code dir="auto">SnapshotExpired</code> contract is therefore unreachable
+from that path — a table hands back a row set, not a typed error, so a
+snapshot that vanished mid-statement reaches DuckLake as a missing <em>row</em>
+and it has nothing to re-resolve from.</p>
+<p>That matters because DuckLake reads one table twice in one statement.
+<code dir="auto">GetSnapshot</code> is <code dir="auto">SELECT ... WHERE snapshot_id = (SELECT MAX(snapshot_id) ...)</code> over <code dir="auto">ducklake_snapshot</code> — two table references, two binds, two
+dumps. Served at two heads, an expiry (or an ordinary commit) landing
+between them leaves the maximum naming a row the other scan never saw, and
+DuckLake reports the tear as “No snapshot found”.</p>
+<p>So the shim pins the read the same way the core pins a materialization,
+one level up: <strong>a synthesized table is dumped once per DuckDB transaction
+and every reader of it in that transaction is served the same rows.</strong> The
+<code dir="auto">MoraineTransaction</code> that already owns one <code dir="auto">moraine_snapshot</code> for its
+catalog entries owns these too, and releases them with itself.</p>
+<p>Two boundaries are deliberate:</p>
+<ul>
+<li><strong>The pin is per table, not per transaction.</strong> Each table is materialized
+at the head its first scan observed, so a statement joining two of them
+can still straddle a commit. Closing that needs one read point across
+dumps — an ABI-level read session — which would hold a SlateDB
+transaction open for a whole user transaction and contradicts this RFC’s
+one-materialization-long retention. Left open deliberately, not by
+oversight.</li>
+<li><strong>A writing transaction is not pinned this way.</strong> Once it opens a staged
+transaction, every read of a writable kind goes through that
+transaction’s dumps: those already read at one fixed point <em>and</em> overlay
+the rows staged so far, which is both the pinning and the read-your-
+writes a writer needs. Nothing caches over them, because that is the
+surface DuckLake’s commit loop re-reads between attempts (RFC 0007) and
+a retry served its first attempt’s state would re-check its conflict
+matrix against a premise that already lost.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="caching-is-per-handle-in-memory-logical">Caching is per-handle, in-memory, logical</h3><a class="sl-anchor-link" href="#caching-is-per-handle-in-memory-logical"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Caching is per-handle, in-memory, logical”</span></a></div>
+<p>The materialized in-memory catalog <em>is</em> the cache. A <code dir="auto">Catalog</code> handle (RFC
+0003, an <code dir="auto">Arc</code>-backed clone-cheap handle over <code dir="auto">slatedb::Db</code>) holds the
+latest <code dir="auto">CatalogSnapshot</code> and shares it; a refresh replaces it. Every head
+read — the public <code dir="auto">snapshot()</code> and a commit attempt’s planning view alike —
+serves from it when its stamp matches, advances it across the gap when it
+does not and the gap replays, and rematerializes otherwise. The view is
+shared, never copied out: a warm read costs one point read on <code dir="auto">sys/head</code>
+and nothing else.</p>
+<p>The cached view is keyed by the <strong>whole head stamp</strong>, snapshot id and batch
+count together, so a maintenance commit that reuses the id cannot leave a
+view of the state it reclaimed serving. A read-write handle additionally
+invalidates the cache before such a commit’s write becomes visible, since
+it is the writer and knows. That alone would not make installing safe from
+a read path: a reader that read head and then installed could land its
+now-stale view <em>after</em> an invalidation, resurrecting content the
+invalidation existed to discard. So the cache carries an <strong>install epoch</strong>,
+bumped on every invalidation. A reader captures the epoch before its first
+store read and installs only if the epoch still matches; any interleaved
+invalidation makes the install a no-op and the reader simply keeps the view
+it computed. Installation is thus compare-and-set, and no path needs to
+discard a view it has already paid for.</p>
+<p>All head-view consumers, including equality, batched equality, range, and NULL
+index lookups, install their computed catalog view under this rule. Capture the
+epoch before opening the read session. Index entries are still resolved anew
+inside that session against the same head as the cached metadata; only the
+catalog view is reused.</p>
+<p><strong>Read-only handles cache too.</strong> A reader folds no batch of its own — it
+has none — so the changelog replay above is the only way it advances, and
+the head stamp tells it exactly which store state its held view stands at.
+That is what the validated cut buys: without it a torn view would persist
+and compound rather than being discarded with the read that built it.</p>
+<p>The migration marker’s absence is established before the cache is
+consulted — from the head-keyed stamp when the head has not moved, from
+the store when it has — so a warm handle refuses a mid-migration store
+exactly as a cold one does: a cached view must never be the reason a
+reader sails through a keyspace move.</p>
+<p>There is:</p>
+<ul>
+<li><strong>No cross-process cache.</strong> RFC 0004’s “many readers” are independent
+processes/handles; each materializes its own view. Coordinating a shared
+logical cache would reintroduce exactly the coordination the topology avoids.</li>
+<li><strong>One physical cache, specified below.</strong> Beneath the logical caches sits
+exactly one byte-tier cache for the catalog (“One block cache: two
+slots, one budget”) and none beside it. This RFC’s cache is the
+<em>logical</em> materialized catalog; the block cache keeps its rebuild cheap
+when the store is remote.</li>
+</ul>
+<p>The view is whole-catalog, and that fixes where filtering can usefully
+happen. DuckDB pushes projection into the <code dir="auto">ducklake_*</code> scans but never a row
+filter, so no predicate reaches the store on the serve path; every metadata
+read is a full range scan of its entity kind, and DuckDB filters over the
+returned rows. Server-side filter pushdown therefore cannot reduce work while
+the whole view is resident — there is nothing left to avoid fetching. Pushdown
+becomes worth building only if moraine stops materializing the whole catalog,
+because lazy materialization needs predicates to know what to fetch. The two
+are one decision, and this RFC rejects both: the full view keeps every accessor
+store-free, and no profile has shown its memory or the replay base-view copy to
+be a problem. A measured live-catalog memory problem would replace this
+decision and take predicate pushdown with it; it does not leave an unbounded
+implementation task in the meantime.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="maintained-served-projections">Maintained served projections</h3><a class="sl-anchor-link" href="#maintained-served-projections"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Maintained served projections”</span></a></div>
+<p>The DuckDB shim serves row-faithful <code dir="auto">ducklake_*</code> projections through the
+<code dir="auto">dump_*</code> functions, and DuckLake re-reads three of them — snapshots, table
+stats, table column stats — at the start of <strong>every</strong> transaction. Rebuilding
+each from a subspace scan per statement makes small-commit latency scale with
+history. Those three projections are therefore <em>maintained</em>, by the same
+principle as committer read-your-writes:</p>
+<ul>
+<li>
+<p>A read-write <code dir="auto">Catalog</code> holds a decoded projection state keyed by the head
+snapshot id it was built at. The first serve pays the full scan and installs
+the state; every commit <strong>folds its own committed batch</strong> into it (the
+committer is the source of the delta), stamping the new head.</p>
+</li>
+<li>
+<p>Every serve re-reads <code dir="auto">sys/head</code> (one point read). If the state’s head does
+not match, the serve rebuilds from a full scan and reinstalls — it never
+serves a mismatched state. Correctness rests on this head check, not on
+fold-in completeness: a missed or undecodable fold clears the state and
+degrades to a rescan, never to wrong rows.</p>
+</li>
+<li>
+<p>The serving contract is row-faithfulness: a maintained projection is equal
+to a fresh scan at the same head, always.</p>
+</li>
+<li>
+<p>Scope: <strong>both</strong>, on one key. A read-write handle folds each batch forward
+and a read-only one folds nothing, but folding is not what decides whether
+a projection may be served — the head stamp is, and a reader reads the
+same stamp the writer wrote. So every projection here is keyed on the
+whole stamp rather than the snapshot id, and a reader serves from it on a
+match and rescans on a miss.
+The distinction is load-bearing rather than pedantic: a maintenance batch
+reuses the snapshot id while changing what a scan finds, so an id-keyed
+projection would serve a reader the state that batch reclaimed. A writer
+never noticed, because it folds every batch and is therefore never stale.
+Keying on the stamp is what makes the reader’s case safe, and once it is
+safe there is no reason left to withhold it — each of these dumps scans
+the whole of <code dir="auto">current</code>, so a reader rescanning per call pays for it on
+every query, not once at attach. A reader’s scan runs under the same
+validated cut every read-only pass does, so the two scans of the entity
+dump observe one store state.</p>
+</li>
+<li>
+<p>The fold reads its stamp out of the batch it is folding. Every batch
+writes <code dir="auto">sys/head</code> (RFC 0004), so the head record is among the staged
+writes, and taking it from there rather than being told alongside them
+makes it impossible for the two to disagree. A batch arriving without one
+cannot be attributed to a state, so it clears the projections rather than
+advancing them — unreachable by construction, and a guard rather than a
+path.</p>
+</li>
+<li>
+<p>The dumps clone only what they return. The record set behind them is
+shared, and a per-kind dump filters it by reference rather than copying
+it whole — populating DuckLake’s metadata tables issues two dozen of
+them, and copying the catalog per call would make the cache the expensive
+path.</p>
+</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="store-facts-outlive-view-invalidation">Store facts outlive view invalidation</h3><a class="sl-anchor-link" href="#store-facts-outlive-view-invalidation"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Store facts outlive view invalidation”</span></a></div>
+<p>Everything above is keyed by the head stamp and dropped or replaced when
+the state it describes stops standing. Three cached facts follow a
+different rule, because each describes the store rather than a view of it,
+and each rests on a monotonicity the store enforces rather than on
+invalidation discipline. Invalidation leaves all three standing.</p>
+<ul>
+<li><strong>The format floor.</strong> <code dir="auto">sys/format</code> is forward-only: no writer lowers it.
+A version once observed is therefore a permanent lower bound — seeded at
+open from the validated format, raised when a landed batch carries a
+stamp (true once the batch lands, whatever a read said before). A commit
+whose target format sits at or below the floor owes no stamp and reads
+nothing; only a commit reaching <em>above</em> the floor reads the stamp before
+writing it (RFC 0015 owns what the stamp means).</li>
+<li><strong>The migration-clear head.</strong> The head at which <code dir="auto">sys/migration</code> was
+observed absent (“A read-write handle resolves the head without reading
+it”, above). Keyed on the whole head stamp, so it is exact rather than
+monotone; its soundness is RFC 0015’s start-batch invariant, and every
+landed commit restamps it for free.</li>
+<li><strong>Inline chunk-directory completeness, per table.</strong> The chunk-range
+directory (RFC 0005) names every live chunk once verified against a full
+chunk walk — and stays that way only when the store format shuts out
+writers that predate the directory, since from then on every chunk
+arrives with its locator in the same batch. Verified once, remembered,
+and monotone from there; RFC 0005 owns who verifies, who heals, and
+which sessions may judge.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="the-stack-named-end-to-end">The stack, named end to end</h3><a class="sl-anchor-link" href="#the-stack-named-end-to-end"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “The stack, named end to end”</span></a></div>
+<p>The caches a moraine-backed query crosses, top to bottom:</p>
+<table>
+<thead>
+<tr>
+<th>tier</th>
+<th>holds</th>
+<th>keyed by</th>
+<th>budget</th>
+<th>who evicts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DuckDB external-file cache</td>
+<td>Parquet byte ranges of data files</td>
+<td>path + version tag</td>
+<td><code dir="auto">memory_limit</code> (buffer-manager blocks)</td>
+<td>DuckDB buffer manager</td>
+</tr>
+<tr>
+<td>DuckDB metadata caches</td>
+<td>Parquet footers, HTTP metadata</td>
+<td>path</td>
+<td>unbounded, opt-in</td>
+<td>never / on error</td>
+</tr>
+<tr>
+<td>DuckLake catalog cache</td>
+<td>schema/catalog entries; the per-transaction snapshot</td>
+<td>snapshot id + <code dir="auto">schema_version</code></td>
+<td>live-catalog-sized</td>
+<td><code dir="auto">schema_version</code> move; transaction end</td>
+</tr>
+<tr>
+<td>shim <code dir="auto">MetadataRows</code></td>
+<td>decoded rows per synthesized table</td>
+<td>head stamp at first scan</td>
+<td>per transaction</td>
+<td>transaction end</td>
+</tr>
+<tr>
+<td>core logical caches</td>
+<td><code dir="auto">CatalogSnapshot</code>, entity record set, maintained projections</td>
+<td>head stamp + install epoch</td>
+<td>one catalog’s decoded size, reported by <code dir="auto">projection_bytes</code></td>
+<td>replaced on stamp move</td>
+</tr>
+<tr>
+<td>core scoped-read metadata</td>
+<td>parsed Parquet footer and page indexes used by equality-index upkeep, and file row-id summaries</td>
+<td>object-store location + path + file size</td>
+<td>process-wide share of <code dir="auto">CACHE_MEMORY</code>, to a ceiling, over <code dir="auto">CACHE_DIR/auxiliary-v2</code></td>
+<td>byte-bounded LRU (foyer), recovered on restart</td>
+</tr>
+<tr>
+<td>SlateDB block + meta cache</td>
+<td>decoded SST blocks, indexes, filters</td>
+<td>scoped SST id + offset</td>
+<td>one cache per attached store: an even share of the process budget in memory over <code dir="auto">CACHE_DIR/&lt;store&gt;/blocks</code></td>
+<td>LRU-ish (foyer), recovered on restart</td>
+</tr>
+</tbody>
+</table>
+<p>Two findings drove this section. Before consolidation, one catalog byte could
+be resident in five tiers at once, four of them refilled from the tier below on
+every miss — duplication that costs copies as well as memory. And SlateDB’s
+per-store cache defaults (hundreds of MiB in memory, 16 GiB on disk,
+<em>multiplied by attached stores</em>) were bounded by nothing DuckDB could see, so a
+host attaching several catalogs was over-committed by construction. The
+subsections below take the row tiers (duplication), DuckLake’s tier (composed
+with, not consolidated), the byte tier (consolidated), and the data tier
+(DuckDB’s, untouched).</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="shared-budget-separate-cache-engines">Shared budget, separate cache engines</h3><a class="sl-anchor-link" href="#shared-budget-separate-cache-engines"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Shared budget, separate cache engines”</span></a></div>
+<p>The SlateDB caches and the scoped reader’s parsed-Parquet cache share a
+<strong>budget and process lifetime, not an entry store</strong>. <code dir="auto">CACHE_MEMORY</code> is split
+once, at the first attach: the auxiliary metadata allowance comes off the
+top, and the remainder is the block budget, re-split evenly across the
+stores currently attached on every attach and detach (a store with nothing
+attached keeps 1 MiB, its blocks staying on disk if it has any). No attach
+may construct another allowance or grow any cache beyond that split.</p>
+<p>The allowance is a <strong>share of the budget to a ceiling</strong>, not a fixed figure.
+It cannot share one eviction store with SlateDB’s — foyer’s cache is
+monomorphic and both the key and the value type are SlateDB’s own, neither
+constructible here — so the bytes are deducted whether the parsed-metadata
+cache fills them or not. That reservation is why it scales with the budget
+rather than standing at a small host’s number, and why it stops scaling
+rather than reserving unboundedly on a large one.</p>
+<p>The logical caches take no share of the budget at all. They are per handle,
+hold one head’s decoded state, and are replaced when the stamp moves rather
+than evicted under pressure, so they are bounded by the catalog’s own size —
+which is a bound, but not one an operator can set.
+<code dir="auto">ReadOnlyCatalog::projection_bytes</code> reports it, because a cache invisible to
+sizing is what this RFC’s goals rule out.</p>
+<p>Their storage engines remain separate because their entries have different
+identity, value, and tiering contracts:</p>
+<ul>
+<li>SlateDB owns keys scoped to an opened database and values such as SST
+filters, indexes, and decoded blocks. Its <code dir="auto">DbCache</code> controls concurrent-fill
+suppression, admission, and the optional Foyer disk tier.</li>
+<li>The scoped reader owns immutable <code dir="auto">Arc&lt;ParquetMetaData&gt;</code> values keyed by
+object-store identity, path, and recorded file size — one entry per file,
+whichever page-index policy first loaded it. A reader that needs the page
+index a resident footer lacks fetches only the index and upgrades the entry
+in place, so a whole-file read and a selective read of one file parse its
+footer once between them. They are useful only inside this process, stay
+memory-only, and are evicted by parsed byte weight. Concurrent misses for
+one key share one in-flight fetch and parse; the result enters the cache
+once, while a failed fill is shared only with its current waiters and
+remains retryable.</li>
+</ul>
+<p>Putting either value into the other engine would erase one of those
+contracts: teaching SlateDB’s closed entry type about Parquet couples the
+catalog store to data-file decoding, while type-erasing both behind a new
+hybrid cache loses SlateDB’s admission and disk behaviour. A common cache
+interface is therefore not a consolidation; it is a second implementation
+layer over two caches that still need their own keys and policies.</p>
+<p>The shared boundary is configuration and accounting. The slot calculation is
+the only source of capacity for both engines, and diagnostics must report the
+auxiliary allowance beside the SlateDB slots before it gains an independently
+tunable option. Parsed metadata never enters the block slot or its disk tier,
+and projected Parquet data never enters either Moraine cache.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="one-owned-store-scan-loop">One owned store scan loop</h3><a class="sl-anchor-link" href="#one-owned-store-scan-loop"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “One owned store scan loop”</span></a></div>
+<p>SlateDB’s scan iterator yields an owned, reference-counted <code dir="auto">Bytes</code> value.
+Moraine therefore has one canonical scan/decode primitive that moves that
+value from the iterator into the extractor. An extractor whose protobuf has
+shared byte fields consumes it with the owned decoder, allowing those fields
+to remain slices of the store allocation. Every other extractor borrows
+<code dir="auto">&amp;bytes</code> for the duration of its ordinary decoder call. The scan loop neither
+clones nor copies the value in either case.</p>
+<p>This is an ownership seam, not another scan abstraction. It continues to:</p>
+<ul>
+<li>decode and validate the key before invoking the extractor;</li>
+<li>preserve SlateDB’s key order and the caller’s declared <code dir="auto">ScanShape</code>;</li>
+<li>stop at the first key, framing, protobuf, or extractor error; and</li>
+<li>collect only the caller’s decoded result, never a second byte buffer.</li>
+</ul>
+<p>There is no borrowed and owned pair of scan loops. A second loop would make
+ordering, admission, and error semantics changes that have to be maintained
+twice for no saving: moving <code dir="auto">Bytes</code> is constant-time, and a decoder that does
+not retain it can borrow it locally.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="one-scan-pair-per-head">One scan pair per head</h3><a class="sl-anchor-link" href="#one-scan-pair-per-head"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “One scan pair per head”</span></a></div>
+<p>View materialization and the entity dumps each scan the store and each
+hold their own decoded copy of the same records at the same head. The rule
+replacing that: <strong>at one head stamp, <code dir="auto">current</code> and <code dir="auto">history</code> are each
+scanned and decoded at most once, into a shared record set every logical
+cache derives from by reference.</strong> Whichever read misses first runs the
+scan under its consistent cut and installs; the halves install
+independently (a head view needs <code dir="auto">current</code> only and must not grow a
+<code dir="auto">history</code> scan; the dumps add <code dir="auto">history</code> when first to want it). The commit
+fold and the changelog replay advance view and record set together — one
+cache entry with two faces, installed and invalidated under the existing
+install-epoch rule.</p>
+<p>Each half is keyed by encoded store key, so it iterates in scan order and
+takes a write the way the store does: a put replaces the record at its key,
+a delete removes it. A committed batch folds its <code dir="auto">current</code> writes into the
+<code dir="auto">current</code> half and its <code dir="auto">history</code> writes into the <code dir="auto">history</code> half, then
+restamps both; a batch that touches neither restamps them untouched. A
+reader’s changelog replay folds the <code dir="auto">current</code> keys it re-read into the
+<code dir="auto">current</code> half and drops the <code dir="auto">history</code> half, which the changelog does not
+name. A value the binary cannot decode drops the half it was bound for,
+never the other. Before this rule the halves were dropped by any batch
+into their subspace, so a write-then-read workload rescanned the live
+catalog from the store on every commit.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="a-reader-that-cannot-match-an-ended-version-does-not-read-them">A reader that cannot match an ended version does not read them</h3><a class="sl-anchor-link" href="#a-reader-that-cannot-match-an-ended-version-does-not-read-them"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “A reader that cannot match an ended version does not read them”</span></a></div>
+<p><code dir="auto">history</code> grows with every ended version and is pruned only by snapshot
+expiry, so a scan pair that always reads both halves sawtooths against the
+expiry cycle rather than against the live catalog. Most of what it reads is
+discarded: every DuckLake read of a versioned table carries
+<code dir="auto">{SNAPSHOT_ID} &gt;= begin_snapshot AND ({SNAPSHOT_ID} &lt; end_snapshot OR end_snapshot IS NULL)</code>, and at the head the second half of that keeps
+nothing from <code dir="auto">history</code>.</p>
+<p>The rule: <strong>a scan may read <code dir="auto">current</code> alone when its caller has been shown
+that no version in <code dir="auto">history</code> can satisfy it.</strong> Two filter shapes prove
+that, and the core — not the shim — checks the first:</p>
+<ul>
+<li>A record reaches <code dir="auto">history</code> by being ended, stamped with the snapshot that
+ended it, which is never past the head. A record there always carries an
+<code dir="auto">end_snapshot</code>; the <code dir="auto">IS NULL</code> arm never keeps one.</li>
+<li>So a reader keeping rows only while <code dir="auto">filter_snapshot &lt; end_snapshot</code>
+matches nothing in <code dir="auto">history</code> once <code dir="auto">filter_snapshot</code> has reached the head.</li>
+<li>Time travel reads behind the head and keeps the full pair, which is what
+makes the narrowing safe by construction rather than by care.</li>
+</ul>
+<p>The second shape is <code dir="auto">end_snapshot IS NULL</code> standing alone, which DuckLake’s
+own writes carry where its reads carry the pair — the statement that ends a
+rewritten file names the versions it may end and nothing else. It needs no
+comparison against the head at all: a record in <code dir="auto">history</code> always carries an
+<code dir="auto">end_snapshot</code>, so this conjunct excludes every one of them whatever the
+head stands at. It travels as a snapshot id like the bounded form, valued
+at every snapshot a store can reach, so one path serves both.</p>
+<p>The bound crosses the ABI as a snapshot id, not as a boolean, and the
+comparison against the head happens inside the same consistent read that
+serves the dump. A shim that compared them itself would be racing: a commit
+landing between its check and the dump moves the head past a bound that was
+at it, and the rows that commit ended would be dropped from a reader that
+still matches them.</p>
+<p>The shim’s side is recognizing the shape. It is a <code dir="auto">pushdown_complex_filter</code>
+that consumes nothing — the filter stays, DuckLake keeps applying it — so a
+bound recognized too generously costs a narrower materialization, never a
+wrong row, and the core still refuses a bound behind its read point.</p>
+<p>One scan is left out. Outside a staged transaction the narrowing is not
+applied at all: a plain reader resolves its head per scan, so a narrowed and
+an unnarrowed read of one table could stand at two heads — the tear
+“one materialization per metadata table” exists to prevent. Inside a staged
+transaction the read point is pinned for the transaction’s life, so no such
+tear exists, and that is where the flush path lives.</p>
+<p>A scan emitting row ids narrows like any other. Its rows are resolved back
+from those ids by the staged-write Sink, against the run that scan
+registered — which is the narrowed list itself — so an id names the row the
+scan handed it out for, whatever that scan left unread. The list a <em>second</em>
+materialization would build never enters it. That is what makes narrowing a
+writing scan safe, and it is the property the row-id resolution suite pins
+against a table holding versions in both halves.</p>
+<p>A live-only read inside a staged transaction — one bounded at the read
+point, or of an unversioned kind — is served from the head view the
+transaction resolved at that read point, which holds every live record in
+store key order, and scans nothing. Only a read that needs ended versions
+scans, and it scans both subspaces through the transaction as one cut.</p>
+<p>The narrowed materialization is cached beside the full one, never in place
+of it, and staging into the table drops both.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="the-stamp-crosses-the-abi">The stamp crosses the ABI</h3><a class="sl-anchor-link" href="#the-stamp-crosses-the-abi"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “The stamp crosses the ABI”</span></a></div>
+<p>The shim’s per-transaction pin is correct but wasteful as a lifetime:
+DuckLake re-reads metadata at every transaction start, autocommit makes
+every statement a transaction, and each rebuild pays the full ABI
+crossing for rows that are byte-identical whenever no commit landed in
+between. So the head stamp crosses the ABI: the attach holds one dumped
+row set per synthesized table under the stamp it was dumped at, and a
+transaction compares held rows against the stamp its own snapshot stands
+at before paying to re-dump. The pin becomes what it logically was —
+the transaction’s snapshot names the stamp, every table is served at it
+— and steady-state reads cross the ABI once per table per <em>commit</em>, not
+per transaction.</p>
+<p>The stamp costs nothing to obtain: the transaction already took its
+snapshot at start, and the view carries the head id and batch count it
+was materialized at, so no table read asks the store where it stands.
+On a read-only handle that removes one point read per table per
+statement; on a read-write handle it removes the crossing.</p>
+<p>Rows that straddled a commit are not held. The stamp is read before and
+after the dump and they must agree, because rows spanning two states
+stand at neither, and holding them under the earlier one would serve a
+concurrent reader at that stamp a row set from beyond it. The writer rule
+outranks all of this: staged dumps are never cached over. And the stamp
+is the whole stamp, id and batch count, because a maintenance batch
+reuses the id.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="ducklakes-caches-sit-on-top-and-the-stamps-compose">DuckLake’s caches sit on top, and the stamps compose</h3><a class="sl-anchor-link" href="#ducklakes-caches-sit-on-top-and-the-stamps-compose"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “DuckLake’s caches sit on top, and the stamps compose”</span></a></div>
+<p>DuckLake keeps two caches above all this: the per-transaction snapshot
+(which the validity-window section already leans on), and a
+schema-metadata cache keyed on the snapshot record’s <code dir="auto">schema_version</code>,
+which RFC 0004 advances only on shape-changing commits. Its freshness
+protocol is a read of <code dir="auto">ducklake_snapshot</code> at every transaction start;
+<code dir="auto">schema_version</code> then decides whether any <em>other</em> metadata table is read
+at all. So the tables DuckLake touches unconditionally — snapshots and
+the stats kinds — are exactly the maintained projections, and the read
+that validates DuckLake’s cache is the read the stamp work above makes
+one point read. The same validate-by-comparison runs at three altitudes
+on one signal, which makes <code dir="auto">schema_version</code> honesty a cache-stack
+obligation, not only a protocol one: always-increment defeats DuckLake’s
+tier and re-fetches every table’s columns through every tier below;
+never-increment serves stale schema from a perfectly coherent moraine
+stack.</p>
+<p>The granularity seam is safe by construction: a maintenance batch moves
+neither snapshot id nor <code dir="auto">schema_version</code> — invisible to DuckLake’s
+caches, correctly, since it changes files and history, never schema — and
+what DuckLake cannot see is what the batch count exists for, one tier
+down. DuckLake’s own catalog-cache race (<code dir="auto">SET threads=1</code>) is upstream’s
+bug in upstream’s tier, tracked by the presence test and nothing more.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="one-block-cache-two-priorities-one-budget">One block cache: two priorities, one budget</h3><a class="sl-anchor-link" href="#one-block-cache-two-priorities-one-budget"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “One block cache: two priorities, one budget”</span></a></div>
+<p>The physical tier is one shared cache instance per process, passed to
+every <code dir="auto">Db</code> and <code dir="auto">DbReader</code> the extension opens (SlateDB supports sharing;
+the sharer owns shutdown). SlateDB’s split structure is kept, because the
+split is the tuning:</p>
+<ul>
+<li>
+<p><strong>SST indexes, filters, and stats are protected by eviction priority,
+not by a slot.</strong> Every probe walks a filter and an index before it can
+touch a data block. Both kinds live in one cache: metadata is admitted at
+normal priority, data blocks at low, and foyer’s LRU drains the
+low-priority list entirely before it touches the high-priority one. So a
+scan cannot push filters out and leave every later probe fetching to learn
+“not here” — metadata is evicted only once no data block is left to evict
+— while metadata a store does not need is space blocks may use.</p>
+<p>A fixed fifth of the budget is what this replaces. That slot was a ceiling
+as much as a floor: metadata could not exceed 20% however idle the block
+cache was, so the only way to hold a large store’s filters was to inflate
+the whole budget fivefold and take the block cache that came with it.</p>
+<p>The share that replaces it is <code dir="auto">METADATA_PRIORITY_POOL_RATIO</code>, and it is
+<strong>not a reservation</strong>. A data block is admitted whatever the share says,
+so metadata a store does not need is space blocks simply take, and an
+unused protected share costs nothing. It binds in one case only: metadata
+larger than the share, where the surplus is demoted to compete with blocks
+on recency rather than being protected.</p>
+<p>That is also why the share is not measured from the store. A census-seeded
+share was tried and removed: for any store whose metadata fits under the
+share it changes nothing, because nothing was being held back; for a store
+that grew past its census it demotes metadata that would have fit; and for
+a store larger than the cache it lands on the same clamp. The census is
+what the sizing check below is for, not what the share is for.</p>
+<p>What the cache is sized against is <strong>residency, not a hit rate</strong>. A probe
+for an absent key clears a filter for every SST on its path — all of L0,
+which is unpartitioned, plus one per sorted run — so holding all but a
+little of the metadata still leaves most such probes fetching: at
+per-entry residency <code dir="auto">h</code> over <code dir="auto">N</code> SSTs the probe is served whole with
+probability about <code dir="auto">h^N</code>. 95% resident is not 95% as good as fitting.
+Absent-key probes are also the read no data-block cache can help with —
+they reach no block at all — so they are what this protection exists for.</p>
+<p>A store can still outgrow the protected share, and does so silently. Every
+attach reads the manifest once and compares the store’s filter, index, and
+statistics bytes against the share actually in force, warning when it
+cannot hold them; <code dir="auto">moraine_store_census</code> reports the same figures per
+subspace. The capacity is read after the open, so it is the one the
+process built rather than the one this attach asked for. The census
+figures are encoded lengths and the cache holds decoded entries, so the
+check understates the requirement and never overstates it.</p>
+<p>Three properties follow from the mechanism rather than from choice.
+Metadata past the protected share is <strong>demoted, not refused</strong> — it
+competes with blocks instead of being rejected — so occupancy may exceed
+the reported capacity, which bounds protection rather than residency. The
+pool is a share of a <strong>shard</strong>, and foyer divides the cache across eight
+by default, so the protection holds for metadata spread across shards as
+real SST keys are and degenerates only for a cache too small to shard.
+And <strong>LRU is required, not preferred</strong>: the priority hint is the only
+thing separating the two kinds, and foyer’s LFU, S3-FIFO, and Sieve
+ignore it.</p>
+<p>Neither <code dir="auto">CachedKey</code> nor <code dir="auto">CachedEntry</code> exposes an entry’s kind outside
+SlateDB, and <code dir="auto">DbCache::insert</code> carries both — data blocks as a scan reads
+them, metadata under write-through admission. The kind is therefore known
+only on the typed <code dir="auto">fetch_index</code> / <code dir="auto">fetch_filter</code> / <code dir="auto">fetch_stats</code> calls,
+which is where it is recorded so the two can be reported apart, and an
+untyped insert is treated as a block: admitting scan traffic into the
+protected share is the failure this design exists to prevent, and metadata
+that arrives untyped is protected again from its next typed fetch.</p>
+</li>
+<li>
+<p><strong>The cache is the foyer hybrid</strong> when <code dir="auto">CACHE_DIR</code> is set: a memory tier
+spilling at block grain to that device. Metadata shares it, so a
+metadata miss can be served from local disk rather than object storage.</p>
+</li>
+</ul>
+<p><code dir="auto">CachedObjectStore</code> is no longer configured — coexisting it with a hybrid
+cache double-writes disk (SlateDB’s own warning). Against it, this buys
+one budget however many stores attach (the multiply-by-stores sizing rule
+is deleted), block-grain fetches, admission control, and no double
+residency. Measured: a cold probe into a 37.8 MB <code dir="auto">index</code> run fetches
+62 KB where a part cache would have faulted 4 MiB, and a warm one
+fetches nothing (<code dir="auto">BENCHMARK.md</code>).</p>
+<p>The replacement covers the same <em>reusable</em> reads despite sitting a layer
+up. The object cache caught every GET, but manifest versions and WAL
+objects are read once per version and held in memory after, so the only
+traffic worth caching is SST blocks, indexes, and filters — exactly what
+the table store routes through the <code dir="auto">DbCache</code> interface, deduplicating
+concurrent misses on one key into a single fetch.</p>
+<p>A process-wide cache needs a process-wide executor, and this is the one
+place that is not automatic. foyer fixes the hybrid’s task spawner when
+the cache is <em>built</em>, so left to default the cache borrows the runtime of
+whichever attach happened to build it — a runtime a detach then drops,
+after which tokio cancels the tasks it owned and dropping an in-flight
+fetch takes foyer’s inflight lock with nothing left running to release
+it. The next attach to touch the cache blocks forever. So the cache
+builds its own runtime and hands foyer that; nothing the cache does runs
+on an attach’s runtime.</p>
+<p>SlateDB scopes a cache’s keys per opened handle from a process-local counter,
+so two stores’ same-numbered WAL SSTs stay apart within one process, but the
+counter resets with the process and follows attach order. One disk device
+shared by every store would therefore, after a restart in a different attach
+order, serve one store’s recovered WAL block for another. So the block cache
+is <strong>one foyer instance per store</strong>, its device at <code dir="auto">CACHE_DIR/&lt;store&gt;/blocks</code>
+where <code dir="auto">&lt;store&gt;</code> is <code dir="auto">v2-</code> followed by a hash of the explicit cache identity
+and the store’s path, with unambiguous component boundaries. Inside one store’s
+directory the keys can only be that store’s, so recovery is
+enabled: entries are written to disk on insertion (a shutdown is not needed
+to persist them) and read back on the next open. A store re-attached in the
+same order gets the same scopes and is served from disk; a different order
+misses until re-read, and can never alias. The one thing the directory
+cannot tell apart is a store deleted and recreated at the same location,
+whose WAL ids restart: its cache directory must be removed with it. Once
+SlateDB accepts a caller-supplied stable scope
+(<a href="https://github.com/morainedb/moraine/blob/main/docs/slatedb.md"><code dir="auto">../slatedb.md</code></a>) the order condition goes away.</p>
+<p>The auxiliary cache is one foyer hybrid at <code dir="auto">CACHE_DIR/auxiliary-v2</code>, its keys
+moraine’s own, carrying the identity the caller’s <code dir="auto">DataStore</code> was built
+with. <code dir="auto">DataStore::new</code> and catalog opens without a cache identity use fresh
+random namespaces, including for custom stores whose display names happen to
+match. Explicit <code dir="auto">CacheIdentity</code> values allow safe sharing across handles and
+restarts. Equal identities assert that equal object paths name the same
+immutable contents; custom wrappers must include their routing context and
+prefixes. Display strings never determine storage equivalence.</p>
+<p>DuckDB attachments supply stable identities: local stores use the resolved
+filesystem root; S3 stores include the configured endpoint (including the
+S3-specific override), region, bucket, addressing style, and Express setting.
+These values come from the fully configured builder, including environment
+configuration when no secret is supplied. Credentials are excluded so rotation
+preserves reuse. In-memory attachments retain random identities.</p>
+<p>Identity hashes and block-cache directories use a new versioned namespace;
+the auxiliary disk tier uses <code dir="auto">auxiliary-v2</code>. Old display-based cache entries are not recovered and
+may be removed; catalog data needs no migration. Footers go to disk in the
+Parquet metadata writer’s form under one of two tags: with the page index
+when it was loaded, else without, decoded without one since the writer keeps
+the original file’s index offsets, which the disk form does not carry. Footer
+entries written while the key still named a page-index policy are unreachable
+under the policy-free key and age out. Summaries go in their own
+shape.</p>
+<p><strong>Admission follows read shape.</strong> SlateDB’s defaults already split it —
+point reads cache their blocks, scans do not — and moraine makes the
+split deliberate: scan-option constructors, bulk (admits nothing; the
+row caches absorb scan reuse) and probe (admits; the reuse is real and
+block-grained), with every read path naming one. Foyer’s admission picker
+repeats the rule at the disk device, so scan and compaction churn cannot
+wear it or evict the probe set.</p>
+<p>A read that takes one entry — or a handful — from a wide range names a
+fourth shape, seek: one block fetched at a time, admitted. The probe shape
+would be wrong there, not merely wasteful: SlateDB spawns its read-ahead
+fetches eagerly when the iterator opens, up to 32 of 8 MiB each per SST,
+and a fetch task has no cancellation on drop, so an iterator dropped after
+one <code dir="auto">next</code> leaves them running to completion. The seek sites are the first
+entry of a subspace or of a table’s probe range (the cache warms), the
+highest key of a split kind (the adaptive split’s one seek from the end),
+the first index id at or past a cursor (the dead-index sweep), and a
+chunk-directory walk that a known chunk width ends within a few entries of
+its last target. A directory walk with no width bound runs to the end of
+the directory and stays a probe. The preload’s first-entry read of a
+subspace is the one seek site that consults the manifest: a segment whose
+recorded size fits one read-ahead warms in probe shape, since each SST
+costs one request either way and the probe’s request brings the whole
+segment in and admits it, where a seek would fetch one block per subspace
+per SST and leave the rest cold; a larger or unrecorded segment seeks.</p>
+<p>Bulk and probe scans use fixed 8 MiB read-ahead with 32 fetches in flight,
+sized for a remote object store. A third shape, streaming, serves a
+sequential consumer that derives as it goes — the staged index build’s
+inline sources — and reads ahead 256 KiB with two fetches in flight: a
+round trip’s worth of blocks ahead of the cursor, admitting nothing, and
+holding at most about half a mebibyte per SST the iterator is positioned in
+rather than the bulk shape’s window. Its previous setting of one block was
+one object-store round trip per 4 KiB.
+These are implementation constants, not attach policy: they remove the
+measured sequential-round-trip failure, while no local/S3 ladder demonstrates
+that per-attach tuning improves a supported workload. A different value needs
+that measurement and changes the implementation choice directly rather than
+adding speculative options.</p>
+<p>A SlateDB iterator is one sequential cursor however much it prefetches, so
+the whole-subspace scans that materialize a view (<code dir="auto">current</code>, and <code dir="auto">history</code>
+for time travel), the per-kind scans a staged transaction’s metadata reads
+issue, and a preload’s deep walks split a large kind into concurrent
+sub-ranges, eight in flight (<code dir="auto">SCAN_SPLIT</code>, sized like the read-ahead for a
+remote store). Only the kinds whose record counts scale with the data can
+split — columns, data files, delete files, file column stats, table column
+stats; schema-scaled kinds and the <code dir="auto">sys</code>/<code dir="auto">snapshot</code>/changelog subspaces
+stay one iterator. The split is adaptive: the scan walks as one iterator
+until a split kind has streamed one read-ahead’s worth of bytes (the span
+one round trip covers), then seeks that kind’s highest key, divides the id
+bytes between the last key seen and it evenly — so ids clustered near zero
+still split where the records are — reads the remainder as concurrent
+sub-ranges, and resumes the walk past the kind. A catalog that fits one
+read-ahead therefore costs exactly one iterator, as before. A split scan
+yields the same records in the same key order as one iterator would
+(sub-ranges are concatenated in range order, never in completion order)
+and counts as one scan in the handle’s tallies.</p>
+<p>The attach options keep their surface (RFC 0006) and change machinery:</p>
+<ul>
+<li><code dir="auto">CACHE_DIR</code> / <code dir="auto">CACHE_SIZE</code> — the block slot’s disk device and cap.</li>
+<li><code dir="auto">CACHE_MEMORY</code> (new) — one memory budget across both kinds, which share
+one cache and are separated by eviction priority; an attach whose store
+outgrows the protected share says so. Unset:
+what SlateDB gave a single store, now for the whole process. Never
+inert — the memory tiers exist without a <code dir="auto">CACHE_DIR</code>.</li>
+<li><code dir="auto">CACHE_PUTS</code> — the flush/compaction insertion policy: written SSTs’
+blocks enter decoded, on write. Opt-in as before: compaction output
+evicts what reads warmed.</li>
+<li><code dir="auto">CACHE_PRELOAD</code> — a segment-aware warm, run as reads rather than as a
+manifest walk. SlateDB’s per-SST warm call takes an id type its crate
+does not export, so no caller outside it can name one (the export request is
+tracked in <a href="https://github.com/morainedb/moraine/blob/main/docs/slatedb.md"><code dir="auto">../slatedb.md</code></a>); reading is in
+any case the cheaper instrument, because a scan admits the blocks it
+touches and SlateDB caches every SST index and filter it walks whatever
+the scan’s own admission says. So the levels differ by <em>subspace</em>, not
+by SST level: <code dir="auto">'l0'</code> touches every subspace just far enough to pull its
+SST metadata — the bytes that make a cold probe tolerable — and <code dir="auto">'all'</code>
+additionally walks the scan-shaped subspaces (<code dir="auto">current</code>, <code dir="auto">sys</code>,
+<code dir="auto">history</code>, <code dir="auto">snapshot</code>, changelog) whole, so an attach’s first
+materialization reads no object storage at all. Neither walks the
+<code dir="auto">index</code> subspace’s data bulk, the tail that made <code dir="auto">'all'</code> unaffordable;
+it stays one fetch per probed block behind the filters just warmed. The
+attach contract holds: warm inside the open, caps govern, a shortfall
+is warned with both numbers, a failure is skipped rather than fatal.</li>
+<li><strong>Per-table warm, explicit.</strong> The <code dir="auto">index</code> and <code dir="auto">inline</code> subspaces
+scale with the data, so their warm is per table and never implicit: no
+read triggers it. <code dir="auto">ReadOnlyCatalog::warm_tables</code> reads, in seek shape,
+the first entry of each named table’s index ranges
+(<code dir="auto">index/&lt;kind&gt;/&lt;index id&gt;</code>) and inline ranges (<code dir="auto">inline/&lt;table id&gt;</code> per
+operation kind, its schemas and chunk-range locators), admitting the SST
+metadata and first block a probe there would fetch — one burst rather
+than a round trip per probe. Ranges are read many at a time, sized for a
+remote object store; a range that fails to read is skipped and counted
+in the log, never surfaced. The extension runs it after a commit for the
+tables the commit wrote data files against, alongside the row-summary
+warm; with <code dir="auto">CACHE_PRELOAD</code> set, the extension also warms every table’s
+probe ranges in the background after the open, spawned rather than
+awaited so the attach does not wait on it, and ended by detach.</li>
+</ul>
+<p><strong>Hit rates before tuning.</strong> The tiers report: hits and misses per slot,
+process-wide through <code dir="auto">moraine_cache_tally()</code> and per attach through
+<code dir="auto">moraine_cache_tally('lake')</code> (RFC 0006) — the budget is set at the first
+scope and attributed at the second. Metadata and
+blocks are counted apart because they are budgeted apart — a metadata
+rate short of ~1 says the cache cannot hold the store’s filters and
+indexes, which the census measures directly, while a low block rate
+beside a healthy metadata one is a working set larger than the block
+slot. The same tally attributes the subset of hits and misses caused by
+attach-time preload and counts subspaces preload failed to warm.
+<code dir="auto">moraine_cache_status()</code> reports actual capacity, occupancy, and eviction
+counts for each memory cache plus the configured block disk capacity. It
+does not report disk occupancy: Foyer’s typed cache API does not expose a
+reliable live figure. <code dir="auto">moraine_store_census</code> reports each subspace’s recorded
+SST filter, index, and stats bytes, so metadata capacity can be compared with
+the store it is expected to hold. A rate is absent rather than zero before
+any lookup. Budgets are sized from these curves, not from the defaults.</p>
+<p>Object-store traffic is measured separately per attach through
+<code dir="auto">moraine_object_store_tally('lake')</code> (RFC 0006). This is the physical
+counterpart to cache hit rates: it distinguishes time in store requests from
+time scanning and decoding the catalog, and it counts retries rather than
+inferring round trips from DuckLake’s metadata-statement count. The commit
+breakdown benchmark keeps Parquet local, then reports DuckLake metadata SQL,
+the staged transaction’s one committed-record scan, Moraine commit time, and
+staged bytes, its durable-write wait, and the exact main/WAL request counts and
+summed latency over the same commit window. These phases are nested
+measurements, not values to add together.</p>
+<p><strong>One budget means one sizing per process.</strong> The first store to open
+settles it and its numbers stand; a later attach asking for different ones
+is sized by what is settled. That is the budget being the process’s rather
+than the store’s, which is the whole point, but it makes the <em>first</em>
+attach’s options the ones that decide — including whether there is a disk
+directory at all.</p>
+<p>A cache per attach with its own budget is rejected: it would multiply
+<code dir="auto">CACHE_MEMORY</code> by an unnamed attach count. A cache per <em>store</em> under one
+budget is what is built: every attach of a store shares its instance, the
+memory split follows the attached count, and the executor stays process-wide.
+Disk is a ceiling per store, not a reservation — a store’s device takes
+<code dir="auto">CACHE_SIZE</code> as its cap and fills only with what that store reads.</p>
+<p>The SST block size is fixed at 4 KiB. Read-ahead removed the per-block network
+round trip from scans, while the measured probe shape is zero bytes warm and
+62 KB cold, so there is no remaining evidence for a 4/16/64 KiB sweep or an
+attach option. A future profile that puts material weight on block grain must
+change this binding choice and add the option and the scan/probe benchmark
+together.</p>
+<p>Two more writer settings leave SlateDB’s defaults, for the same reason the
+block size is fixed: they are what the remote-store read profile needs, not
+per-attach policy.</p>
+<ul>
+<li><strong>Every SST carries a bloom filter</strong> (<code dir="auto">min_filter_keys</code> is 0, not 1000).
+SlateDB skips the filter on an SST under the threshold, and moraine’s
+SSTs are routinely that small — a commit’s L0 flush, a merge of a
+sparsely written subspace — so an absent-key probe, the read the filters
+exist for, was reading such an SST’s data blocks to learn “not here”. The
+in-process compactor writes with the writer’s settings, so a merge keeps
+the filters; a standalone compaction worker, which moraine does not run,
+would have to be configured to match.</li>
+<li><strong>A writer polls the manifest every 5 s</strong> (not every 1 s). The poll is
+one object-store GET per open writer, and it exists to notice fencing and
+compacted state, neither of which a catalog writer needs within a second.
+A reader’s cadence is its own attach option and is unchanged.</li>
+</ul>
+<p>Not changed: the WAL-flush bound on a memtable’s life
+(<code dir="auto">max_wal_flushes_before_l0_flush</code>) stays at SlateDB’s 4096, its floor —
+SlateDB refuses a lower value at open — and SST compression stays off, since
+turning it on is a format change with cross-version consequences that this
+profile does not weigh.</p>
+<p>Two losses, taken knowingly. Part-grain prefetch: replaced by the scan
+path’s own read-ahead (the measured fix for the 277 s materialization in
+<code dir="auto">BENCHMARK.md</code>), with admission per the shape rule. And a <code dir="auto">CACHE_DIR</code>
+shared between concurrent processes: a foyer device has one owner at a
+time — the deployed topology never shared a directory across hosts.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="the-query-data-path-is-duckdbs-index-upkeep-reads-scoped-metadata">The query data path is DuckDB’s; index upkeep reads scoped metadata</h3><a class="sl-anchor-link" href="#the-query-data-path-is-duckdbs-index-upkeep-reads-scoped-metadata"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “The query data path is DuckDB’s; index upkeep reads scoped metadata”</span></a></div>
+<p>Ordinary lake scans never send data-file bytes through moraine and add no
+data-page cache or read-through layer: a lakehouse’s query data path belongs
+to the engine reading it, and duplicating DuckDB’s would be the mistake this
+RFC removes from the catalog tier.</p>
+<p>It does not have to. <strong>A lake read goes through DuckDB’s caching file
+system and populates the external-file cache</strong>, so data bytes are held
+under <code dir="auto">memory_limit</code> and evicted by the buffer manager alongside every
+other allocation. Measured over a remote <code dir="auto">DATA_PATH</code>: one query fetches
+the file’s footer and its data ranges, a second differently shaped query
+over the same data fetches nothing, and the same pair under
+<code dir="auto">enable_external_file_cache = false</code> fetches everything twice.</p>
+<p>Equality-index upkeep is the narrow exception. A commit deleting indexed
+rows must recover their indexed values, and its Rust scoped reader talks to
+<code dir="auto">DATA_PATH</code> directly rather than entering DuckDB’s Parquet reader. DuckLake’s
+recorded file and footer sizes are carried into every registered data-file and
+delete-file read. The production scoped-reader API requires both values in one
+file descriptor; metadata discovery is not a production state. For a large
+object, the footer size lets the first read
+prefetch the serialized footer and its trailing length in one request; data
+files then fetch only indexed values and row ids, while delete files fetch only
+their position column. An object recorded at or below 1 MiB — every delete
+file, and DuckLake’s small per-insert data files — is instead fetched whole on
+its first touch and held as one block, from which its footer, page index, and
+column ranges are all cut: a delete file’s positions cost one request rather
+than a footer request and a dependent column request, and a small target’s
+selected pages are resident by the time its selection is known. A
+single-touch read of a small object takes only its ranges, since it would keep
+nothing. A process-wide byte-bounded cache retains the parsed
+footer and page indexes for repeated touches of the same immutable file; it is
+keyed by object-store identity, path, and file size, adds the page index to a
+resident footer on demand rather than parsing the footer again under a second
+policy, and holds only metadata. A file whose row ids are its recorded dense
+range is remembered as a summary once its footer has proved that, so a repeat
+location of it needs neither. Its allowance is one sixteenth of
+<code dir="auto">CACHE_MEMORY</code>’s metadata share, capped at 8 MiB, with the remainder of that
+share continuing to hold SlateDB metadata — one Moraine memory budget, not a
+third invisible one. Projected data-column ranges are retained under the same
+allowance, keyed by the exact range a read asked for and admitted at low
+priority so they leave before any footer or summary. A read declared
+<strong>single-touch</strong> — an index build or a backfill, which touches each column
+chunk once — fetches its ranges without admitting them: a build otherwise
+writes roughly every byte it streams into the disk tier and churns the
+footers and summaries sharing the allowance out of it. Commit-time upkeep is
+not single-touch, because repeated deletes against one file re-read its
+chunks. The footer and the summary are cached whatever the read declares.
+This cache exists because DuckDB’s metadata cache cannot be reached from the
+direct Rust reader, not as a second copy of metadata DuckDB served to it.</p>
+<p><strong>Data-block caching rides on the Parquet reader’s prefetch, taken only
+for files that are not on local disk</strong> — without it the reader issues a
+deliberately non-caching read. So a local <code dir="auto">DATA_PATH</code> caches the footer
+and stops there, and <code dir="auto">prefetch_all_parquet_files</code> forces the remote
+behaviour, which is how the property stays observable in a test with no
+object store. The gate is locality rather than scheme, so a deployment
+on S3 takes the prefetching path.</p>
+<p>Two shapes therefore report a working cache as an absent one, and a
+measurement must avoid both: a lake <code dir="auto">count(*)</code>, answered from catalog
+statistics without opening a file at all, and a local path’s
+footer-only caching.</p>
+<p>So the data-page tier is <em>unified, not un-budgeted</em>: it is DuckDB’s cache,
+inside DuckDB’s budget. A host sizes DuckDB’s <code dir="auto">memory_limit</code> and moraine’s
+<code dir="auto">CACHE_MEMORY</code>; the latter includes the scoped reader’s parsed metadata. A
+further tier exists only if an operator adds a filesystem cache.</p>
+<p>That remains a real option, and its value is what the external-file
+cache does not do: survive the process. The external-file cache is
+buffer-manager memory and dies with the instance, so a redeploy or a new
+process reads cold. A <em>filesystem</em>-level cache intercepts below the
+reader and keeps bytes on disk across processes — on S3 the
+<code dir="auto">cache_httpfs</code> community extension. It buys that at the cost this RFC
+spent the catalog tier removing: its cache is sized by its own knobs,
+outside <code dir="auto">memory_limit</code>, and keeps a read-through memory cache even in
+its on-disk mode. So it is an operator’s trade, made knowingly, and not
+something the attach should arrange — moraine arranging it would
+re-create an un-budgeted tier one layer down.</p>
+<p>The embedder configuration worth setting beside an attach:
+<code dir="auto">validate_external_file_cache = 'NO_VALIDATION'</code>, which is live for lake
+data and safe because DuckLake never rewrites a data file, so a cached
+range cannot go stale under it; <code dir="auto">parquet_metadata_cache</code> (DuckDB’s
+<code dir="auto">ObjectCache</code>, keyed on file path); and the httpfs metadata and
+connection caches at the filesystem layer. All are global, so the shim
+sets none of them — an <code dir="auto">ATTACH</code> that mutates global state reaches every
+other database in the process — and they are documented as embedding
+guidance beside the attach options (RFC 0006).</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="test-obligations">Test obligations</h3><a class="sl-anchor-link" href="#test-obligations"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Test obligations”</span></a></div>
+<p>Per RFC 0001, integration tests run against real SlateDB on in-memory
+<code dir="auto">object_store</code> — no mocks of the store:</p>
+<ul>
+<li><strong>Consistent cut.</strong> A commit forced to land mid-materialization yields a view
+that is entirely pre- or entirely post-commit, never torn. Both halves are
+staged rather than raced: on a read-write handle the commit lands between
+the pass’s head read and its <code dir="auto">current</code> scan and is invisible to both; on a
+read-only one the pass commits from inside itself and waits for the reader
+to observe it, and the stamp check discards and re-runs it.</li>
+<li><strong>Isolation.</strong> A <code dir="auto">CatalogSnapshot</code> built at <code dir="auto">S</code>, then <code dir="auto">k</code> commits applied,
+still returns exactly the <code dir="auto">S</code> view from every accessor.</li>
+<li><strong>Incremental == full.</strong> Refreshing <code dir="auto">S → head</code> incrementally yields a view
+identical to a full rematerialization at head — entity maps <em>and</em> name
+indexes, so a rename that left a stale name entry behind is caught.</li>
+<li><strong>Every batch moves the stamp.</strong> A snapshot-minting batch moves both
+halves of the head record; a maintenance batch that reuses the snapshot id
+still moves the batch count.</li>
+<li><strong>The refresh declines what it cannot replay.</strong> A gap holding a batch
+that minted no snapshot, a gap whose changelogs later commits swept out of
+the retained window, and a gap whose churn passes the size backstop each
+fall back to a full rematerialization rather than replaying part of it.</li>
+<li><strong>The window bounds the subspace.</strong> However many commits land, the
+changelog subspace holds no more records than the window.</li>
+<li><strong>Committer read-your-writes.</strong> After <code dir="auto">commit</code>, the committer’s folded view
+reflects the just-committed entities without a store re-read.</li>
+<li><strong>A warm read equals a cold one.</strong> A handle that has served reads across a
+sequence of commits answers exactly as a freshly opened handle does.</li>
+<li><strong>Install is compare-and-set.</strong> An invalidation interleaved between a
+reader’s first store read and its install voids that install; the cache
+never serves the resurrected view.</li>
+<li><strong>The marker outranks the cache.</strong> A read against a mid-migration store
+returns the typed <code dir="auto">Migration</code> error even when the handle holds a valid
+cached view.</li>
+<li><strong>Fallback.</strong> A reader whose <code dir="auto">S</code> fell below the horizon rematerializes at
+head; a reader asking for an expired <code dir="auto">S</code> gets <code dir="auto">SnapshotExpired</code>.</li>
+<li><strong>No dangling file.</strong> A view within the retention window resolves every file
+it names; a view driven past the window fails loudly rather than naming a
+reclaimed file.</li>
+<li><strong>Migration marker refusal.</strong> A materialization or refresh attempted while
+<code dir="auto">sys/migration</code> is present returns the typed <code dir="auto">Migration</code> error and never
+yields a partial view (RFC 0015’s mid-migration reader contract).</li>
+<li><strong>No conflict-window gap.</strong> A commit forced to land between a commit
+attempt’s materialization and its batch write is always detected: the
+attempt either observes it (materialized through the transaction, so the
+premise view includes it) or conflicts on <code dir="auto">sys/head</code>. There is no
+interleaving in which the attempt commits against premises that omit a
+landed commit. Staged, not raced: a transaction opens and materializes,
+a commit lands through the catalog, and only then does the first write.</li>
+<li><strong>Maintained == scanned.</strong> After every commit in a randomized operation
+sequence (creates, file registrations, stats updates, renames, expiry), each
+maintained projection equals a fresh scan of the same subspaces at the same
+head.</li>
+<li><strong>A metadata table is one materialization per DuckDB transaction.</strong> Over
+two connections on one instance: a commit landing under an open reader does
+not change what that reader’s transaction sees of <code dir="auto">ducklake_snapshot</code>, the
+two-scan resolution shape still resolves to a row inside it, and the
+reader’s next transaction sees the commit. A <em>writing</em> transaction is
+exempt — it reads its own uncommitted rows across statements.</li>
+<li><strong>Reads survive an expiry pass under them.</strong> With the scheduler expiring
+everything below head on a sub-second tick, a session that keeps reading
+and committing never sees “No snapshot found”.</li>
+<li><strong>One scan pair per head.</strong> Populating every metadata table and
+materializing the head view at one head costs one <code dir="auto">current</code> scan and at
+most one <code dir="auto">history</code> scan; a head view alone scans no <code dir="auto">history</code>.</li>
+<li><strong>The stamp crosses the ABI.</strong> A read transaction following another with
+no commit between serves the same metadata rows without a dump rebuild;
+with a commit it re-dumps; a staged-write transaction is served staged
+dumps regardless.</li>
+<li><strong>A warm probe costs no store read.</strong> An index lookup repeated against
+a resident working set issues no GET and fetches no bytes.</li>
+<li><strong>A warm writer probes without a session.</strong> Index lookups and row
+locations repeated on a warm read-write handle read <code dir="auto">sys/head</code> no
+further and open no read transaction, and return what the session path
+returns.</li>
+<li><strong>One budget across attaches.</strong> Several attached stores share one cache
+and one tally; a later attach’s differing options are reported as
+ignored rather than silently applied.</li>
+<li><strong>Restart persistence and isolation.</strong> Two stores with colliding WAL and
+L0 ids are warmed by one process; a fresh process attaching them in the
+same order reads both without a cache miss, and one attaching them in
+reverse reads the correct store from both. The test is cross-process so
+the scope counter actually resets.</li>
+<li><strong>Scans cannot evict the probe path.</strong> After a whole-subspace scan and a
+compaction through a warm cache, a probe that was GET-free stays
+GET-free.</li>
+<li><strong>Admission follows the declared shape.</strong> A bulk scan admits no data
+blocks; a probe admits its own.</li>
+<li><strong>Preload warms before the first read.</strong> An attach that preloads has
+consulted the cache by the time it returns, and warms no <code dir="auto">index</code> data
+blocks at either level.</li>
+<li><strong>The cache reports what it served.</strong> A cold read moves the tally, the
+slots are counted apart, and a rate is absent rather than zero until
+something has been looked up.</li>
+<li><strong>The data path is cached by DuckDB.</strong> A lake read that touches data
+populates <code dir="auto">duckdb_external_file_cache()</code> for its file, and forcing the
+prefetch a remote path takes anyway extends that from the footer to the
+data ranges — so the tier stays inside <code dir="auto">memory_limit</code>, and a regression
+that routes lake reads around the caching file system fails the test. A
+lake <code dir="auto">count(*)</code>, answered from catalog statistics, is pinned as reading
+no file at all: it is the shape that makes a working cache look absent.</li>
+<li><strong>Owned and borrowed value decoding share one scan.</strong> An inline protobuf’s
+shared body remains inside the allocation yielded by SlateDB, while an
+ordinary protobuf decoded by borrowing observes the same key order and
+errors at the same entry. Neither path copies the framed value in the scan
+loop.</li>
+<li><strong>Concurrent parsed-metadata misses coalesce.</strong> Two scoped readers starting
+cold against the same file issue one footer/page-index fill and retain one
+parsed value, while each continues to read its own projected data ranges.</li>
+<li><strong>Delete-file reads preserve the crossover.</strong> A small delete file is fetched
+once in full, and a later read of the same object fetches nothing. A large
+one uses its recorded file and footer sizes, fetches only <code dir="auto">pos</code>, and reuses
+parsed metadata on a later read.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="alternatives-considered">Alternatives considered</h2><a class="sl-anchor-link" href="#alternatives-considered"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Alternatives considered”</span></a></div>
+<ul>
+<li><strong>Per-get consistency (no single read point).</strong> Rejected: independent gets
+across a concurrent commit can observe a torn view (new <code dir="auto">column</code>, missing
+<code dir="auto">file</code>). One read point — pinned where SlateDB offers one, validated where
+it does not — is the only cheap way to get a consistent cut without
+locking writers.</li>
+<li><strong>Re-scanning <code dir="auto">current</code> on every read (no cache / no incremental refresh).</strong>
+Rejected: defeats RFC 0003’s “no store I/O after build” and pays the full
+scan per refresh. The write set a commit already assembles is a precise,
+cheap changelog; record it and use it.</li>
+<li><strong>Driving the refresh off DuckLake’s <code dir="auto">snapshot_changes</code> instead of a
+moraine-native key list.</strong> Rejected: the grammar is table-grained, names
+created relations by name rather than id, and has no entry at all for a
+stats-only or schema-tag commit — a replay of it would silently miss
+writes. Keeping the two side by side costs a bounded per-commit list and
+buys a changelog that is exact by construction.</li>
+<li><strong>Validating a read-only cut on <code dir="auto">DbReader::manifest()</code>’s id.</strong> Rejected
+on inspection: the reader’s WAL-replay refresh carries the manifest
+forward unchanged, so the id does not move for exactly the commits a live
+reader is trying to see. <code dir="auto">DbStatus::durable_seq</code> does move, but leads the
+state install rather than following it. A stamp in moraine’s own keyspace
+is under moraine’s control and needs no assumption about SlateDB
+internals.</li>
+<li><strong>Pinning a read-only handle to a checkpoint.</strong> Rejected as the general
+answer: it is genuinely consistent, and moraine keeps it as an explicit
+option for credentials that cannot write the manifest at all, but it
+spawns no poller and so never sees another commit. Liveness is not
+optional for a reader that is meant to follow a lake.</li>
+<li><strong>Push-based invalidation (committer notifies readers of new commits).</strong>
+Rejected: contradicts RFC 0004’s no-coordination, cross-process topology and
+reintroduces a notification channel the design deliberately omits. Readers
+poll <code dir="auto">sys/head</code>; that is the whole protocol.</li>
+<li><strong>A persistent name→id index to skip materialization.</strong> Already rejected by
+RFC 0002 (complexity without payoff at live-catalog scale); nothing here
+changes that calculus. Name resolution stays against the in-memory view.</li>
+<li><strong>Partial or lazy materialization.</strong> Rejected with server-side filter
+pushdown while the live catalog fits comfortably: lazy reads need predicates
+to know what to fetch, and predicates save nothing while the whole view is
+already resident. This also leaves the replay base-view copy proportional to
+catalog size. A profile showing either memory term to be material would be
+evidence for replacing both choices together.</li>
+<li><strong>Rematerializing fully on every refresh (no incremental path).</strong> Rejected as
+the default: correct but pays catalog-size cost per refresh for a
+churn-sized delta. Kept only as the fallback when the gap is large or the base
+snapshot was reclaimed.</li>
+<li><strong>Holding files alive for any live reader (reference-tracking readers against
+expiry).</strong> Rejected: it is exactly the cross-process reader coordination RFC
+0004 forbids and RFC 0007’s reference-counting alternative already rejected.
+The retention <em>window</em> plus a typed <code dir="auto">SnapshotExpired</code> is the coordination-free
+contract.</li>
+<li><strong>Keeping SlateDB’s object cache as the disk tier.</strong> Rejected: per-store
+caps, 4 MiB parts against a point-probe workload, and it cannot coexist
+with a hybrid cache without double-writing disk. Prefetch is covered by
+the scan path’s read-ahead, write-side warming by the insertion policy;
+the loss is a cross-process cache directory, weighed above.</li>
+<li><strong>One pooled hybrid cache, no slots.</strong> Rejected: a pool lets data blocks
+evict filters, after which every probe pays a fetch to learn “not
+here”. The metadata is small enough to pin; only data blocks need
+tiering.</li>
+<li><strong>One entry store for SlateDB and parsed Parquet metadata.</strong> Rejected: the
+former is a database-scoped encoded-block cache with admission and an
+optional disk tier; the latter is an object-store-scoped typed-object cache
+whose values are process-only. They share the one capacity calculation,
+but merging their entries would require either changing SlateDB’s closed
+cache types or replacing its cache policy with a weaker type-erased one.</li>
+<li><strong>Separate borrowed and owned store scan loops.</strong> Rejected: SlateDB already
+yields an owned <code dir="auto">Bytes</code>, whose move is constant-time. One extractor may
+consume it and another may borrow it locally without duplicating ordering,
+admission, collection, and error handling.</li>
+<li><strong>A moraine-level data-file byte cache.</strong> Rejected: DuckDB’s external-file
+cache already holds data bytes inside <code dir="auto">memory_limit</code>; adding one re-creates
+the double-caching this RFC removes. The scoped equality-index reader’s
+bounded parsed-metadata cache is the exception above: that reader bypasses
+DuckDB, and it never retains data pages.</li>
+<li><strong>Setting DuckDB’s cache settings from the attach.</strong> Rejected: they are
+global, and an <code dir="auto">ATTACH</code> that mutates global state reaches every other
+database in the process. Guidance over mutation.</li>
+<li><strong>A cross-process row cache (serialized projections on disk).</strong> Rejected:
+preload bounds process-cold cost at re-fetch cost, while a persisted row
+snapshot is a second durable encoding to version and migrate (RFC 0015).
+Deploy-cold attach must first be measured as a material problem; that result
+would justify a new format design rather than an open-ended cache task.</li>
+</ul>
+</div><script type="module">var e=class extends HTMLElement{constructor(){super()}connectedCallback(){let e=()=>{let e=t===`ready`?`<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></g></svg>`:`<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/></svg>`;this.innerHTML=`<span class="w-full h-full block [&_svg]:w-full [&_svg]:h-full">`+e+`</span>`},t=`ready`;e(),this.addEventListener(`click`,()=>{if(t===`ready`){t=`success`,e();let n=this.dataset.code||``;navigator.clipboard.writeText(n),setTimeout(()=>{t=`ready`,e()},1500)}})}};customElements.define(`nova-code-copy-button`,e);</script><script type="module" src="/_astro/MarkdownContent.astro_astro_type_script_index_0_lang.x0CmCSF8.js"></script><footer class="sl-flex astro-xhxjzfa7"><div class="meta sl-flex astro-xhxjzfa7"></div><div class="flex min-w-full flex-row items-stretch justify-between gap-2 px-1 pt-0 pb-6 print:hidden" dir="ltr"><a href="/rfcs/0008-compaction/" rel="prev" data-side="left" class="group m-0 flex items-center justify-end gap-2 rounded-xl p-2 font-medium text-(--sl-color-gray-2) no-underline transition hover:text-(--sl-color-white) md:text-lg [[rel='next']]:flex-row [[rel='prev']]:flex-row-reverse"><span>0008: Maintenance operations — compaction and delete-file consolidation</span><svg width="1em" height="1em" viewBox="0 0 24 24" class="block min-h-5 min-w-5 transition group-hover:-translate-x-1"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18l-6-6l6-6" /></svg></a><div class="flex-1"></div><a href="/rfcs/0010-async-sync-bridge/" rel="next" data-side="right" class="group m-0 flex items-center justify-end gap-2 rounded-xl p-2 font-medium text-(--sl-color-gray-2) no-underline transition hover:text-(--sl-color-white) md:text-lg [[rel='next']]:flex-row [[rel='prev']]:flex-row-reverse"><span>0010: Async↔sync bridge: mechanism, runtime, threading, and cancellation</span><svg width="1em" height="1em" viewBox="0 0 24 24" class="block min-h-5 min-w-5 transition group-hover:translate-x-1"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6" /></svg></a></div></footer></div></div></main></div></div></div></div></body></html>

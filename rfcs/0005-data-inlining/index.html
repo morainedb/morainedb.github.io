@@ -1,0 +1,676 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-vdxcvpsm"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>RFC 0005: Data inlining on SlateDB | moraine</title><link rel="canonical" href="https://morainedb.github.io/rfcs/0005-data-inlining/"/><link rel="sitemap" href="/sitemap-index.xml"/><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.1.4"/><meta name="generator" content="Starlight v0.41.4"/><meta property="og:title" content="RFC 0005: Data inlining on SlateDB"/><meta property="og:type" content="article"/><meta property="og:url" content="https://morainedb.github.io/rfcs/0005-data-inlining/"/><meta property="og:locale" content="en"/><meta property="og:description" content="A DuckLake catalog that lives in your bucket — SlateDB-backed, serverless, nothing to operate."/><meta property="og:site_name" content="moraine"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="A DuckLake catalog that lives in your bucket — SlateDB-backed, serverless, nothing to operate."/><script>
+"use strict";(()=>{(()=>{let t="theme-toggle",n;function r(){return window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}function l(){let e=localStorage.getItem(t);return e==="dark"||e==="light"?e:null}function m(){return n||l()||r()}function s(e){e===r()?localStorage.removeItem(t):localStorage.setItem(t,e)}function h(e){let o=document.documentElement;o.classList.toggle("dark",e==="dark"),o.dataset.theme=e,o.style.colorScheme=e}function a(e){n=e,s(e),h(e)}function c(){a(m())}c(),document.addEventListener("astro:after-swap",c),window.astroThemeToggle={setTheme:a,getTheme:m}})();})();
+</script><link rel="stylesheet" href="/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/_astro/common.DJmCPQrT.css"><style>@layer starlight.components{.card:where(.astro-zts4jgjd){--sl-card-border:var(--sl-color-purple);--sl-card-bg:var(--sl-color-purple-low);border:1px solid var(--sl-color-gray-5);background-color:var(--sl-color-black);flex-direction:column;gap:clamp(.5rem,.125rem + 1vw,1rem);padding:clamp(1rem,.125rem + 3vw,2.5rem)}.card:where(.astro-zts4jgjd):nth-child(4n+1){--sl-card-border:var(--sl-color-orange);--sl-card-bg:var(--sl-color-orange-low)}.card:where(.astro-zts4jgjd):nth-child(4n+3){--sl-card-border:var(--sl-color-green);--sl-card-bg:var(--sl-color-green-low)}.card:where(.astro-zts4jgjd):nth-child(4n+4){--sl-card-border:var(--sl-color-red);--sl-card-bg:var(--sl-color-red-low)}.card:where(.astro-zts4jgjd):nth-child(4n+5){--sl-card-border:var(--sl-color-blue);--sl-card-bg:var(--sl-color-blue-low)}.title:where(.astro-zts4jgjd){font-weight:600;font-size:var(--sl-text-h4);color:var(--sl-color-white);line-height:var(--sl-line-height-headings);align-items:center;gap:1rem}.card:where(.astro-zts4jgjd) .icon:where(.astro-zts4jgjd){border:1px solid var(--sl-card-border);background-color:var(--sl-card-bg);border-radius:.25rem;flex-shrink:0;padding:.2em}.card:where(.astro-zts4jgjd) .body:where(.astro-zts4jgjd){font-size:clamp(var(--sl-text-sm), calc(.5rem + 1vw), var(--sl-text-body));margin:0}.card-grid:where(.astro-lmor3ela){grid-template-columns:100%;gap:1rem;display:grid}.card-grid:where(.astro-lmor3ela)>*{margin-top:0!important}@media (width>=50rem){.card-grid:where(.astro-lmor3ela){grid-template-columns:1fr 1fr;gap:1.5rem}.stagger:where(.astro-lmor3ela){--stagger-height:5rem;padding-bottom:var(--stagger-height)}.stagger:where(.astro-lmor3ela)>:nth-child(2n){transform:translateY(var(--stagger-height))}}}
+@layer starlight.components{svg:where(.astro-n5k4ipy7){color:var(--sl-icon-color);font-size:var(--sl-icon-size,1em);width:1em;height:1em}}
+</style><script type="module" src="/_astro/page.LAbJoB63.js"></script></head><body class="astro-vdxcvpsm"><a class="sl-skip-link astro-vxeigawq" href="#_top">Skip to content</a><div class="flex min-h-screen flex-col astro-3iko6sul"><header class="fixed inset-0 z-(--sl-z-index-navbar) box-border h-(--sl-nav-height) w-full border-0 border-b border-solid border-(--sl-color-hairline) bg-(--sl-color-bg-nav) px-(--sl-nav-pad-x) py-(--sl-nav-pad-y) backdrop-blur astro-3iko6sul"><div class="box-border flex h-full items-center gap-2"><div class="-m-3 overflow-clip p-3 flex min-w-0"><span class="-m-1.5 rounded-md p-1.5 **:text-lg **:font-semibold **:text-(--sl-color-text) focus-visible:outline-offset-0"><a href="/" class="site-title sl-flex astro-clw6ags5"><img class="light:sl-hidden print:hidden astro-clw6ags5" alt src="/_astro/moraine-dark.CEVNFCXz.svg" width="128" height="128"><img class="dark:sl-hidden print:block astro-clw6ags5" alt src="/_astro/moraine.B97P_dWh.svg" width="128" height="128"><span class="astro-clw6ags5" translate="no">moraine</span></a></span></div><nav class="flex flex-1 flex-row gap-4 overflow-x-auto py-3 pr-4 pl-4 text-sm font-medium max-md:**:hidden xl:gap-6 xl:pl-6"></nav><div class="flex md:max-w-60 md:flex-1 print:hidden"><site-search class=" astro-hdulihjd" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"><button class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90 md:h-9 md:w-full md:max-w-88 md:rounded-md md:border md:border-solid md:border-(--sl-color-gray-5) md:p-2 md:text-(--sl-color-text) md:transition-colors md:hover:bg-gray-400/10 astro-hdulihjd" data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4 astro-hdulihjd"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m21 21l-4.34-4.34" /><circle cx="11" cy="11" r="8" /></g></svg><span class="sl-hidden md:sl-block astro-hdulihjd" aria-hidden="true">Search</span><kbd class="sl-hidden md:sl-flex astro-hdulihjd" style="display: none;"><kbd class="astro-hdulihjd">Ctrl</kbd><kbd class="astro-hdulihjd">K</kbd></kbd></button><dialog style="padding:0" aria-label="Search" class="astro-hdulihjd"><div class="dialog-frame sl-flex astro-hdulihjd"><button data-close-modal class="sl-flex md:sl-hidden astro-hdulihjd">Cancel</button><div class="search-container astro-hdulihjd"><div id="starlight__search" class="astro-hdulihjd"></div></div></div></dialog></site-search><script>
+  ;(() => {
+    const openBtn = document.querySelector('button[data-open-modal]')
+    const shortcut = openBtn?.querySelector('kbd')
+    if (!openBtn || !(shortcut instanceof HTMLElement)) return
+    const platformKey = shortcut.querySelector('kbd')
+    if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+      platformKey.textContent = '⌘'
+      openBtn.setAttribute('aria-keyshortcuts', 'Meta+K')
+    }
+    shortcut.style.display = ''
+  })()
+</script><script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.vTFUHulS.js"></script></div><div class="hidden items-center gap-2 md:flex print:hidden"><a href="https://github.com/morainedb/moraine" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">GitHub</span><svg aria-hidden="true" class=" astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script><div class="size-8 overflow-visible"><astro-theme-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><div class="astro-theme-toggle-icon-light"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 19a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1m-4.95-2.05a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0m11.314 0l1.414 1.414a1 1 0 0 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 1.414-1.414m-5.049-9.836a5 5 0 1 1-2.532 9.674a5 5 0 0 1 2.532-9.674M4 11a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zm18 0a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM5.636 4.222L7.05 5.636A1 1 0 0 1 5.636 7.05L4.222 5.636a1 1 0 0 1 1.414-1.414m14.142 0a1 1 0 0 1 0 1.414L18.364 7.05a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0M12 1a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1" /></svg></div><div class="astro-theme-toggle-icon-dark"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 1.992a10 10 0 1 0 9.236 13.838c.341-.82-.476-1.644-1.298-1.31a6.5 6.5 0 0 1-6.864-10.787l.077-.08c.551-.63.113-1.653-.758-1.653h-.266l-.068-.006z" /></svg></div></astro-theme-toggle><script type="module">function e(){return typeof window>`u`?`light`:window.astroThemeToggle?.getTheme?.()||`light`}function t(e){typeof window>`u`||window.astroThemeToggle?.setTheme?.(e)}function n(){t(e()===`light`?`dark`:`light`)}var r=`astro-theme-toggle-temporary-styles`;function i(){document.getElementById(r)?.remove()}function a(){i();let e=document.createElement(`style`);e.id=r,e.textContent=`::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }`,document.head.appendChild(e)}async function o(e,t,n){let r=document;if(typeof r.startViewTransition!=`function`){e();return}a();let o=r.startViewTransition(()=>{e()});await o?.ready,o?.finished?.then(i);let s=.7,c=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><defs><radialGradient id="toggle-theme-gradient"><stop offset="${s}"/><stop offset="1" stop-opacity="0"/></radialGradient></defs><circle cx="4" cy="4" r="4" fill="url(#toggle-theme-gradient)"/></svg>`,l=`data:image/svg+xml;base64,${window.btoa(c)}`,u=window.innerWidth,d=window.innerHeight,f=Math.ceil(Math.hypot(Math.max(t,u-t),Math.max(n,d-n))/s);document.documentElement.animate({maskImage:[`url('${l}')`,`url('${l}')`],maskRepeat:[`no-repeat`,`no-repeat`],maskPosition:[`${t}px ${n}px`,`${t-f}px ${n-f}px`],maskSize:[`0`,`${2*f}px`]},{duration:500,easing:`ease-in`,pseudoElement:`::view-transition-new(root)`})}function s(e){o(n,e.clientX,e.clientY)}var c=class extends HTMLElement{connectedCallback(){this.hasAttribute(`tabindex`)||this.setAttribute(`tabindex`,`0`),this.hasAttribute(`role`)||this.setAttribute(`role`,`button`),this.addEventListener(`click`,s),this.addEventListener(`keydown`,e=>{if(e.key===`Enter`||e.key===` `){e.preventDefault();let t=this.getBoundingClientRect();s({clientX:t.left+t.width/2,clientY:t.top+t.height/2})}})}};customElements.define(`astro-theme-toggle`,c);</script></div></div><div class="flex items-center gap-2 md:hidden print:hidden"><nova-mobile-menu-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90 print:hidden" aria-label="Menu" aria-controls="starlight__sidebar"><div class="transition-transform [body[data-mobile-menu-expanded]_&amp;]:rotate-90"><svg width="1em" height="1em" viewBox="0 0 24 24" class="block [body[data-mobile-menu-expanded]_&amp;]:hidden"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16M4 12h16M4 19h16" /></svg><svg width="1em" height="1em" viewBox="0 0 24 24" class="hidden [body[data-mobile-menu-expanded]_&amp;]:block"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12" /></svg></div></nova-mobile-menu-toggle><script type="module" src="/_astro/MobileMenuToggle.astro_astro_type_script_index_0_lang.Bg4YKcfM.js"></script></div></div></header><nav class="sidebar print:hidden astro-3iko6sul" aria-label="Main" id="nova-sidebar-nav"><div id="starlight__sidebar" class="nova-scroll-container invisible md:visible [body[data-mobile-menu-expanded]_&amp;]:max-md:visible fixed top-(--sl-nav-height) bottom-0 left-0 z-(--sl-z-index-menu) overflow-y-auto border-0 border-solid border-(--sl-color-hairline) bg-(--sl-color-black) max-md:w-full md:w-(--sl-sidebar-width) md:border-r astro-3iko6sul"><div class="sidebar-content flex h-full min-h-max flex-col px-(--sl-sidebar-pad-x) py-4 astro-3iko6sul"><sl-sidebar-state-persist data-hash="05ix94y" class="astro-f5yvicm7"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-ojxuodky"><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Guide</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/guide/what-is-moraine/" class="astro-ojxuodky"><span class="astro-ojxuodky">What is moraine?</span></a></li><li class="astro-ojxuodky"><a href="/guide/getting-started/" class="astro-ojxuodky"><span class="astro-ojxuodky">Getting started</span></a></li><li class="astro-ojxuodky"><a href="/guide/architecture/" class="astro-ojxuodky"><span class="astro-ojxuodky">Architecture</span></a></li><li class="astro-ojxuodky"><a href="/guide/embedding/" class="astro-ojxuodky"><span class="astro-ojxuodky">Embedding the core</span></a></li><li class="astro-ojxuodky"><a href="/guide/operating/" class="astro-ojxuodky"><span class="astro-ojxuodky">Operating a lake</span></a></li></ul></details></li><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Design (RFCs)</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/rfcs/0001-repository-structure-and-conventions/" class="astro-ojxuodky"><span class="astro-ojxuodky">0001: Repository structure and conventions</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0002-slatedb-key-encoding/" class="astro-ojxuodky"><span class="astro-ojxuodky">0002: SlateDB key encoding for DuckLake catalog state</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0003-public-api-shape/" class="astro-ojxuodky"><span class="astro-ojxuodky">0003: Public API shape of the moraine core</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0004-commit-protocol/" class="astro-ojxuodky"><span class="astro-ojxuodky">0004: Commit and transaction protocol</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0005-data-inlining/" aria-current="page" class="astro-ojxuodky"><span class="astro-ojxuodky">0005: Data inlining on SlateDB</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0006-extension-surface/" class="astro-ojxuodky"><span class="astro-ojxuodky">0006: Extension surface</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0007-snapshot-expiry-and-gc/" class="astro-ojxuodky"><span class="astro-ojxuodky">0007: Snapshot expiry and garbage collection</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0008-compaction/" class="astro-ojxuodky"><span class="astro-ojxuodky">0008: Maintenance operations — compaction and delete-file consolidation</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0009-reader-consistency-and-caching/" class="astro-ojxuodky"><span class="astro-ojxuodky">0009: Reader consistency and snapshot caching</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0010-async-sync-bridge/" class="astro-ojxuodky"><span class="astro-ojxuodky">0010: Async↔sync bridge: mechanism, runtime, threading, and cancellation</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0011-crash-recovery/" class="astro-ojxuodky"><span class="astro-ojxuodky">0011: Crash recovery</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0012-schema-evolution-and-versioning/" class="astro-ojxuodky"><span class="astro-ojxuodky">0012: Schema evolution and versioning</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0013-partitioning-sorting-and-pruning/" class="astro-ojxuodky"><span class="astro-ojxuodky">0013: Partitioning, sorting, and pruning</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0014-encryption/" class="astro-ojxuodky"><span class="astro-ojxuodky">0014: Catalog and data encryption</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0015-format-migration/" class="astro-ojxuodky"><span class="astro-ojxuodky">0015: On-disk format migration</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0016-equality-indexes/" class="astro-ojxuodky"><span class="astro-ojxuodky">0016: Equality and range indexes</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0017-read-write-and-read-only-attach/" class="astro-ojxuodky"><span class="astro-ojxuodky">0017: Read-write and read-only attach paths</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0018-column-and-name-mapping/" class="astro-ojxuodky"><span class="astro-ojxuodky">0018: Column and name mapping for externally written Parquet</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0019-macros/" class="astro-ojxuodky"><span class="astro-ojxuodky">0019: Scalar and table macros</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0020-change-data-feed/" class="astro-ojxuodky"><span class="astro-ojxuodky">0020: Change data feed</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0021-maintenance-model/" class="astro-ojxuodky"><span class="astro-ojxuodky">0021: Maintenance orchestration</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0022-commit-log-and-leader-role/" class="astro-ojxuodky"><span class="astro-ojxuodky">0022: The commit log and the leader role</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="flex items-center justify-end gap-2 py-4 print:hidden"><a href="https://github.com/morainedb/moraine" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">GitHub</span><svg aria-hidden="true" class=" astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><div class="size-8 overflow-visible"><astro-theme-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><div class="astro-theme-toggle-icon-light"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 19a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1m-4.95-2.05a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0m11.314 0l1.414 1.414a1 1 0 0 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 1.414-1.414m-5.049-9.836a5 5 0 1 1-2.532 9.674a5 5 0 0 1 2.532-9.674M4 11a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zm18 0a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM5.636 4.222L7.05 5.636A1 1 0 0 1 5.636 7.05L4.222 5.636a1 1 0 0 1 1.414-1.414m14.142 0a1 1 0 0 1 0 1.414L18.364 7.05a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0M12 1a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1" /></svg></div><div class="astro-theme-toggle-icon-dark"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 1.992a10 10 0 1 0 9.236 13.838c.341-.82-.476-1.644-1.298-1.31a6.5 6.5 0 0 1-6.864-10.787l.077-.08c.551-.63.113-1.653-.758-1.653h-.266l-.068-.006z" /></svg></div></astro-theme-toggle></div></div></div></div></div></nav><div class="main-frame astro-3iko6sul"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-nrnkqug2"><aside class="right-sidebar-container print:hidden astro-nrnkqug2"><div class="right-sidebar astro-nrnkqug2"><div class="lg:sl-hidden astro-q5mffni3"><div class="[&amp;_nav]:backdrop-blur [&amp;_summary]:border-b-(--sl-color-hairline)"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-5ulgm6bh"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-5ulgm6bh"><details id="starlight__mobile-toc" class="astro-5ulgm6bh"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-5ulgm6bh"><span class="toggle sl-flex astro-5ulgm6bh">On this page<svg aria-hidden="true" class="caret astro-5ulgm6bh astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-5ulgm6bh"></span></summary><div class="dropdown astro-5ulgm6bh"><ul class="isMobile astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#summary" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Summary</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#goals" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Goals</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#background" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Background</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#design" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Design</span></a><ul class="isMobile astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#keyspace-fills-in-the-rfc-0002-inline-reservation" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Keyspace (fills in the RFC 0002 inline reservation)</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#write-path" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Write path</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#encoding-overhead" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Encoding overhead</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#read-path" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Read path</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#flush" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Flush</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#why-this-is-a-fit-for-the-substrate" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Why this is a fit for the substrate</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#extension-surface-as-implemented" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Extension surface (as implemented)</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#flush-registers-a-data-file-and-a-delete-file-against-it-in-one-commit" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Flush registers a data file and a delete file against it in one commit</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#an-inlined-deletion-dies-with-its-targets-row-not-with-its-target" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">An inlined deletion dies with its target’s row, not with its target</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#alternatives-considered" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Alternatives considered</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.BcSo_yiZ.js"></script></div></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-q5mffni3"><div class="sl-container astro-q5mffni3"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#summary" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Summary</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#goals" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Goals</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#background" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Background</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#design" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Design</span></a><ul class="astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#keyspace-fills-in-the-rfc-0002-inline-reservation" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Keyspace (fills in the RFC 0002 inline reservation)</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#write-path" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Write path</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#encoding-overhead" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Encoding overhead</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#read-path" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Read path</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#flush" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Flush</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#why-this-is-a-fit-for-the-substrate" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Why this is a fit for the substrate</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#extension-surface-as-implemented" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Extension surface (as implemented)</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#flush-registers-a-data-file-and-a-delete-file-against-it-in-one-commit" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Flush registers a data file and a delete file against it in one commit</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#an-inlined-deletion-dies-with-its-targets-row-not-with-its-target" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">An inlined deletion dies with its target’s row, not with its target</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#alternatives-considered" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Alternatives considered</span></a></li></ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.Csloo1VZ.js"></script></div></div></div></aside><div class="main-pane astro-nrnkqug2"><main data-pagefind-body class="astro-vdxcvpsm" lang="en" dir="ltr"><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><h1 id="_top" class="astro-2sm4b3ln">RFC 0005: Data inlining on SlateDB</h1></div></div><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><div class="sl-markdown-content"><ul>
+<li><strong>Date:</strong> 2026-07-08</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="summary">Summary</h2><a class="sl-anchor-link" href="#summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Summary”</span></a></div>
+<p>DuckLake data inlining stores small inserts as rows in the catalog database
+instead of writing a Parquet file per tiny commit, flushing them to Parquet
+later. This RFC defines how moraine implements inlining in the <code dir="auto">inline</code>
+subspace reserved by RFC 0002: chunked Arrow-encoded inserts, append-only
+tombstones for deletes, and a flush operation that mirrors
+<code dir="auto">ducklake_flush_inlined_data</code>. Inlining is strategically important for
+moraine — small frequent writes are the workload an LSM is built for, and
+this is where a KV catalog can beat a SQL catalog rather than merely match
+it — and it is a launch feature: moraine ships with it from the first
+release.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="goals">Goals</h2><a class="sl-anchor-link" href="#goals"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Goals”</span></a></div>
+<ul>
+<li>An inlined insert is part of the same single-<code dir="auto">WriteBatch</code> commit as its
+catalog metadata (RFC 0002 atomicity invariant) — inlining must not add
+round trips to the commit path.</li>
+<li>Reading a table’s live inlined rows is one contiguous range scan.</li>
+<li>Time travel over inlined data works exactly as DuckLake specifies:
+live inlined rows are visible for <code dir="auto">begin_snapshot &lt;= S &lt; end_snapshot</code>;
+after flush, pre-flush snapshots are served from the <strong>flushed Parquet</strong>
+(backdated file record + per-row snapshot columns — Background), never
+from retained catalog rows.</li>
+<li>Storage is append-only on the write path — no read-modify-write of
+existing records inside a commit.</li>
+</ul>
+<p>Non-goals:</p>
+<ul>
+<li>Auto-flush policy. moraine exposes the flush mechanism; the caller owns when
+to invoke it as part of its write and maintenance policy. No moraine-chosen
+threshold or scheduler is part of this design.</li>
+<li>Inlining <code dir="auto">VARIANT</code> columns. Arrow cannot represent the type, so a
+<code dir="auto">VARIANT</code> column is refused rather than inlined; carrying it would mean a
+second, non-Arrow value format.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="background">Background</h2><a class="sl-anchor-link" href="#background"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Background”</span></a></div>
+<p>DuckLake v1.0 models inlined data as catalog tables:</p>
+<ul>
+<li><strong>Inlined insert tables</strong>, one per <code dir="auto">(table, schema_version)</code>: columns
+<code dir="auto">row_id</code>, <code dir="auto">begin_snapshot</code>, <code dir="auto">end_snapshot</code>, plus the user table’s
+columns. A new inlined table per schema version keeps the row layout
+matched to the schema.</li>
+<li><strong>Inlined deletion tables</strong>, one per table: <code dir="auto">(file_id, row_id, begin_snapshot)</code> — deletes against rows in <em>existing Parquet files</em>,
+inlined to avoid writing a tiny deletion file.</li>
+<li>Deletes that target inlined insert rows set that row’s <code dir="auto">end_snapshot</code>.</li>
+<li><code dir="auto">ducklake_flush_inlined_data()</code> materializes inlined inserts to Parquet
+and then <strong>hard-deletes</strong> the inlined rows from the catalog
+(source-verified: <code dir="auto">DELETE FROM &lt;inlined table&gt; WHERE begin_snapshot &lt;= flush_snapshot</code>; empty superseded inlined tables are then dropped).
+Time travel survives because the flushed file carries hidden per-row
+<code dir="auto">_ducklake_internal_row_id</code> / <code dir="auto">_ducklake_internal_snapshot_id</code> columns
+and its <code dir="auto">ducklake_data_file</code> record is <strong>backdated</strong> to the minimum
+per-row snapshot — a pre-flush time-travel scan reads the Parquet with
+a per-row snapshot filter. Accumulated deletions consolidate into a
+partial deletion file. The catalog retains nothing; retaining and
+serving flushed rows on any catalog path would <strong>double-count</strong> them
+against the backdated file.</li>
+<li>The row threshold comes from <code dir="auto">data_inlining_row_limit</code>, settable
+globally, per attach, or persistently per table/schema (RFC 0002
+<code dir="auto">option</code> records).</li>
+</ul>
+<p>SQL catalogs store nested types as <code dir="auto">VARCHAR</code> because they are limited to
+their host’s type system. Moraine controls its value format and does not
+inherit that limitation.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="design">Design</h2><a class="sl-anchor-link" href="#design"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Design”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="keyspace-fills-in-the-rfc-0002-inline-reservation">Keyspace (fills in the RFC 0002 <code dir="auto">inline</code> reservation)</h3><a class="sl-anchor-link" href="#keyspace-fills-in-the-rfc-0002-inline-reservation"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Keyspace (fills in the RFC 0002 inline reservation)”</span></a></div>
+<table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Key components</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code dir="auto">inline/schema</code></td>
+<td><code dir="auto">table_id, schema_version</code></td>
+<td>Arrow IPC schema-only stream (written once per schema version), or — once deregistered — a reference to the version of the same table whose bytes are identical</td>
+</tr>
+<tr>
+<td><code dir="auto">inline/insert</code></td>
+<td><code dir="auto">table_id, schema_version, begin_snapshot, chunk_seq</code></td>
+<td>Arrow IPC record-batch <strong>body</strong> (the batch message + buffers, no schema) over the user columns + <code dir="auto">row_id_start</code>, <code dir="auto">row_count</code>. Decoded against the version’s <code dir="auto">inline/schema</code> stream, so the schema is not re-serialized per chunk</td>
+</tr>
+<tr>
+<td><code dir="auto">inline/inline_delete</code></td>
+<td><code dir="auto">table_id, row_id</code></td>
+<td>Legacy <code dir="auto">end_snapshot</code>; read and removed only by the format-9 migration</td>
+</tr>
+<tr>
+<td><code dir="auto">inline/row_tombstone</code></td>
+<td><code dir="auto">table_id, row_id, end_snapshot</code></td>
+<td><code dir="auto">end_snapshot</code>, matching the key; one immutable deletion event per row and snapshot</td>
+</tr>
+<tr>
+<td><code dir="auto">inline/file_delete</code></td>
+<td><code dir="auto">table_id, data_file_id, row_id</code></td>
+<td><code dir="auto">begin_snapshot</code> (inlined delete against a Parquet file)</td>
+</tr>
+<tr>
+<td><code dir="auto">inline/file_delete_table</code></td>
+<td><code dir="auto">table_id</code></td>
+<td>Empty — the key is the fact. Marks that <code dir="auto">ducklake_inlined_delete_&lt;table_id&gt;</code> exists</td>
+</tr>
+<tr>
+<td><code dir="auto">inline/schema_dropped</code></td>
+<td><code dir="auto">table_id, schema_version</code></td>
+<td>Empty — the key is the fact. Marks that <code dir="auto">ducklake_inlined_data_&lt;t&gt;_&lt;v&gt;</code> has been deregistered by a flush</td>
+</tr>
+<tr>
+<td><code dir="auto">inline/chunk_locator</code></td>
+<td><code dir="auto">table_id, row_id_end, schema_version, begin_snapshot, chunk_seq</code></td>
+<td><code dir="auto">row_id_start, schema_version, begin_snapshot, chunk_seq</code> — one locator per live insert chunk; <code dir="auto">row_id_end</code> is inclusive</td>
+</tr>
+<tr>
+<td><code dir="auto">inline/chunk_range</code></td>
+<td><code dir="auto">table_id, row_id_end</code></td>
+<td>superseded by <code dir="auto">inline/chunk_locator</code>; nothing writes it, and the directory’s repair sweeps what an older store left</td>
+</tr>
+</tbody>
+</table>
+<p>A locator is keyed by its range end <strong>and the chunk’s own identity</strong>. The
+end alone cannot key it: an UPDATE re-inlines a row whose id another live
+chunk’s range still ends on, and that pair shares an end. Keyed by end
+alone, the second chunk overwrites the first’s locator and takes the
+first’s other rows out of every directory-served read — and because both
+completeness checks compared <em>sets</em> of ends, the truncated directory
+compared equal, was memoized complete, and was never healed. The end still
+leads the key, so a scan seeks by row id as before.</p>
+<p>Ranges may therefore <strong>overlap</strong>, and readers must not assume otherwise: a
+point lookup collects every chunk whose range holds the target rather than
+stopping at the first, and coverage is judged by chunk identity rather than
+by range end.</p>
+<p>Collecting every such chunk would otherwise walk a table’s whole directory,
+since a chunk holding the target can sit at any larger end. The walk is
+bounded instead by the widest chunk the table is known to hold: a chunk
+holding <code dir="auto">t</code> spans at most <code dir="auto">W</code>, so it ends at or before <code dir="auto">t + W</code>. <code dir="auto">W</code> is
+memoized per table rather than stored — raised as chunks are written and
+again by the walk that already verifies the directory — and is <strong>only ever
+raised</strong>, so however stale it is it still bounds the true width from above.
+A bound that could fall would silently skip a chunk, which is the failure
+this key layout exists to prevent; an unknown <code dir="auto">W</code> bounds nothing and the
+walk runs in full.</p>
+<p>The identity-carrying locator takes its own key kind rather than widening
+the old one. The format-9 tombstone migration leaves those directory keys
+for the existing repair path: its superseded keys decode as <code dir="auto">inline/chunk_range</code>, sit outside the
+directory’s prefix, and the repair that already heals a missing locator
+rebuilds the directory and sweeps them. Writing a locator stamps
+<code dir="auto">FORMAT_WITH_INLINE_CHUNK_IDENTITY</code>, which shuts out a binary that would
+look for the superseded key and conclude the table has no directory.</p>
+<p>Each inline row version ends at the earliest tombstone snapshot strictly
+greater than its <code dir="auto">begin_snapshot</code>. An update’s deletion ends the old version
+while its same-snapshot insertion remains live; later updates append events
+instead of moving the old version’s end. Readers resolve events across
+schema versions. This also preserves gaps when a
+row moves through Parquet between two inline versions: the next inline
+insertion is not sufficient evidence of when the preceding version ended.</p>
+<p><code dir="auto">inline/row_tombstone</code> appends discriminant 7 to <code dir="auto">InlineKey</code> without changing
+the encoding of any existing key. Structural format 9
+(<code dir="auto">FORMAT_WITH_INLINE_TOMBSTONE_HISTORY</code>) rewrites every old row-level
+tombstone into its corresponding event key, preserving the value bytes and
+removing the source key atomically. Normal readers use only the event keys.
+The readable floor and fresh-store bootstrap both start at 9; older catalogs
+must run <code dir="auto">Catalog::migrate</code> or the unattached <code dir="auto">moraine_migrate</code> SQL function
+before opening. Formats 1 through 7 first advance additively to 8, then the
+<code dir="auto">version-inline-tombstones</code> unit performs the 8-to-9 rewrite using RFC 0015’s
+bounded batches, durable cursor, migration marker, and atomic finish.</p>
+<p>Deletion snapshots already overwritten by an older writer are not recoverable from
+the remaining tombstone record; the new format does not reconstruct that
+lost history or repair Parquet files flushed with incorrect lifetimes.</p>
+<p>Flush removes a tombstone only when the versions it ends have been drained;
+a surviving chunk or another schema version retains its required event.
+Drop removes all deletion events with the table.</p>
+<p>The insert and versioned tombstone records are append-only on the commit path. The
+file-delete-table record is a marker, and exists because existence cannot be
+derived from the file-delete records: a flush
+materializes a table’s inlined deletions into a real delete file and
+clears them, and an emptied SQL table still exists. DuckLake caches that
+table’s existence for the life of the catalog and never re-probes, so a
+content-derived existence disappears under it mid-session and every later
+bind fails. Written idempotently by both paths that prove the table
+exists — staging a deletion into it, and removing one from it, the latter
+so a store written before the marker heals on its first flush — and
+removed by the <code dir="auto">DROP TABLE</code> cascade.</p>
+<p>The dropped-schema marker answers the same caching for the insert side,
+where the flush’s cleanup deregisters and drops a superseded, emptied
+<code dir="auto">ducklake_inlined_data_&lt;t&gt;_&lt;v&gt;</code>. DuckLake caches a table’s inlined-table
+list under the <em>schema version</em>, and a flush does not move that version,
+so nothing tells a reader in another process that the list it holds has
+gone stale; the reader keeps naming the dropped table and every later
+bind fails. The marker splits registration from existence: it deregisters
+the version from <code dir="auto">ducklake_inlined_data_tables</code> — so a reader that loads
+the list afterwards never learns the version, and the flush’s cleanup
+does not re-target it — while the <code dir="auto">inline/schema</code> record stays, so the
+name still resolves and scans empty. That is the correct answer for a
+stale reader: the rows it is asking for are in the file the flush wrote,
+and the retained record holds no chunks to double-count. Registering a
+version clears its marker in the same batch, so a version is never both
+listed and marked; the <code dir="auto">DROP TABLE</code> cascade takes the markers with
+everything else.</p>
+<p>Retention is not bounded — one record per inlined table a live DuckLake
+table has ever registered, reclaimed only when that table is dropped — so
+what keeps it cheap is that the records deduplicate. DuckLake mints a new
+inlined table whenever it finds no registration for one, which includes
+the case where a session’s <em>cached</em> list is empty; the version is fresh
+but the columns are unchanged, so the schema it registers is byte-
+identical to the one already stored. A deregistration therefore collapses
+its record to a <code dir="auto">same_as_version</code> reference when another version of the
+same table carries the same bytes, and the bytes are stored once however
+many versions accumulate. Resolution is one hop and only onto a version
+carrying bytes: a version that is already a reference, and a version some
+other reference resolves through, are both left whole. A reference naming
+a version that carries no bytes is corruption, not an empty schema.</p>
+<p>This is the one part of the design with a store-format floor. A reader
+that predates the field decodes a reference as a schema with no columns,
+which is wrong rather than merely stale, so the batch that writes one
+carries the store to the format that shuts those readers out — the same
+way a live index carries it to <code dir="auto">FORMAT_WITH_INDEX</code> and an inline chunk
+locator to <code dir="auto">FORMAT_WITH_INLINE_CHUNK_DIRECTORY</code>. A deregistration that
+collapses nothing stamps nothing, so a store takes the floor exactly when
+duplicate versions first accumulate, and never before.</p>
+<p>The stamp is one-way: a store that has taken the format cannot be opened
+by a binary that predates it, and a reader <em>already attached</em> on such a
+binary is not refused — it keeps running and may misread what later
+commits write. That is the same exposure every earlier format carries,
+and the same discipline answers it: upgrade every reader of a store
+before the writers start producing shapes the readers do not know.
+<code dir="auto">moraine_raise_format</code> takes the format deliberately for an operator who
+would rather not wait for the first collapse to take it, and
+<code dir="auto">dry_run := true</code> reports a store’s format without moving it — the only
+way to read it.</p>
+<p>A structural migration is the wrong instrument for a purely additive
+format: the registry’s floor invariant ties <code dir="auto">MIN_FORMAT_VERSION</code> to the
+newest unit’s target, so a unit here would refuse every un-migrated store
+at attach.</p>
+<p>The registration read is keys-only for the same reason: it needs the
+<code dir="auto">(table, version)</code> pairs, not the columns, and a scan that decoded every
+retained schema would grow with the retention. It walks the key range
+instead — the store still delivers each value, since a key and its value
+share an SST block, but nothing decodes them.</p>
+<p>The marker itself carries no store-format floor, unlike the chunk
+directory and the schema reference above. Nothing about it caches a
+judgment that a writer predating it could falsify: a writer that old
+deletes the schema record outright, which costs that one version its bind
+and leaves an inert marker the drop cascade sweeps. Mixed writers degrade
+a version at a time; they do not make a reader wrong.</p>
+<p>The chunk-range record is an immutable
+secondary directory written and removed atomically with its owning chunk.
+Its inclusive end is the ordered key, so a forward seek beginning at a
+deleted row id lands on the first range that could own the row; the value’s
+start rejects gaps. This is one entry per chunk, not one reverse entry per
+row.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="write-path">Write path</h3><a class="sl-anchor-link" href="#write-path"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Write path”</span></a></div>
+<p>An insert below the row limit becomes one <code dir="auto">inline/insert</code> <strong>chunk record</strong>:
+the commit’s rows for that table, Arrow-IPC-encoded, with row ids
+allocated from the table’s row-id counter exactly as a Parquet write would
+allocate them — the per-table row-id high-water mark in <code dir="auto">tstat</code>, as
+DuckLake allocates it. Chunk-per-commit (not row-per-key) because the read
+unit is “all live inlined rows of table T”, and because one key per commit
+rides the <code dir="auto">WriteBatch</code> with negligible overhead. <code dir="auto">chunk_seq</code> disambiguates
+multiple chunks in one commit (how rows are batched within a commit is an
+implementation detail). The same batch writes the chunk’s
+<code dir="auto">inline/chunk_range</code> locator.</p>
+<p>Type eligibility here is <strong>moraine’s</strong>, not DuckLake’s, and it is set by the
+value format below: an inline chunk is Arrow IPC, so a column is inlinable
+exactly when DuckDB’s Arrow encoding can carry it. That is a different and
+narrower rule than DuckLake’s own — stock DuckLake stores inline data as SQL
+values and inlines types moraine cannot.</p>
+<p><code dir="auto">GEOMETRY</code> is inlinable when <code dir="auto">spatial</code> is loaded, because spatial registers
+the Arrow extension type; values survive both the inline keyspace and the
+flush. <code dir="auto">VARIANT</code> has no Arrow representation at all, so moraine refuses the
+column at <code dir="auto">CREATE TABLE</code> with an error naming moraine, the type, and Arrow
+as the cause — a refusal, not a silent Parquet fallback, because the table
+would otherwise appear to work until its first insert. Scalars, <code dir="auto">BLOB</code>,
+<code dir="auto">UUID</code>, <code dir="auto">DECIMAL</code> and nested <code dir="auto">LIST</code>/<code dir="auto">STRUCT</code>/<code dir="auto">MAP</code> all inline.</p>
+<p>Arrow IPC is the value format because inlined data is <em>row data</em>, not
+metadata: it carries the table’s actual types — including nested
+STRUCT/MAP/LIST natively, where SQL catalogs degrade to <code dir="auto">VARCHAR</code> — and
+the flush path can feed record batches to a Parquet writer without a
+transcoding step. The chunk’s schema is pinned by <code dir="auto">schema_version</code> in the
+key, mirroring DuckLake’s inlined-table-per-schema-version design: schema
+evolution never rewrites existing chunks.</p>
+<p>Deletes:</p>
+<ul>
+<li>Against an inlined insert row → <code dir="auto">inline/row_tombstone</code> tombstone carrying
+<code dir="auto">end_snapshot</code>. DuckLake’s SQL form updates the row in place; a
+tombstone is the append-only equivalent and keeps chunks immutable.</li>
+<li>Against a Parquet-file row, when small enough to inline →
+<code dir="auto">inline/file_delete</code>, matching the spec’s inlined deletion table shape.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="encoding-overhead">Encoding overhead</h3><a class="sl-anchor-link" href="#encoding-overhead"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Encoding overhead”</span></a></div>
+<p>Arrow IPC is chosen for the flush path and type fidelity, not for
+compactness at a few rows per chunk — and inlining is nothing but the
+small-chunk regime. Two costs are inherent to the format there: buffer
+alignment (each column buffer is padded to an 8/64-byte boundary, which
+at three rows can exceed the row bytes themselves) and the per-message
+flatbuffer header. Both are fixed per chunk, so they are worst when
+chunks are smallest — exactly the workload this feature targets. This is
+a deliberate trade for a transcode-free flush, and it is bounded: chunk
+sizes are capped by the row limit and drained by flush cadence.</p>
+<p>The schema is <em>not</em> one of these costs, and is not paid per chunk.
+<code dir="auto">schema_version</code> is a key component (<code dir="auto">inline/insert</code>), so the reader schema
+is recoverable without re-embedding it. Each <code dir="auto">inline/insert</code> value carries
+the record-batch <strong>body</strong> only — the batch message (buffer layout, null
+counts) plus the buffers, with no schema message — and decode supplies the
+schema back from the version’s <code dir="auto">inline/schema</code> record (arrow-rs’s low-level
+<code dir="auto">encode</code>/<code dir="auto">read_record_batch</code>, either side of the FFI bridge). So the WAL
+append for a tiny commit never re-serializes the schema.</p>
+<p>An <code dir="auto">inline/schema</code> record is still stored once per <code dir="auto">(table_id, schema_version)</code> — the Arrow IPC schema-only stream — written in the same
+<code dir="auto">WriteBatch</code> as the first inlined insert for that schema version. It is
+what reconstructs the synthesized table entry’s columns (names and types)
+when the table is looked up, including for an empty scan. Storing it
+rather than deriving the columns from the catalog’s per-version metadata
+is deliberate: the stored message is self-describing, so the column layout
+resolves identically no matter how moraine’s DuckLake-type → Arrow-type
+mapping evolves after it was written — correct under the append-only
+immutability invariant, for one small record per schema version.</p>
+<p>Buffer compression stays off. Arrow’s LZ4/ZSTD codecs are framed per
+buffer and lose to their own overhead at these sizes; whatever cross-
+chunk redundancy remains is reclaimed by SlateDB’s SST block compression
+at rest, where it costs nothing on the write path. (That reclamation
+assumes plaintext values, which holds: RFC 0014 delegates catalog-at-rest
+encryption to the object store, which encrypts post-compression.)</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="read-path">Read path</h3><a class="sl-anchor-link" href="#read-path"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Read path”</span></a></div>
+<p>Live inlined rows of table T at snapshot S: range-scan
+<code dir="auto">inline/insert/{table_id}</code> (all schema versions), keep chunks with
+<code dir="auto">begin_snapshot &lt;= S</code>, resolve each version’s end from the first later
+<code dir="auto">inline/row_tombstone</code> event, and retain versions with no end or <code dir="auto">S &lt; end_snapshot</code>. Inlined file-deletes overlay Parquet scans the same
+way delete files do. The tombstone set for a table is scanned once and
+held in memory — inlined data is bounded by the row limit and flush
+cadence, so these sets are small by construction.</p>
+<p>Equality-index maintenance for an <code dir="auto">inline/row_tombstone</code> needs the deleted
+row’s indexed values. It seeks the <code dir="auto">inline/chunk_range</code> directory from that
+row id, reads only the owning immutable chunk, and decodes that body. A
+partially populated directory means an older chunk is still live, so the
+lookup falls back to the full chunk scan rather than risking an uncovered
+index removal.</p>
+<p>The directory serves every other inline read the same way once it is known
+<strong>complete</strong> — naming every live chunk. Completeness is judged once, by
+comparing the directory against a full chunk walk, and remembered per
+table (RFC 0009, store facts) — but only when the store format locks out
+writers that predate the directory, because from that format on every
+chunk arrives with its locator in the same batch and completeness is
+monotone. From there:</p>
+<ul>
+<li>the flush walk and the row-location probe run on locators alone — row
+spans without the Arrow bodies, which were the bulk of a flush’s block
+misses and were paid again per DELETE statement;</li>
+<li>a table scan materializes its row set from the locators, selects the
+scan’s rows, and point-reads only the chunk bodies the selected rows
+reference — a chunk whose rows are all tombstoned, or outside an
+incremental scan’s window, is never hauled.</li>
+</ul>
+<p>Who judges and who repairs is split by capability. A flush that finds the
+directory incomplete heals the gap onto its own batch — locators for
+surviving uncovered chunks, deletions for locators naming no chunk — and
+remembers nothing off a repair still riding the batch: completeness is
+trusted only once it has landed. The read path never writes, so it judges
+without healing, and only on an isolated session — a manifest-following
+pass can straddle a commit and must not judge. A directory found short of
+complete costs what it always did: the full chunk scan.</p>
+<p>Each chunk carries its <code dir="auto">schema_version</code> (its key component), so a
+body-only chunk is decoded against <em>its own</em> version’s <code dir="auto">inline/schema</code>,
+never a neighbor’s. This matters once a table is schema-evolved and holds
+inline chunks under several versions: DuckLake reads each
+<code dir="auto">ducklake_inlined_data_&lt;t&gt;_&lt;v&gt;</code> separately, and the shim serves it only the
+chunks of version <code dir="auto">v</code>.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="flush">Flush</h3><a class="sl-anchor-link" href="#flush"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Flush”</span></a></div>
+<p>Flush reproduces <code dir="auto">ducklake_flush_inlined_data</code> semantics as one catalog
+commit (still one <code dir="auto">WriteBatch</code>, plus the Parquet PUTs that precede it, in
+that order — data before metadata, like any DuckLake write):</p>
+<ol>
+<li>
+<p>Write live inlined rows to Parquet data file(s); write a partial
+deletion file consolidating tombstones if any, preserving per-row
+snapshot metadata.</p>
+<p>The rows reach DuckLake’s writer <strong>column-wise</strong>. A chunk decodes once,
+through DuckDB’s own Arrow importer, and stays as the <code dir="auto">DataChunk</code> that
+importer produced; the scan then emits its output by copying whole runs
+of it across, vector to vector. Runs are long in practice: the scan
+orders by <code dir="auto">row_id</code>, and row ids within a chunk follow insertion order.
+The three metadata columns are written straight into flat vectors, and a
+column no one projected is never copied at all. Nothing is transcoded
+through <code dir="auto">duckdb::Value</code> in either direction, which is the point — a
+row-by-row materialization would undo the transcode-free property the
+format was chosen for, one <code dir="auto">Value</code> per cell, twice.</p>
+<p>A physical rowid is the index into the scan’s row list, so versions
+sharing a logical <code dir="auto">row_id</code> remain distinct. UPDATE and DELETE resolve
+it against the statement’s shared scan materialization, with no second
+store scan or Arrow decode.</p>
+</li>
+<li>
+<p>In the commit batch: create the <code dir="auto">file</code> (and <code dir="auto">delfile</code>) records — the
+file record backdated to the minimum per-row snapshot, row-faithfully,
+as DuckLake writes it — and <strong>delete</strong> the flushed <code dir="auto">inline/insert</code> chunks,
+their <code dir="auto">inline/chunk_range</code> locators, and consumed
+<code dir="auto">inline/row_tombstone</code>/<code dir="auto">inline/file_delete</code> records, matching DuckLake’s
+delete-at-flush semantics. Pre-flush time travel is served by the
+flushed Parquet (per-row snapshot columns), not by retained chunks —
+retained chunks visible to any catalog scan would double-count rows.</p>
+</li>
+</ol>
+<div class="sl-heading-wrapper level-h3"><h3 id="why-this-is-a-fit-for-the-substrate">Why this is a fit for the substrate</h3><a class="sl-anchor-link" href="#why-this-is-a-fit-for-the-substrate"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Why this is a fit for the substrate”</span></a></div>
+<p>Every inlined commit is a small append into SlateDB’s WAL — the access
+pattern LSMs exist for. Sustained small-insert throughput is then governed
+by WAL group commit (many catalog commits per PUT), not by
+one-Parquet-file-per-commit overhead. And because the <code dir="auto">inline</code> subspace is
+its own SlateDB segment (RFC 0002: format v1 stores are created with a
+tag-byte segment extractor), inline churn compacts independently — the
+heaviest write traffic in the store never drags the small metadata
+subspaces into shared rewrites. Latency per commit remains
+PUT-bound as documented in the README; what inlining changes is that tiny
+commits stop costing a Parquet file, a data-file record, and eventual
+compaction debt each. Flush is the explicit analogue of LSM compaction,
+converting accumulated small writes into scan-optimized storage.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="extension-surface-as-implemented">Extension surface (as implemented)</h3><a class="sl-anchor-link" href="#extension-surface-as-implemented"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Extension surface (as implemented)”</span></a></div>
+<p>DuckLake does not write inlined rows as fixed <code dir="auto">ducklake_*</code> rows. When
+<code dir="auto">data_inlining_row_limit != 0</code> (its compiled default is 10, which moraine
+leaves standing — it serves no <code dir="auto">ducklake_metadata</code> row for the key,
+because one would outrank the ATTACH option and the DuckDB setting alike
+and shadow every way of raising the limit), DuckLake
+<strong>dynamically creates and drives per-table physical tables</strong> in the
+metadata catalog and issues ordinary SQL against them. moraine’s
+<code dir="auto">StorageExtension</code> recognizes these table-name patterns and routes every
+operation into the <code dir="auto">inline/*</code> keyspace instead of materializing real
+tables — the same staged-commit substrate the fixed <code dir="auto">ducklake_*</code> tables
+ride, extended to two dynamic name families:</p>
+<ul>
+<li><code dir="auto">ducklake_inlined_data_&lt;table_id&gt;_&lt;schema_version&gt;</code> — inlined inserts.
+Columns <code dir="auto">(row_id BIGINT, begin_snapshot BIGINT, end_snapshot BIGINT, &lt;the table's user columns at that schema version&gt;)</code>.</li>
+<li><code dir="auto">ducklake_inlined_delete_&lt;table_id&gt;</code> — inlined deletes against Parquet
+rows. Columns <code dir="auto">(file_id BIGINT, row_id BIGINT, begin_snapshot BIGINT)</code>.</li>
+</ul>
+<p>The operation → keyspace mapping (source-verified against DuckLake
+<code dir="auto">ducklake_metadata_manager.cpp</code> / <code dir="auto">ducklake_inline_data.cpp</code> /
+<code dir="auto">ducklake_flush_inlined_data.cpp</code>):</p>
+<table>
+<thead>
+<tr>
+<th>DuckLake SQL</th>
+<th>moraine record</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code dir="auto">CREATE TABLE ducklake_inlined_data_&lt;t&gt;_&lt;v&gt;(...)</code> (batched with the <code dir="auto">INSERT INTO ducklake_inlined_data_tables</code> registration)</td>
+<td><code dir="auto">inline/schema</code> at <code dir="auto">(t, v)</code> holding the user columns as an Arrow IPC schema-only stream (DuckDB’s <code dir="auto">ArrowConverter::ToArrowSchema</code> transcodes the column list; the Rust bridge serializes it); the table appears in the now-live <code dir="auto">ducklake_inlined_data_tables</code> projection</td>
+</tr>
+<tr>
+<td><code dir="auto">INSERT INTO ducklake_inlined_data_&lt;t&gt;_&lt;v&gt; VALUES (row_id, {snap}, NULL, &lt;cols&gt;), …</code> (one multi-row <code dir="auto">VALUES</code> per commit)</td>
+<td>one <code dir="auto">inline/insert</code> chunk at <code dir="auto">(t, v, begin_snapshot={snap}, chunk_seq)</code>: the user-column cells as one Arrow IPC record-batch body (no schema message; decoded against the version’s <code dir="auto">inline/schema</code>), plus <code dir="auto">row_id_start</code> (first row’s <code dir="auto">row_id</code>) and <code dir="auto">row_count</code>; and one <code dir="auto">inline/chunk_range</code> locator keyed by its inclusive row-id end. The <code dir="auto">row_id</code>/<code dir="auto">begin_snapshot</code>/<code dir="auto">end_snapshot</code> columns are moraine-derived on read (<code dir="auto">row_id = row_id_start + offset</code>, <code dir="auto">begin_snapshot</code> from the key, <code dir="auto">end_snapshot</code> from <code dir="auto">inline/row_tombstone</code>), never stored in the body</td>
+</tr>
+<tr>
+<td><code dir="auto">UPDATE ducklake_inlined_data_&lt;t&gt;_&lt;v&gt; SET end_snapshot={snap} WHERE row_id=r …</code></td>
+<td><code dir="auto">inline/row_tombstone</code> at <code dir="auto">(t, r, snap)</code> holding <code dir="auto">end_snapshot={snap}</code></td>
+</tr>
+<tr>
+<td><code dir="auto">SELECT &lt;cols&gt; FROM ducklake_inlined_data_&lt;t&gt;_&lt;v&gt; WHERE {snap} &gt;= begin_snapshot AND ({snap} &lt; end_snapshot OR end_snapshot IS NULL) ORDER BY row_id</code> (and the <code dir="auto">SCAN_INSERTIONS</code>/<code dir="auto">SCAN_DELETIONS</code>/<code dir="auto">SCAN_FOR_FLUSH</code> filter variants)</td>
+<td>range-scan <code dir="auto">inline/insert</code> for <code dir="auto">t</code> at <code dir="auto">v</code>, decode Arrow, reconstruct the three virtual columns, apply the snapshot predicate, apply the version-specific <code dir="auto">inline/row_tombstone</code> ends, project and order by <code dir="auto">row_id</code></td>
+</tr>
+<tr>
+<td><code dir="auto">INSERT INTO ducklake_inlined_delete_&lt;t&gt; VALUES (file_id, row_id, {snap}), …</code></td>
+<td><code dir="auto">inline/file_delete</code> at <code dir="auto">(t, file_id, row_id)</code> holding <code dir="auto">begin_snapshot={snap}</code>, plus the <code dir="auto">inline/file_delete_table</code> marker for <code dir="auto">t</code></td>
+</tr>
+<tr>
+<td><code dir="auto">DELETE FROM ducklake_inlined_delete_&lt;t&gt;</code> (the flush’s clean-up, once those deletions are written out as a real delete file)</td>
+<td>remove the <code dir="auto">inline/file_delete</code> record behind each matched row, keeping the <code dir="auto">inline/file_delete_table</code> marker. Translated per row rather than as a table-wide clear: DuckLake’s flush happens to delete every row, but what it issues is an ordinary SQL <code dir="auto">DELETE</code>, so a filtered one removes exactly what it matched. Naming a record the table does not carry is a typed error, not a silent no-op</td>
+</tr>
+<tr>
+<td><code dir="auto">DELETE FROM ducklake_inlined_data_&lt;t&gt;_&lt;v&gt; WHERE begin_snapshot &lt;= {flush_snap}</code> then <code dir="auto">DROP TABLE …</code> + <code dir="auto">DELETE FROM ducklake_inlined_data_tables …</code> (flush / superseded-table cleanup)</td>
+<td>remove the flushed <code dir="auto">inline/insert</code> chunks, their <code dir="auto">inline/chunk_range</code> locators, and consumed <code dir="auto">inline/row_tombstone</code>; write the version’s <code dir="auto">inline/schema_dropped</code> marker, retaining its <code dir="auto">inline/schema</code>. The flushed data lives on as the backdated <code dir="auto">ducklake_data_file</code> DuckLake registers through the ordinary file path</td>
+</tr>
+<tr>
+<td>hard <code dir="auto">DELETE FROM ducklake_data_file</code> naming <code dir="auto">(t, file_id)</code> (a merge pruning its sources, cleanup draining the schedule)</td>
+<td>remove every <code dir="auto">inline/file_delete</code> record targeting that file, keeping the marker. Silent on a miss, unlike the removal above: this cascade names a file rather than records, and a pruned file carrying no inlined deletion is the ordinary case</td>
+</tr>
+<tr>
+<td><code dir="auto">UPDATE ducklake_data_file SET end_snapshot</code> (a rewrite ending its source)</td>
+<td>nothing — see below</td>
+</tr>
+<tr>
+<td><code dir="auto">DROP TABLE lake.&lt;schema&gt;.&lt;t&gt;</code> cascade</td>
+<td>drop every <code dir="auto">inline/*</code> record for <code dir="auto">t</code></td>
+</tr>
+</tbody>
+</table>
+<p>This is served through the same staged-row commit path (RFC 0004): the
+inline operations arrive as staged INSERT/UPDATE/DELETE inside DuckLake’s
+metadata-commit transaction and translate at commit into one atomic batch
+of <code dir="auto">inline/*</code> records — same one-batch atomicity, same no-internal-retry,
+same <code dir="auto">conflict</code> wire contract. Values DuckLake authors (<code dir="auto">row_id</code>,
+<code dir="auto">begin_snapshot</code>, <code dir="auto">end_snapshot</code>, user cells) are stored verbatim per the
+keyspace; nothing is re-derived on write.</p>
+<p>A nested column reaches the catalog as DuckLake represents it: a top-level
+marker row (<code dir="auto">list</code>/<code dir="auto">struct</code>/<code dir="auto">map</code>) plus child <code dir="auto">ducklake_column</code> rows linked
+by <code dir="auto">parent_column</code>. moraine stores those rows verbatim, passes the marker
+through its <code dir="auto">ducklake_column</code> projection, and reconstructs the nested
+<code dir="auto">LogicalType</code> from the child hierarchy for its own catalog entries
+(<code dir="auto">catalog.cpp</code>’s <code dir="auto">BuildColumnType</code>); the Arrow IPC inline path carries the
+values themselves natively. <code dir="auto">LIST</code>, <code dir="auto">STRUCT</code>, and <code dir="auto">MAP</code> are verified live
+through inline and flush by the e2e test
+<code dir="auto">ducklake_inline_nested_types_round_trip_through_flush</code>.</p>
+<p>Three reconciliations with the surrounding RFCs, recorded here because they
+governed the implementation:</p>
+<ul>
+<li><strong>Flush removes inline records; it does not move them to <code dir="auto">history</code>.</strong>
+RFC 0004’s commit-participants note phrases flush as “moves consumed
+inline records to <code dir="auto">history</code>”; the accurate behavior — matching DuckLake’s
+hard <code dir="auto">DELETE</code> and RFC 0005’s flush section — is that <code dir="auto">inline/*</code> records
+are <em>deleted</em> at flush (the data survives as the backdated Parquet
+file). The <code dir="auto">inline</code> subspace is append-then-delete, not begin/end
+versioned like the entity subspaces, so this slice hard-deletes the
+consumed records at flush.</li>
+<li><strong>Schema stored, not derived.</strong> <code dir="auto">inline/schema</code> holds the Arrow schema
+written at <code dir="auto">CREATE</code> time (transcoded from DuckLake’s column list), so an
+<code dir="auto">inline/insert</code> chunk decodes self-describingly without coupling to the
+mutable <code dir="auto">ducklake_column</code> type mapping — as the Alternatives section
+requires.</li>
+<li><strong>Arrow IPC via the C Data Interface, transcode split across the FFI.</strong>
+DuckDB’s C++ has no Arrow IPC serializer, so the shim (<code dir="auto">inline_tables.cpp</code>)
+and the Rust bridge (<code dir="auto">arrow_ipc.rs</code>) split the work along the C Data
+Interface: C++ converts a <code dir="auto">DataChunk</code>’s user columns to <code dir="auto">ArrowArray</code>/
+<code dir="auto">ArrowSchema</code> with DuckDB’s own <code dir="auto">ArrowConverter</code>, and Rust serializes
+those to IPC bytes with <code dir="auto">arrow-rs</code>. Decode reverses it — Rust turns IPC
+bytes back into C Data Interface structs, and the shim feeds them to
+DuckDB’s own record-batch importer (<code dir="auto">ArrowTableFunction::ArrowToDuckDB</code>).
+Because DuckDB owns both the export and the import, the encoding is
+exactly as type-faithful as DuckDB’s Arrow support (nested <code dir="auto">LIST</code>/<code dir="auto">STRUCT</code>
+round-trip; proven at the bridge level in <code dir="auto">arrow_ipc.rs</code>), not the
+lossier <code dir="auto">Value::ToString()</code> text a shim-local codec would force. The one
+cost the RFC’s “encoding overhead” note flags remains: flush is <strong>not
+transcode-free</strong> — <code dir="auto">ducklake_flush_inlined_data</code> reads inlined rows back
+through the importer into a <code dir="auto">DataChunk</code> (each cell then boxed into a
+<code dir="auto">duckdb::Value</code> for the shim’s row-oriented scan) and DuckLake’s writer
+re-encodes to Parquet. A future column-oriented decode path could hand
+the imported <code dir="auto">DataChunk</code> to the flush writer directly, but the row
+materialization is not on the tiny-commit hot path inlining optimizes.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="flush-registers-a-data-file-and-a-delete-file-against-it-in-one-commit">Flush registers a data file and a delete file against it in one commit</h3><a class="sl-anchor-link" href="#flush-registers-a-data-file-and-a-delete-file-against-it-in-one-commit"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Flush registers a data file and a delete file against it in one commit”</span></a></div>
+<p>A flush does not filter tombstoned rows out of the Parquet it writes. It
+materializes <strong>every</strong> inlined row of the table — live and tombstoned
+alike — into one data file, then writes a delete file naming the
+tombstoned rows’ <em>positions in that file</em>
+(<code dir="auto">ducklake_flush_inlined_data.cpp</code>’s <code dir="auto">AttachDeleteFilesToWrittenFiles</code>).
+One commit therefore carries a <code dir="auto">ducklake_data_file</code> insert and a
+<code dir="auto">ducklake_delete_file</code> insert whose <code dir="auto">data_file_id</code> is that same
+brand-new file.</p>
+<p>Equality-index upkeep therefore resolves such a delete <strong>at the add</strong>: the
+rows it kills are left out of the file’s entries as the file is read, so
+they are never indexed at all. The commit first groups delete sources by
+target without opening their objects. A newly registered target resolves its
+own delete files before deriving that target’s additions, while unrelated
+additions and removals run beside that discovery. Nothing relies on the two
+catalog rows’ order in the batch.</p>
+<p>Staging a removal beside the add instead would be wrong, not merely
+wasteful. An index entry’s key carries no file, so an add and a removal of
+one <code dir="auto">(key, row_id)</code> in a single batch is <em>exactly</em> the shape an <code dir="auto">UPDATE</code>
+produces — DuckLake rewrites the updated row into a new file under its
+preserved row id, ending the old file’s copy — and there the entry must
+survive. The two are indistinguishable at the batch layer and can only be
+told apart by whether the removal targets the very file the add came from.
+<code dir="auto">stage_file_delete_entries</code> accordingly handles only targets the committed
+head already holds; a target the commit itself registers is skipped there
+because the add already accounted for it.</p>
+<p>Only an indexed table reaches any of this: upkeep returns early when the
+table carries no live index.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="an-inlined-deletion-dies-with-its-targets-row-not-with-its-target">An inlined deletion dies with its target’s row, not with its target</h3><a class="sl-anchor-link" href="#an-inlined-deletion-dies-with-its-targets-row-not-with-its-target"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “An inlined deletion dies with its target’s row, not with its target”</span></a></div>
+<p><code dir="auto">ducklake_inlined_delete_&lt;t&gt;</code> has no <code dir="auto">end_snapshot</code> column: a deletion
+exists or it does not, and there is no way to express one that applied over
+a window. Removal is therefore the only way one goes away, and every
+removal has to be paired with something that preserves what it meant — the
+flush pairs its clear with a backdated delete file.</p>
+<p>That forces the cascade to key on how a data file leaves, which RFC 0021
+already distinguishes for its own reasons:</p>
+<ul>
+<li><strong>Pruned</strong> (a merge’s sources, cleanup’s schedule) — the row is
+hard-deleted, current <em>and</em> history, because the backdated replacement
+subsumed its whole visibility history. Nothing can read that file at any
+snapshot again, so an inlined deletion against it is unreachable. It is
+removed with the file’s row. Left behind, it would still be served, and
+the next flush would materialize it into a delete file naming a data file
+that no longer exists — which the commit refuses.</li>
+<li><strong>Ended</strong> (a rewrite’s source) — the row moves to <code dir="auto">history</code> precisely
+because a reader below the rewrite must still see the rows it
+materialized deletes for. The deletions that make those rows dead have to
+stay readable alongside it, so ending a file removes nothing. They go
+later, when expiry and cleanup prune the ended row.</li>
+</ul>
+<p>Both are covered by
+<code dir="auto">hard_deleting_a_data_file_drops_the_inlined_deletions_against_it</code> and
+<code dir="auto">ending_a_data_file_keeps_the_inlined_deletions_against_it</code>.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="alternatives-considered">Alternatives considered</h2><a class="sl-anchor-link" href="#alternatives-considered"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Alternatives considered”</span></a></div>
+<ul>
+<li><strong>Row-per-key inserts (<code dir="auto">inline/insert/&lt;table_id&gt;/&lt;row_id&gt;</code>):</strong> enables
+point deletes by key but makes every read a per-row decode and bloats
+key overhead for the dominant scan workload. Rejected; chunks match the
+read unit.</li>
+<li><strong>In-place <code dir="auto">end_snapshot</code> updates on delete (mirror the SQL design):</strong>
+requires read-modify-write of a chunk inside the commit path, breaking
+append-only writes and inflating write amplification for one deleted
+row. Rejected in favor of tombstones.</li>
+<li><strong>Encoding rows as protobuf like metadata records:</strong> loses native
+columnar types, adds a transcode on flush, and reimplements what Arrow
+already defines. Rejected; the metadata codec argument (RFC 0002) does
+not transfer to row data.</li>
+<li><strong>Self-contained IPC stream per chunk (schema embedded in every
+value):</strong> re-serializes the schema into the WAL on every tiny commit for
+bytes the key already determines via <code dir="auto">schema_version</code> — the encoding to
+avoid, and avoided. Each <code dir="auto">inline/insert</code> value stores the record-batch
+<strong>body</strong> alone (via arrow-rs’s low-level <code dir="auto">encode</code>), decoded against the
+version’s <code dir="auto">inline/schema</code> stream (<code dir="auto">read_record_batch</code>). The
+round-trip-robustness a self-contained stream would have bought is instead
+guaranteed by DuckDB owning both the export and import — the body carries
+the batch message (buffer layout, null counts), which is all <code dir="auto">read_record_ batch</code> needs alongside the stored schema. Dictionary-encoded columns are
+the one shape the body cannot carry (no dictionary messages); inlined user
+columns are not dictionary-encoded, and the encoder rejects them if they
+ever were.</li>
+<li><strong>Deriving the reader schema from catalog column metadata</strong> (instead of
+the <code dir="auto">inline/schema</code> record): saves that record, but couples chunk
+decode to a frozen DuckLake-type → Arrow-type mapping — a later mapping
+change would silently misread existing chunks. Rejected; a self-
+describing stored schema is worth one small record per schema version
+under the append-only immutability invariant.</li>
+<li><strong>Storing inlined rows outside SlateDB (small Parquet in the bucket):</strong>
+that is just… not inlining; it recreates the tiny-file problem inlining
+exists to solve.</li>
+</ul>
+</div><script type="module">var e=class extends HTMLElement{constructor(){super()}connectedCallback(){let e=()=>{let e=t===`ready`?`<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></g></svg>`:`<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/></svg>`;this.innerHTML=`<span class="w-full h-full block [&_svg]:w-full [&_svg]:h-full">`+e+`</span>`},t=`ready`;e(),this.addEventListener(`click`,()=>{if(t===`ready`){t=`success`,e();let n=this.dataset.code||``;navigator.clipboard.writeText(n),setTimeout(()=>{t=`ready`,e()},1500)}})}};customElements.define(`nova-code-copy-button`,e);</script><script type="module" src="/_astro/MarkdownContent.astro_astro_type_script_index_0_lang.x0CmCSF8.js"></script><footer class="sl-flex astro-xhxjzfa7"><div class="meta sl-flex astro-xhxjzfa7"></div><div class="flex min-w-full flex-row items-stretch justify-between gap-2 px-1 pt-0 pb-6 print:hidden" dir="ltr"><a href="/rfcs/0004-commit-protocol/" rel="prev" data-side="left" class="group m-0 flex items-center justify-end gap-2 rounded-xl p-2 font-medium text-(--sl-color-gray-2) no-underline transition hover:text-(--sl-color-white) md:text-lg [[rel='next']]:flex-row [[rel='prev']]:flex-row-reverse"><span>0004: Commit and transaction protocol</span><svg width="1em" height="1em" viewBox="0 0 24 24" class="block min-h-5 min-w-5 transition group-hover:-translate-x-1"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18l-6-6l6-6" /></svg></a><div class="flex-1"></div><a href="/rfcs/0006-extension-surface/" rel="next" data-side="right" class="group m-0 flex items-center justify-end gap-2 rounded-xl p-2 font-medium text-(--sl-color-gray-2) no-underline transition hover:text-(--sl-color-white) md:text-lg [[rel='next']]:flex-row [[rel='prev']]:flex-row-reverse"><span>0006: Extension surface</span><svg width="1em" height="1em" viewBox="0 0 24 24" class="block min-h-5 min-w-5 transition group-hover:translate-x-1"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6" /></svg></a></div></footer></div></div></main></div></div></div></div></body></html>
