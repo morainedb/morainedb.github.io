@@ -1,0 +1,502 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-vdxcvpsm"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>RFC 0015: On-disk format migration | moraine</title><link rel="canonical" href="https://morainedb.github.io/rfcs/0015-format-migration/"/><link rel="sitemap" href="/sitemap-index.xml"/><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.1.4"/><meta name="generator" content="Starlight v0.41.4"/><meta property="og:title" content="RFC 0015: On-disk format migration"/><meta property="og:type" content="article"/><meta property="og:url" content="https://morainedb.github.io/rfcs/0015-format-migration/"/><meta property="og:locale" content="en"/><meta property="og:description" content="A DuckLake catalog that lives in your bucket — SlateDB-backed, serverless, nothing to operate."/><meta property="og:site_name" content="moraine"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="A DuckLake catalog that lives in your bucket — SlateDB-backed, serverless, nothing to operate."/><script>
+"use strict";(()=>{(()=>{let t="theme-toggle",n;function r(){return window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}function l(){let e=localStorage.getItem(t);return e==="dark"||e==="light"?e:null}function m(){return n||l()||r()}function s(e){e===r()?localStorage.removeItem(t):localStorage.setItem(t,e)}function h(e){let o=document.documentElement;o.classList.toggle("dark",e==="dark"),o.dataset.theme=e,o.style.colorScheme=e}function a(e){n=e,s(e),h(e)}function c(){a(m())}c(),document.addEventListener("astro:after-swap",c),window.astroThemeToggle={setTheme:a,getTheme:m}})();})();
+</script><link rel="stylesheet" href="/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/_astro/common.DJmCPQrT.css"><style>@layer starlight.components{.card:where(.astro-zts4jgjd){--sl-card-border:var(--sl-color-purple);--sl-card-bg:var(--sl-color-purple-low);border:1px solid var(--sl-color-gray-5);background-color:var(--sl-color-black);flex-direction:column;gap:clamp(.5rem,.125rem + 1vw,1rem);padding:clamp(1rem,.125rem + 3vw,2.5rem)}.card:where(.astro-zts4jgjd):nth-child(4n+1){--sl-card-border:var(--sl-color-orange);--sl-card-bg:var(--sl-color-orange-low)}.card:where(.astro-zts4jgjd):nth-child(4n+3){--sl-card-border:var(--sl-color-green);--sl-card-bg:var(--sl-color-green-low)}.card:where(.astro-zts4jgjd):nth-child(4n+4){--sl-card-border:var(--sl-color-red);--sl-card-bg:var(--sl-color-red-low)}.card:where(.astro-zts4jgjd):nth-child(4n+5){--sl-card-border:var(--sl-color-blue);--sl-card-bg:var(--sl-color-blue-low)}.title:where(.astro-zts4jgjd){font-weight:600;font-size:var(--sl-text-h4);color:var(--sl-color-white);line-height:var(--sl-line-height-headings);align-items:center;gap:1rem}.card:where(.astro-zts4jgjd) .icon:where(.astro-zts4jgjd){border:1px solid var(--sl-card-border);background-color:var(--sl-card-bg);border-radius:.25rem;flex-shrink:0;padding:.2em}.card:where(.astro-zts4jgjd) .body:where(.astro-zts4jgjd){font-size:clamp(var(--sl-text-sm), calc(.5rem + 1vw), var(--sl-text-body));margin:0}.card-grid:where(.astro-lmor3ela){grid-template-columns:100%;gap:1rem;display:grid}.card-grid:where(.astro-lmor3ela)>*{margin-top:0!important}@media (width>=50rem){.card-grid:where(.astro-lmor3ela){grid-template-columns:1fr 1fr;gap:1.5rem}.stagger:where(.astro-lmor3ela){--stagger-height:5rem;padding-bottom:var(--stagger-height)}.stagger:where(.astro-lmor3ela)>:nth-child(2n){transform:translateY(var(--stagger-height))}}}
+@layer starlight.components{svg:where(.astro-n5k4ipy7){color:var(--sl-icon-color);font-size:var(--sl-icon-size,1em);width:1em;height:1em}}
+</style><script type="module" src="/_astro/page.LAbJoB63.js"></script></head><body class="astro-vdxcvpsm"><a class="sl-skip-link astro-vxeigawq" href="#_top">Skip to content</a><div class="flex min-h-screen flex-col astro-3iko6sul"><header class="fixed inset-0 z-(--sl-z-index-navbar) box-border h-(--sl-nav-height) w-full border-0 border-b border-solid border-(--sl-color-hairline) bg-(--sl-color-bg-nav) px-(--sl-nav-pad-x) py-(--sl-nav-pad-y) backdrop-blur astro-3iko6sul"><div class="box-border flex h-full items-center gap-2"><div class="-m-3 overflow-clip p-3 flex min-w-0"><span class="-m-1.5 rounded-md p-1.5 **:text-lg **:font-semibold **:text-(--sl-color-text) focus-visible:outline-offset-0"><a href="/" class="site-title sl-flex astro-clw6ags5"><img class="light:sl-hidden print:hidden astro-clw6ags5" alt src="/_astro/moraine-dark.CEVNFCXz.svg" width="128" height="128"><img class="dark:sl-hidden print:block astro-clw6ags5" alt src="/_astro/moraine.B97P_dWh.svg" width="128" height="128"><span class="astro-clw6ags5" translate="no">moraine</span></a></span></div><nav class="flex flex-1 flex-row gap-4 overflow-x-auto py-3 pr-4 pl-4 text-sm font-medium max-md:**:hidden xl:gap-6 xl:pl-6"></nav><div class="flex md:max-w-60 md:flex-1 print:hidden"><site-search class=" astro-hdulihjd" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"><button class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90 md:h-9 md:w-full md:max-w-88 md:rounded-md md:border md:border-solid md:border-(--sl-color-gray-5) md:p-2 md:text-(--sl-color-text) md:transition-colors md:hover:bg-gray-400/10 astro-hdulihjd" data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4 astro-hdulihjd"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m21 21l-4.34-4.34" /><circle cx="11" cy="11" r="8" /></g></svg><span class="sl-hidden md:sl-block astro-hdulihjd" aria-hidden="true">Search</span><kbd class="sl-hidden md:sl-flex astro-hdulihjd" style="display: none;"><kbd class="astro-hdulihjd">Ctrl</kbd><kbd class="astro-hdulihjd">K</kbd></kbd></button><dialog style="padding:0" aria-label="Search" class="astro-hdulihjd"><div class="dialog-frame sl-flex astro-hdulihjd"><button data-close-modal class="sl-flex md:sl-hidden astro-hdulihjd">Cancel</button><div class="search-container astro-hdulihjd"><div id="starlight__search" class="astro-hdulihjd"></div></div></div></dialog></site-search><script>
+  ;(() => {
+    const openBtn = document.querySelector('button[data-open-modal]')
+    const shortcut = openBtn?.querySelector('kbd')
+    if (!openBtn || !(shortcut instanceof HTMLElement)) return
+    const platformKey = shortcut.querySelector('kbd')
+    if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+      platformKey.textContent = '⌘'
+      openBtn.setAttribute('aria-keyshortcuts', 'Meta+K')
+    }
+    shortcut.style.display = ''
+  })()
+</script><script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.vTFUHulS.js"></script></div><div class="hidden items-center gap-2 md:flex print:hidden"><a href="https://github.com/morainedb/moraine" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">GitHub</span><svg aria-hidden="true" class=" astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script><div class="size-8 overflow-visible"><astro-theme-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><div class="astro-theme-toggle-icon-light"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 19a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1m-4.95-2.05a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0m11.314 0l1.414 1.414a1 1 0 0 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 1.414-1.414m-5.049-9.836a5 5 0 1 1-2.532 9.674a5 5 0 0 1 2.532-9.674M4 11a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zm18 0a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM5.636 4.222L7.05 5.636A1 1 0 0 1 5.636 7.05L4.222 5.636a1 1 0 0 1 1.414-1.414m14.142 0a1 1 0 0 1 0 1.414L18.364 7.05a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0M12 1a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1" /></svg></div><div class="astro-theme-toggle-icon-dark"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 1.992a10 10 0 1 0 9.236 13.838c.341-.82-.476-1.644-1.298-1.31a6.5 6.5 0 0 1-6.864-10.787l.077-.08c.551-.63.113-1.653-.758-1.653h-.266l-.068-.006z" /></svg></div></astro-theme-toggle><script type="module">function e(){return typeof window>`u`?`light`:window.astroThemeToggle?.getTheme?.()||`light`}function t(e){typeof window>`u`||window.astroThemeToggle?.setTheme?.(e)}function n(){t(e()===`light`?`dark`:`light`)}var r=`astro-theme-toggle-temporary-styles`;function i(){document.getElementById(r)?.remove()}function a(){i();let e=document.createElement(`style`);e.id=r,e.textContent=`::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }`,document.head.appendChild(e)}async function o(e,t,n){let r=document;if(typeof r.startViewTransition!=`function`){e();return}a();let o=r.startViewTransition(()=>{e()});await o?.ready,o?.finished?.then(i);let s=.7,c=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><defs><radialGradient id="toggle-theme-gradient"><stop offset="${s}"/><stop offset="1" stop-opacity="0"/></radialGradient></defs><circle cx="4" cy="4" r="4" fill="url(#toggle-theme-gradient)"/></svg>`,l=`data:image/svg+xml;base64,${window.btoa(c)}`,u=window.innerWidth,d=window.innerHeight,f=Math.ceil(Math.hypot(Math.max(t,u-t),Math.max(n,d-n))/s);document.documentElement.animate({maskImage:[`url('${l}')`,`url('${l}')`],maskRepeat:[`no-repeat`,`no-repeat`],maskPosition:[`${t}px ${n}px`,`${t-f}px ${n-f}px`],maskSize:[`0`,`${2*f}px`]},{duration:500,easing:`ease-in`,pseudoElement:`::view-transition-new(root)`})}function s(e){o(n,e.clientX,e.clientY)}var c=class extends HTMLElement{connectedCallback(){this.hasAttribute(`tabindex`)||this.setAttribute(`tabindex`,`0`),this.hasAttribute(`role`)||this.setAttribute(`role`,`button`),this.addEventListener(`click`,s),this.addEventListener(`keydown`,e=>{if(e.key===`Enter`||e.key===` `){e.preventDefault();let t=this.getBoundingClientRect();s({clientX:t.left+t.width/2,clientY:t.top+t.height/2})}})}};customElements.define(`astro-theme-toggle`,c);</script></div></div><div class="flex items-center gap-2 md:hidden print:hidden"><nova-mobile-menu-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90 print:hidden" aria-label="Menu" aria-controls="starlight__sidebar"><div class="transition-transform [body[data-mobile-menu-expanded]_&amp;]:rotate-90"><svg width="1em" height="1em" viewBox="0 0 24 24" class="block [body[data-mobile-menu-expanded]_&amp;]:hidden"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16M4 12h16M4 19h16" /></svg><svg width="1em" height="1em" viewBox="0 0 24 24" class="hidden [body[data-mobile-menu-expanded]_&amp;]:block"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12" /></svg></div></nova-mobile-menu-toggle><script type="module" src="/_astro/MobileMenuToggle.astro_astro_type_script_index_0_lang.Bg4YKcfM.js"></script></div></div></header><nav class="sidebar print:hidden astro-3iko6sul" aria-label="Main" id="nova-sidebar-nav"><div id="starlight__sidebar" class="nova-scroll-container invisible md:visible [body[data-mobile-menu-expanded]_&amp;]:max-md:visible fixed top-(--sl-nav-height) bottom-0 left-0 z-(--sl-z-index-menu) overflow-y-auto border-0 border-solid border-(--sl-color-hairline) bg-(--sl-color-black) max-md:w-full md:w-(--sl-sidebar-width) md:border-r astro-3iko6sul"><div class="sidebar-content flex h-full min-h-max flex-col px-(--sl-sidebar-pad-x) py-4 astro-3iko6sul"><sl-sidebar-state-persist data-hash="05ix94y" class="astro-f5yvicm7"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-ojxuodky"><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Guide</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/guide/what-is-moraine/" class="astro-ojxuodky"><span class="astro-ojxuodky">What is moraine?</span></a></li><li class="astro-ojxuodky"><a href="/guide/getting-started/" class="astro-ojxuodky"><span class="astro-ojxuodky">Getting started</span></a></li><li class="astro-ojxuodky"><a href="/guide/architecture/" class="astro-ojxuodky"><span class="astro-ojxuodky">Architecture</span></a></li><li class="astro-ojxuodky"><a href="/guide/embedding/" class="astro-ojxuodky"><span class="astro-ojxuodky">Embedding the core</span></a></li><li class="astro-ojxuodky"><a href="/guide/operating/" class="astro-ojxuodky"><span class="astro-ojxuodky">Operating a lake</span></a></li></ul></details></li><li class="astro-ojxuodky"><details open class="astro-ojxuodky"><summary class="astro-ojxuodky"><span class="group-label astro-ojxuodky"><span class="large astro-ojxuodky">Design (RFCs)</span></span><svg aria-hidden="true" class="caret astro-ojxuodky astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-ojxuodky"><li class="astro-ojxuodky"><a href="/rfcs/0001-repository-structure-and-conventions/" class="astro-ojxuodky"><span class="astro-ojxuodky">0001: Repository structure and conventions</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0002-slatedb-key-encoding/" class="astro-ojxuodky"><span class="astro-ojxuodky">0002: SlateDB key encoding for DuckLake catalog state</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0003-public-api-shape/" class="astro-ojxuodky"><span class="astro-ojxuodky">0003: Public API shape of the moraine core</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0004-commit-protocol/" class="astro-ojxuodky"><span class="astro-ojxuodky">0004: Commit and transaction protocol</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0005-data-inlining/" class="astro-ojxuodky"><span class="astro-ojxuodky">0005: Data inlining on SlateDB</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0006-extension-surface/" class="astro-ojxuodky"><span class="astro-ojxuodky">0006: Extension surface</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0007-snapshot-expiry-and-gc/" class="astro-ojxuodky"><span class="astro-ojxuodky">0007: Snapshot expiry and garbage collection</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0008-compaction/" class="astro-ojxuodky"><span class="astro-ojxuodky">0008: Maintenance operations — compaction and delete-file consolidation</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0009-reader-consistency-and-caching/" class="astro-ojxuodky"><span class="astro-ojxuodky">0009: Reader consistency and snapshot caching</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0010-async-sync-bridge/" class="astro-ojxuodky"><span class="astro-ojxuodky">0010: Async↔sync bridge: mechanism, runtime, threading, and cancellation</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0011-crash-recovery/" class="astro-ojxuodky"><span class="astro-ojxuodky">0011: Crash recovery</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0012-schema-evolution-and-versioning/" class="astro-ojxuodky"><span class="astro-ojxuodky">0012: Schema evolution and versioning</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0013-partitioning-sorting-and-pruning/" class="astro-ojxuodky"><span class="astro-ojxuodky">0013: Partitioning, sorting, and pruning</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0014-encryption/" class="astro-ojxuodky"><span class="astro-ojxuodky">0014: Catalog and data encryption</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0015-format-migration/" aria-current="page" class="astro-ojxuodky"><span class="astro-ojxuodky">0015: On-disk format migration</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0016-equality-indexes/" class="astro-ojxuodky"><span class="astro-ojxuodky">0016: Equality and range indexes</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0017-read-write-and-read-only-attach/" class="astro-ojxuodky"><span class="astro-ojxuodky">0017: Read-write and read-only attach paths</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0018-column-and-name-mapping/" class="astro-ojxuodky"><span class="astro-ojxuodky">0018: Column and name mapping for externally written Parquet</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0019-macros/" class="astro-ojxuodky"><span class="astro-ojxuodky">0019: Scalar and table macros</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0020-change-data-feed/" class="astro-ojxuodky"><span class="astro-ojxuodky">0020: Change data feed</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0021-maintenance-model/" class="astro-ojxuodky"><span class="astro-ojxuodky">0021: Maintenance orchestration</span></a></li><li class="astro-ojxuodky"><a href="/rfcs/0022-commit-log-and-leader-role/" class="astro-ojxuodky"><span class="astro-ojxuodky">0022: The commit log and the leader role</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="flex items-center justify-end gap-2 py-4 print:hidden"><a href="https://github.com/morainedb/moraine" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">GitHub</span><svg aria-hidden="true" class=" astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><div class="size-8 overflow-visible"><astro-theme-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><div class="astro-theme-toggle-icon-light"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 19a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1m-4.95-2.05a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0m11.314 0l1.414 1.414a1 1 0 0 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 1.414-1.414m-5.049-9.836a5 5 0 1 1-2.532 9.674a5 5 0 0 1 2.532-9.674M4 11a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zm18 0a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM5.636 4.222L7.05 5.636A1 1 0 0 1 5.636 7.05L4.222 5.636a1 1 0 0 1 1.414-1.414m14.142 0a1 1 0 0 1 0 1.414L18.364 7.05a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0M12 1a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1" /></svg></div><div class="astro-theme-toggle-icon-dark"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 1.992a10 10 0 1 0 9.236 13.838c.341-.82-.476-1.644-1.298-1.31a6.5 6.5 0 0 1-6.864-10.787l.077-.08c.551-.63.113-1.653-.758-1.653h-.266l-.068-.006z" /></svg></div></astro-theme-toggle></div></div></div></div></div></nav><div class="main-frame astro-3iko6sul"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-nrnkqug2"><aside class="right-sidebar-container print:hidden astro-nrnkqug2"><div class="right-sidebar astro-nrnkqug2"><div class="lg:sl-hidden astro-q5mffni3"><div class="[&amp;_nav]:backdrop-blur [&amp;_summary]:border-b-(--sl-color-hairline)"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-5ulgm6bh"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-5ulgm6bh"><details id="starlight__mobile-toc" class="astro-5ulgm6bh"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-5ulgm6bh"><span class="toggle sl-flex astro-5ulgm6bh">On this page<svg aria-hidden="true" class="caret astro-5ulgm6bh astro-n5k4ipy7" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-5ulgm6bh"></span></summary><div class="dropdown astro-5ulgm6bh"><ul class="isMobile astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#summary" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Summary</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#goals" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Goals</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#background" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Background</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#design" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Design</span></a><ul class="isMobile astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#the-two-axes-drawn-sharply" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">The two axes, drawn sharply</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#additive-versus-rewriting-within-axis-2" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Additive versus rewriting, within axis 2</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#on-open-version-check" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">On-open version check</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#single-writer-migration" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Single-writer migration</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#crash-safe-resumable-migration" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Crash-safe resumable migration</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#reader-coherence-during-migration" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Reader coherence during migration</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#one-way-composable-migrations" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">One-way, composable migrations</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#trigger-policy" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Trigger policy</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#test-obligations" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Test obligations</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#alternatives-considered" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Alternatives considered</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.BcSo_yiZ.js"></script></div></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-q5mffni3"><div class="sl-container astro-q5mffni3"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-cxyftcne" style="--depth: 0;"><li style="--depth: 0;" class="astro-cxyftcne"><a href="#_top" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Overview</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#summary" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Summary</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#goals" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Goals</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#background" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Background</span></a></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#design" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Design</span></a><ul class="astro-cxyftcne" style="--depth: 1;"><li style="--depth: 1;" class="astro-cxyftcne"><a href="#the-two-axes-drawn-sharply" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">The two axes, drawn sharply</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#additive-versus-rewriting-within-axis-2" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Additive versus rewriting, within axis 2</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#on-open-version-check" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">On-open version check</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#single-writer-migration" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Single-writer migration</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#crash-safe-resumable-migration" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Crash-safe resumable migration</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#reader-coherence-during-migration" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Reader coherence during migration</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#one-way-composable-migrations" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">One-way, composable migrations</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#trigger-policy" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Trigger policy</span></a></li><li style="--depth: 1;" class="astro-cxyftcne"><a href="#test-obligations" style="--depth: 1;" class="astro-cxyftcne"><span style="--depth: 1;" class="astro-cxyftcne">Test obligations</span></a></li></ul></li><li style="--depth: 0;" class="astro-cxyftcne"><a href="#alternatives-considered" style="--depth: 0;" class="astro-cxyftcne"><span style="--depth: 0;" class="astro-cxyftcne">Alternatives considered</span></a></li></ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.Csloo1VZ.js"></script></div></div></div></aside><div class="main-pane astro-nrnkqug2"><main data-pagefind-body class="astro-vdxcvpsm" lang="en" dir="ltr"><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><h1 id="_top" class="astro-2sm4b3ln">RFC 0015: On-disk format migration</h1></div></div><div class="content-panel astro-oil7k7jf"><div class="sl-container astro-oil7k7jf"><div class="sl-markdown-content"><ul>
+<li><strong>Date:</strong> 2026-07-09</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="summary">Summary</h2><a class="sl-anchor-link" href="#summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Summary”</span></a></div>
+<p><a href="../0002-slatedb-key-encoding/">RFC 0002</a> defines two independent axes of
+format evolution, and it is essential to keep them apart because they are
+handled by opposite mechanisms. <strong>Axis 1</strong> is value evolution: protobuf field
+add/deprecate plus the per-value 1-byte encoding version in the framing
+header. It is forward/backward compatible and handled <strong>lazily by readers</strong> on
+the fly — a reader translates an old value as it decodes it, and there is
+<strong>no migration</strong>. <strong>Axis 2</strong> is structural: a change to the subspace tag set
+or the key structure — the physical shape of the keyspace itself. A structural
+change cannot be absorbed by a reader on the fly, because it changes <em>where</em>
+data lives and <em>how keys are ordered</em>; it requires rewriting keys. This RFC
+specifies the mechanism for <strong>axis 2 only</strong>: how a store written at an older
+structural <code dir="auto">sys/format</code> version is rewritten in place to a newer one, safely,
+under the single fenced writer, and crash-resumably. Axis 1 is out of scope
+here and stays out — a reader meeting an old <em>value</em> encoding never invokes
+any of this machinery.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="goals">Goals</h2><a class="sl-anchor-link" href="#goals"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Goals”</span></a></div>
+<ul>
+<li>One in-place rewrite mechanism for structural (<code dir="auto">sys/format</code>) upgrades that
+preserves every invariant already established: single fenced writer
+(<a href="../0004-commit-protocol/">RFC 0004</a>), one-batch atomicity per step
+(<a href="../0002-slatedb-key-encoding/">RFC 0002</a>), data-before-metadata ordering
+(<a href="../0007-snapshot-expiry-and-gc/">RFC 0007</a>), and crash-resumability
+(<a href="../0011-crash-recovery/">RFC 0011</a>).</li>
+<li>Refuse, loudly and typed, to open a store whose <code dir="auto">sys/format</code> is <em>newer</em> than
+the running binary understands (RFC 0002’s meet-a-newer-format rule) — never
+silently downgrade or misread.</li>
+<li>Migrations are <strong>named, composable, individually tested</strong> <code dir="auto">v_n → v_{n+1}</code>
+units; a multi-version jump is their composition.</li>
+<li>A migration is crash-resumable at every seam: a crash mid-rewrite reopens
+and resumes from a durable cursor, never losing catalog state and never
+exposing a half-migrated store to a reader.</li>
+<li>A structural rewrite is <strong>operator-triggered</strong>, not a silent side effect of
+opening a store in production.</li>
+</ul>
+<p>Non-goals:</p>
+<ul>
+<li><strong>Value (axis 1) evolution.</strong> Protobuf field changes and the framing
+header’s encoding-version byte are RFC 0002’s domain and need no migration;
+this RFC does not touch the value codec.</li>
+<li><strong>Online migration across mixed binary versions.</strong> A structural rewrite
+changes key structure, so an old binary cannot read the new layout. Rolling a
+fleet across a structural bump is unresolved, not solved here.</li>
+<li><strong>Automatic rollback / downgrade.</strong> Migrations are one-way; recovery is
+manual and rests on old objects surviving until new ones are durable
+(below). Rollback strategy is unresolved.</li>
+<li><strong>Inventing new atomicity or fencing primitives.</strong> This RFC composes the
+existing ones exactly as <a href="../0011-crash-recovery/">RFC 0011</a>
+composes them for genesis.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="background">Background</h2><a class="sl-anchor-link" href="#background"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Background”</span></a></div>
+<p><code dir="auto">sys/format</code> lives in the <code dir="auto">system</code> subspace (RFC 0002) and records two things:
+the <strong>structural format version</strong> (RFC 0002’s layout = 1) and the moraine
+version that wrote the store. The structural version is bumped only by a
+change to the subspace tag set or the key structure — precisely the changes a
+reader cannot absorb lazily. RFC 0002 states the governing rule: <em>a
+reader/writer that meets a newer format than it understands errors rather
+than misreading.</em> This RFC is the other half of that rule — what happens when
+the store is <strong>older</strong> than the binary, and the operator chooses to upgrade it
+in place. Not every older store needs upgrading, though — see “Additive
+versus rewriting, within axis 2”.</p>
+<p>The genesis protocol (<a href="../0011-crash-recovery/">RFC 0011</a>, the genesis cases)
+already establishes the template this RFC follows: a multi-step state change
+that cannot always be one <code dir="auto">WriteBatch</code>, made safe by a durable marker, a
+resume-from-cursor loop, and a final atomic flip. Genesis births a store;
+migration rewrites one. The shapes are deliberately the same.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="design">Design</h2><a class="sl-anchor-link" href="#design"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Design”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="the-two-axes-drawn-sharply">The two axes, drawn sharply</h3><a class="sl-anchor-link" href="#the-two-axes-drawn-sharply"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “The two axes, drawn sharply”</span></a></div>
+<p>This is the distinction most likely to be conflated, so it is stated as a
+table before anything else.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Axis 1: value evolution</th>
+<th>Axis 2: structural migration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What changes</td>
+<td>Protobuf fields; per-value encoding version</td>
+<td>Subspace tags; key structure</td>
+</tr>
+<tr>
+<td>Signal</td>
+<td>Framing-header encoding byte (RFC 0002)</td>
+<td><code dir="auto">sys/format</code> structural version</td>
+</tr>
+<tr>
+<td>Compatibility</td>
+<td>Forward/backward (skip unknown, default missing)</td>
+<td>Breaking for a binary that cannot name the new tags</td>
+</tr>
+<tr>
+<td>Handled by</td>
+<td><strong>Readers, lazily, on decode</strong></td>
+<td><strong>A lazy stamp, or a one-time rewrite of the store</strong></td>
+</tr>
+<tr>
+<td>Migration?</td>
+<td><strong>None</strong></td>
+<td><strong>This RFC — for the rewriting kind only (next section)</strong></td>
+</tr>
+</tbody>
+</table>
+<p>If a proposed change can be expressed as a new protobuf field a reader
+defaults or ignores, it is axis 1 and does <strong>not</strong> bump <code dir="auto">sys/format</code>. Only a
+change to <em>where a key lives</em> or <em>how it sorts</em> is axis 2. The bar for axis 2
+is deliberately high, because axis 2 is the expensive one.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="additive-versus-rewriting-within-axis-2">Additive versus rewriting, within axis 2</h3><a class="sl-anchor-link" href="#additive-versus-rewriting-within-axis-2"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Additive versus rewriting, within axis 2”</span></a></div>
+<p>Axis 2 splits again, and only one half needs this RFC’s machinery.</p>
+<p>An <strong>additive</strong> structural change introduces a new subspace or a new kind and
+<strong>moves no existing key</strong>. The <code dir="auto">index</code> subspace (<a href="../0016-equality-indexes/">RFC 0016</a>)
+and the per-chunk inline row-range directory
+(<a href="../0005-data-inlining/">RFC 0005</a>) are worked examples: a store that grows
+either is stamped a higher
+<code dir="auto">sys/format</code> so binaries that cannot name the new tag refuse it, but nothing
+already written is rewritten, and a binary that <em>does</em> know the tag reads the
+older store unchanged. The stamp is therefore <strong>lazy</strong> — written the first
+time the feature is used, not on open — and there is <strong>no migration</strong>.</p>
+<p>A <strong>rewriting</strong> structural change alters where existing keys live or how they
+sort. Old keys must be read, re-encoded, and deleted. This is the only kind
+that needs the start/step/finish protocol below, and the only kind that makes
+an older store unreadable rather than merely older.</p>
+<p>The practical consequence is that a binary reads a <strong>range</strong> of formats, not
+one: every format from the oldest it can still make sense of (its floor) up
+to the newest it can name. Additive bumps widen that range; a rewriting bump
+raises the floor, because below it the keys are somewhere else.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="on-open-version-check">On-open version check</h3><a class="sl-anchor-link" href="#on-open-version-check"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “On-open version check”</span></a></div>
+<p>Every attach reads <code dir="auto">sys/format</code> before doing anything else and compares its
+structural version to the binary’s:</p>
+<table>
+<thead>
+<tr>
+<th>Store vs. binary</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Within the binary’s range</strong> (floor ≤ store ≤ newest it names)</td>
+<td>Proceed normally. A store <em>below</em> the binary’s newest is not migration-eligible: the intervening bumps were additive, so its keys are exactly where this binary looks for them. It is stamped forward lazily if and when it uses the newer feature, never rewritten on open.</td>
+</tr>
+<tr>
+<td><strong>Below the floor</strong></td>
+<td><strong>Refuse to open.</strong> Return the typed <code dir="auto">Migration</code> error (RFC 0003) naming the store’s version, the floor, and the verb that repairs it. A rewriting migration put this store’s keys somewhere this binary does not look; it must be migrated up first.</td>
+</tr>
+<tr>
+<td><strong>Newer than the binary names</strong></td>
+<td><strong>Refuse to open.</strong> Return the typed <code dir="auto">Migration</code> error (RFC 0003, per RFC 0002’s meet-a-newer-format rule). Never guess, never downgrade, never write.</td>
+</tr>
+<tr>
+<td><strong>Absent</strong></td>
+<td>The store is uninitialized. A read-write attach bootstraps it; a read-only attach refuses, having nothing committed to read.</td>
+</tr>
+</tbody>
+</table>
+<p>The newer-than-binary refusal is not optional or best-effort: a binary that
+cannot name every subspace tag it might encounter cannot safely read, so it
+stops. This is the same discipline the framing header applies to an unknown
+value encoding, lifted to the structural level.</p>
+<p>The first rewriting migration, <code dir="auto">version-inline-tombstones</code> (8 → 9), moves
+single inline tombstones to immutable deletion-event keys (RFC 0005).
+The readable floor and fresh-store bootstrap are both 9. Opening an older
+catalog refuses until the operator invokes <code dir="auto">Catalog::migrate</code> or the
+unattached <code dir="auto">moraine_migrate</code> SQL function.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="single-writer-migration">Single-writer migration</h3><a class="sl-anchor-link" href="#single-writer-migration"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Single-writer migration”</span></a></div>
+<p>A structural migration is a sequence of writes, so it runs under the <strong>one
+fenced writer</strong> (RFC 0004). This is not new machinery: SlateDB’s
+<code dir="auto">writer_epoch</code> CAS-on-open means a second process attempting to migrate the
+same store is fenced — it loses the epoch and writes nothing (RFC 0011, the
+takeover cases).
+So <strong>exactly one migrator runs</strong>, by the same guarantee that makes an
+accidental second catalog writer safe. Readers, meanwhile, must never observe
+a half-migrated store; the resume protocol below is structured so the only
+externally visible flip of <code dir="auto">sys/format</code> is atomic and last.</p>
+<p>The start batch is additionally the <strong>only writer of the marker key</strong>:
+<code dir="auto">migration::start</code> is the one code path that puts <code dir="auto">sys/migration</code>, and any
+future writer must keep its rule — the marker lands in the same batch as a
+head move. Handles cache the marker’s absence keyed on the head they
+observed it at (RFC 0009), so a marker written without moving the head
+would be invisible to every warm handle. The invariant is what that caching
+is sound against, not an incidental property of today’s code — and every registered migration uses that start path.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="crash-safe-resumable-migration">Crash-safe resumable migration</h3><a class="sl-anchor-link" href="#crash-safe-resumable-migration"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Crash-safe resumable migration”</span></a></div>
+<p>A large migration cannot be one <code dir="auto">WriteBatch</code> — the rewritten keyspace is
+unbounded in size, and one giant batch has no resume point (see Alternatives).
+So migration gets its own resume protocol, modeled directly on genesis
+(RFC 0011). It has three phases.</p>
+<p><strong>1. Start (one batch).</strong> The migrator writes a <code dir="auto">sys/migration</code> marker
+recording <code dir="auto">{ from_format, to_format, cursor }</code>, where <code dir="auto">cursor</code> is a
+resumption position in the migration’s key-ordered work (e.g. the last
+source key processed) — <strong>together with a <code dir="auto">sys/head</code> stamp</strong>, the standing
+head re-put with its batch count advanced, the same write every commit
+batch carries (RFC 0004). This first batch is atomic: either the marker
+exists or it does not, and if it exists the head moved with it. The stamp
+makes <code dir="auto">sys/head</code> the start batch’s conflict anchor too, so a commit racing
+the start wins or loses cleanly rather than interleaving; a start that
+loses the race retries under the same bounded backoff a commit uses. It is
+also what warm handles rest on: a handle that observed the marker absent
+at a head may trust that observation for as long as the head stands,
+because no marker can appear without moving it (RFC 0009). A store with no
+head yet is pre-bootstrap and has nothing to anchor to; there the marker
+goes alone.</p>
+<p><strong>2. Step loop (many batches, each idempotent).</strong> The migration walks its
+work in key order. Each step batch does two things, in this order:</p>
+<ul>
+<li><strong>Writes new-format keys <em>before</em> deleting the old-format keys they
+supersede</strong> — the structural analog of data-before-metadata (RFC 0007). A
+crash between the write and the delete leaves a <em>resumable</em> overlap
+(new keys present, old keys not yet gone), never a <em>lost</em> record. Catalog
+state is never absent at any seam.</li>
+<li><strong>Advances the <code dir="auto">cursor</code></strong> in the <em>same</em> batch that performs the rewrite, so
+the durable cursor never claims more progress than is durably rewritten.</li>
+</ul>
+<p>Every step is <strong>idempotent</strong>: re-applying a step whose new keys already exist
+and whose old keys are already gone is a no-op. On reopen, the migrator reads
+the cursor and resumes from exactly there; steps at or before the cursor that
+partially re-execute converge without duplication.</p>
+<p><strong>3. Finish (one batch).</strong> The final batch <strong>atomically flips <code dir="auto">sys/format</code> to
+<code dir="auto">to_format</code> and clears the <code dir="auto">sys/migration</code> marker</strong> — together, in one
+<code dir="auto">WriteBatch</code>. Until this batch lands, <code dir="auto">sys/format</code> still reads the old version
+and the marker is present. After it lands, the store <em>is</em> the new version and
+there is no marker. There is no observable in-between: a reader sees either
+“old format, migration possibly in progress” or “new format, done.”</p>
+<p><strong>Crash and resume.</strong> A crash at any point reopens into one of three states,
+distinguished by reading <code dir="auto">sys/format</code> and <code dir="auto">sys/migration</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Reopen sees</th>
+<th>Meaning</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No marker, old format</td>
+<td>Migration never started (or start batch lost)</td>
+<td>Nothing to resume; store is coherently old.</td>
+</tr>
+<tr>
+<td>Marker present, old format</td>
+<td>Migration in progress</td>
+<td>Resume from <code dir="auto">cursor</code>; re-run steps idempotently.</td>
+</tr>
+<tr>
+<td>No marker, new format</td>
+<td>Migration completed (finish batch landed)</td>
+<td>Nothing to do; store is coherently new.</td>
+</tr>
+</tbody>
+</table>
+<p>The one combination that must be impossible — <strong>new format with the marker
+still present</strong> — is made impossible by putting the flip and the clear in the
+same batch. This is exactly <code dir="auto">GenesisInterrupted</code>’s “one <code dir="auto">WriteBatch</code> for the
+terminal transition” applied to the migration’s end instead of genesis’s.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="reader-coherence-during-migration">Reader coherence during migration</h3><a class="sl-anchor-link" href="#reader-coherence-during-migration"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Reader coherence during migration”</span></a></div>
+<p>Because axis 2 changes key structure, <strong>a reader running the old binary cannot
+read the new layout</strong>, and a reader on the new binary cannot make sense of a
+store still on the old format. This is an honest, structural consequence, not
+a limitation to be engineered around cheaply.</p>
+<p>Note first what the <code dir="auto">sys/format</code> check alone does <strong>not</strong> cover. It would
+be tempting to reason that a pre-migration reader “keeps resolving the
+pre-migration state for as long as the old keys it needs remain” — but the
+step loop is <em>deleting</em> old keys as it progresses. Mid-migration,
+<code dir="auto">sys/format</code> still reads the old version, so an old-binary reader would
+open without complaint, scan the old-layout ranges, and see a catalog with
+a <strong>growing hole in it</strong> — records vanishing from under it as they move to
+the new layout. That is not “briefly unavailable”; it is <strong>silently
+wrong</strong>, the exact failure class this document set exists to make
+impossible.</p>
+<p>Closing it is why the <strong><code dir="auto">sys/migration</code> marker is a reader-side gate</strong>, not
+merely migrator bookkeeping:</p>
+<ul>
+<li>Every read session checks <code dir="auto">sys/migration</code> under its pinned read-snapshot
+(RFC 0009) and, if the marker is present, fails loudly with the typed
+<code dir="auto">Migration</code> error (RFC 0003) instead of returning a view. The check may
+be served from a head-keyed record of the marker’s absence — sound
+because a marker only appears with a head move (above) — but it is never
+skipped outright: a reader mid-migration is <em>unavailable</em>, never partial.</li>
+<li>Consequently the marker key and this check must exist <strong>from format
+version 1, before any migration is ever written</strong> — RFC 0002 reserves the
+key and RFC 0009 specifies the check. A reader binary that predates the
+check cannot be protected retroactively; shipping the gate with the first
+release is what makes the first structural migration, years later, safe
+against every reader in the field.</li>
+<li>Once the store flips, an old-binary reader meets a newer <code dir="auto">sys/format</code> and
+refuses to open (previous section). Both failure modes are typed and
+loud; neither returns wrong data.</li>
+<li>The new-binary migrator is the single writer; it does not serve reads of a
+half-migrated intermediate to anyone.</li>
+</ul>
+<p>Consequently <strong>structural migration is <em>not</em> online across mixed binary
+versions</strong>, and that is the permanent answer, not an open gap. A rolling
+deployment that spans a structural bump either drains readers across the flip
+or tolerates a brief unavailability window. Serving one structural bump across
+two binary versions at once is not offered: the key layout differs, so an old
+binary cannot read the new store, and no scheme reconciles that without keeping
+a second layout live alongside the first.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="one-way-composable-migrations">One-way, composable migrations</h3><a class="sl-anchor-link" href="#one-way-composable-migrations"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “One-way, composable migrations”</span></a></div>
+<p>Migrations are directed <code dir="auto">v_n → v_{n+1}</code>, each a <strong>named unit</strong> with its own
+step logic and its own tests. A jump from v1 to v3 is the <strong>composition</strong>
+v1→v2 then v2→v3, run in sequence, each with its own start/step/finish and its
+own cursor. There is no bespoke v1→v3 path to write or test; correctness of
+the composition follows from correctness of each link.</p>
+<p>The shipped registry contains <code dir="auto">version-inline-tombstones</code> (8 → 9). For a
+catalog at format 1 through 7 without an in-progress marker, the migration
+verb first advances the additive stamp to 8, then runs the rewrite. An
+interrupted unit resumes at its recorded format and cursor. The report keeps
+the original format as <code dir="auto">from_format</code>, including when an additive advance
+preceded the rewrite.</p>
+<p>The unit processes at most 256 old tombstones per step in encoded-key order.
+Each step preserves the framed value at the new <code dir="auto">(table_id, row_id, end_snapshot)</code> key, deletes the old key, and advances a full source-key
+cursor atomically. It leaves Arrow bodies and catalog snapshots unchanged.
+Deletion snapshots an older writer already overwrote cannot be recovered;
+migration preserves the surviving events, not history already lost.
+Future rewrites add a named unit, raise the readable floor, and pin the
+registry chain in tests.</p>
+<p>There is <strong>no automatic rollback</strong>, by decision. Recovery from a failed
+migration is manual, resting on two mitigations already load-bearing elsewhere
+in the design:</p>
+<ul>
+<li>Old objects are not deleted until the new ones that supersede them are
+durable (the step-loop ordering), so a failed migration can be reasoned
+about against surviving old state.</li>
+<li>An <strong>optional pre-migration checkpoint</strong> gives a manual recovery point,
+alongside SlateDB’s object history. It is a whole-store
+<code dir="auto">Db::create_checkpoint()</code> behind an operator flag on the <code dir="auto">migrate</code> verb, off
+by default; when taken, it is released after the finish batch is durable.</li>
+</ul>
+<p>Paired inverse migrations are deliberately not written or tested: the
+sanctioned recovery path is the pre-migration checkpoint, not a reverse
+rewrite.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="trigger-policy">Trigger policy</h3><a class="sl-anchor-link" href="#trigger-policy"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Trigger policy”</span></a></div>
+<p>A structural rewrite is heavyweight — it rewrites the keyspace and takes the
+single writer for its duration. It is therefore gated behind <strong>explicit
+operator opt-in</strong>: a dedicated verb/flag (e.g. a <code dir="auto">migrate</code> operation, distinct
+from ordinary attach), <strong>not</strong> a silent auto-run on open. The reasoning:</p>
+<ul>
+<li>An unbounded rewrite triggered implicitly by “someone opened the store with
+a newer binary” can surprise a rolling fleet — the first upgraded node to
+attach would begin rewriting under every still-running old-binary reader,
+which is exactly the mixed-version hazard the previous section names.</li>
+<li>Migration cost (time, object-store traffic, writer occupancy) is an
+operational decision with a maintenance-window shape; the operator owns it.</li>
+</ul>
+<p>The verb takes the object store rather than an open catalog, because the
+store it must act on is precisely the one an ordinary attach refuses: below
+the floor, or carrying a marker. It opens the writer itself — taking the
+same epoch <code dir="auto">open</code> takes, so it fences a running catalog and is fenced by
+one — runs the plan the durable state implies, and closes.</p>
+<p>That is also what makes the refusal actionable, and the refusal says so: the
+verb never runs the format check, so the binary that refuses to <em>open</em> a
+below-the-floor store is the same binary that migrates it. An operator
+reading “refused” as “wrong binary” would go looking for one that does not
+exist. The refusal names the verb — the core names <code dir="auto">Catalog::migrate</code>, and
+the DuckDB shim, which is the layer that holds the store path and the only
+one that may name a SQL function, turns the same error into one naming
+<code dir="auto">moraine_migrate('&lt;path&gt;')</code>.</p>
+<p>Every migration is triggered by the explicit verb; nothing auto-runs on open.
+This includes bounded metadata-only rewrites: one trigger rule is easier to
+operate and audit than classifying which mutations are harmless enough to run
+as a side effect of attach.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="test-obligations">Test obligations</h3><a class="sl-anchor-link" href="#test-obligations"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Test obligations”</span></a></div>
+<p>These extend <a href="../0011-crash-recovery/">RFC 0011</a>’s cases; they
+run against real SlateDB on in-memory <code dir="auto">object_store</code>, no store mocks
+(RFC 0001), and are naturally expressed as new <code dir="auto">CrashCase</code>-style cases.</p>
+<p>The shipped inline-tombstone migration is tested with enough records to span
+multiple steps and interrupted at every seam. Synthetic rewriting units
+also exercise option-record preservation and multi-unit chains through the
+public migration verb.</p>
+<ul>
+<li>
+<p><strong>Crash at every migration seam.</strong> Inject a crash after the start batch,
+after each step batch, before the finish flip, and after it. Each reopen
+resumes to a <strong>coherent store</strong> — new format if the finish landed, else
+resumed from the cursor — and never exposes new-format-with-marker.</p>
+<p>Those four are the <em>whole</em> set, because a seam is only meaningful where a
+durable state exists to crash into. A step’s new-key write, its old-key
+delete, and its cursor advance all land in <strong>one batch</strong>, so there is no
+durable intermediate between them to inject at: the interleavings are
+unrepresentable rather than merely untested. The same holds for the finish
+flip and the marker clear. Injecting “inside” a batch would test SlateDB’s
+atomicity, not this protocol’s.</p>
+</li>
+<li>
+<p><strong>Refuse-to-open on a future format.</strong> A store whose <code dir="auto">sys/format</code> exceeds
+the binary errors typed, writes nothing.</p>
+</li>
+<li>
+<p><strong>The marker rides the head.</strong> A start moves <code dir="auto">sys/head</code> in the marker’s
+batch: a handle holding the head it last observed clear re-reads the
+marker after a migration starts, and a start racing a commit retries
+rather than interleaving. The divergence form is the proof — a marker
+planted under an unmoved head goes unseen, so the test that passes by
+seeing one is the test that the head moved.</p>
+</li>
+<li>
+<p><strong>Reader gate mid-migration.</strong> With the <code dir="auto">sys/migration</code> marker present, a
+materialization or refresh — on either binary version — returns the typed
+<code dir="auto">Migration</code> error and never a partial view (the RFC 0009 check; this is
+the row that forbids the silently-shrinking-catalog failure). Including a
+read-only handle that was already open and healthy when the marker was
+planted: it polls object storage on its own cadence, so the marker reaches
+it a poll late, and the read it is mid-way through when that happens must
+refuse rather than serve the view it had.</p>
+</li>
+<li>
+<p><strong>Idempotent re-run of a completed migration.</strong> Running the migration verb
+against an already-migrated store is a no-op (no marker, format already at
+target), not a re-rewrite.</p>
+</li>
+<li>
+<p><strong>Migrate-then-time-travel.</strong> After migration, resolving the catalog at a
+pre-migration snapshot (RFC 0002 <code dir="auto">history</code>/<code dir="auto">snapshot</code>) still returns the correct
+historical state — the rewrite preserves temporal semantics, it does not
+flatten history.</p>
+</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="alternatives-considered">Alternatives considered</h2><a class="sl-anchor-link" href="#alternatives-considered"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Alternatives considered”</span></a></div>
+<ul>
+<li><strong>Silent auto-migrate on open.</strong> Rejected for migrations of every size. A
+heavyweight, unbounded rewrite should be the operator’s explicit choice:
+triggered implicitly, the first
+upgraded node to attach begins rewriting the keyspace under every
+still-running old-binary reader, surprising a rolling fleet and coupling an
+operational decision to an incidental attach. Explicit opt-in makes the
+cost and timing owned, while one rule keeps bounded metadata rewrites
+observable too.</li>
+<li><strong>Lazy / online per-key migration on read.</strong> Translate old keys to the new
+layout on the fly, forever, the way axis 1 translates old <em>values</em>.
+Rejected for key structure specifically: it leaves the store <strong>permanently
+bimodal</strong> (both layouts live indefinitely), every read pays translation
+forever, and range scans must union two key layouts. The crucial contrast:
+axis-1 value field-evolution <em>is</em> handled lazily precisely because a value
+is opaque bytes a reader decodes in place — but a <strong>key’s structure governs
+ordering and placement</strong>, so “translate on read” cannot fix where a key
+physically sorts in a range scan. What works for values cannot work for
+keys.</li>
+<li><strong>Never migrate — a new major version is a new store plus an external
+copy.</strong> Rejected. It abandons in-place durability for the single
+most-expensive-to-reverse state moraine owns (RFC 0002 calls the on-disk
+format “the single most expensive-to-reverse decision”), forcing a
+full external dump/reload for any structural change and giving up the
+atomicity and history guarantees the store provides.</li>
+<li><strong>One giant <code dir="auto">WriteBatch</code> for the whole migration.</strong> Rejected. Batch size is
+unbounded in the size of the keyspace, and a single batch has no resume
+point — a crash restarts the entire rewrite from zero, and a large enough
+store may never fit a batch at all. The start/step/finish protocol with a
+durable cursor is the bounded, resumable form, matching genesis (RFC 0011).</li>
+</ul>
+</div><script type="module">var e=class extends HTMLElement{constructor(){super()}connectedCallback(){let e=()=>{let e=t===`ready`?`<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></g></svg>`:`<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/></svg>`;this.innerHTML=`<span class="w-full h-full block [&_svg]:w-full [&_svg]:h-full">`+e+`</span>`},t=`ready`;e(),this.addEventListener(`click`,()=>{if(t===`ready`){t=`success`,e();let n=this.dataset.code||``;navigator.clipboard.writeText(n),setTimeout(()=>{t=`ready`,e()},1500)}})}};customElements.define(`nova-code-copy-button`,e);</script><script type="module" src="/_astro/MarkdownContent.astro_astro_type_script_index_0_lang.x0CmCSF8.js"></script><footer class="sl-flex astro-xhxjzfa7"><div class="meta sl-flex astro-xhxjzfa7"></div><div class="flex min-w-full flex-row items-stretch justify-between gap-2 px-1 pt-0 pb-6 print:hidden" dir="ltr"><a href="/rfcs/0014-encryption/" rel="prev" data-side="left" class="group m-0 flex items-center justify-end gap-2 rounded-xl p-2 font-medium text-(--sl-color-gray-2) no-underline transition hover:text-(--sl-color-white) md:text-lg [[rel='next']]:flex-row [[rel='prev']]:flex-row-reverse"><span>0014: Catalog and data encryption</span><svg width="1em" height="1em" viewBox="0 0 24 24" class="block min-h-5 min-w-5 transition group-hover:-translate-x-1"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18l-6-6l6-6" /></svg></a><div class="flex-1"></div><a href="/rfcs/0016-equality-indexes/" rel="next" data-side="right" class="group m-0 flex items-center justify-end gap-2 rounded-xl p-2 font-medium text-(--sl-color-gray-2) no-underline transition hover:text-(--sl-color-white) md:text-lg [[rel='next']]:flex-row [[rel='prev']]:flex-row-reverse"><span>0016: Equality and range indexes</span><svg width="1em" height="1em" viewBox="0 0 24 24" class="block min-h-5 min-w-5 transition group-hover:translate-x-1"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6" /></svg></a></div></footer></div></div></main></div></div></div></div></body></html>
