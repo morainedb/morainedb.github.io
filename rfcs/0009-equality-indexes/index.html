@@ -1,0 +1,625 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-g5ptsecz"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Equality and range indexes | Moraine</title><link rel="canonical" href="https://morainedb.com/rfcs/0009-equality-indexes/"/><link rel="sitemap" href="/sitemap-index.xml"/><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.8"/><meta name="generator" content="Starlight v0.42.10"/><meta property="og:title" content="Equality and range indexes"/><meta property="og:type" content="article"/><meta property="og:url" content="https://morainedb.com/rfcs/0009-equality-indexes/"/><meta property="og:locale" content="en"/><meta property="og:description" content="A DuckLake catalog backend that stores the catalog in object storage on SlateDB."/><meta property="og:site_name" content="Moraine"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="A DuckLake catalog backend that stores the catalog in object storage on SlateDB."/><script>
+"use strict";(()=>{{let t=function(){return window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"},i=function(){let e=localStorage.getItem(n);return e==="dark"||e==="light"?e:null},o=function(){return l||i()||t()},u=function(e){e===t()?localStorage.removeItem(n):localStorage.setItem(n,e)},d=function(e){let c=document.documentElement;c.classList.toggle("dark",e==="dark"),c.dataset.theme=e,c.style.colorScheme=e},r=function(e){l=e,u(e),d(e)},a=function(){r(o())};m=t,s=i,f=o,g=u,h=d,k=r,w=a;let n="theme-toggle",l;a(),document.addEventListener("astro:after-swap",a),window.astroThemeToggle={setTheme:r,getTheme:o}}var m,s,f,g,h,k,w;})();
+</script><link rel="stylesheet" href="/_astro/print.C9eyqPGL.css" media="print"><link rel="stylesheet" href="/_astro/common._6WK_K5k.css"><style>@layer starlight.components{.card:where(.astro-oag6qnet){--sl-card-border:var(--sl-color-purple);--sl-card-bg:var(--sl-color-purple-low);border:1px solid var(--sl-color-gray-5);background-color:var(--sl-color-black);flex-direction:column;gap:clamp(.5rem,.125rem + 1vw,1rem);padding:clamp(1rem,.125rem + 3vw,2.5rem)}.card:where(.astro-oag6qnet):nth-child(4n+1){--sl-card-border:var(--sl-color-orange);--sl-card-bg:var(--sl-color-orange-low)}.card:where(.astro-oag6qnet):nth-child(4n+3){--sl-card-border:var(--sl-color-green);--sl-card-bg:var(--sl-color-green-low)}.card:where(.astro-oag6qnet):nth-child(4n+4){--sl-card-border:var(--sl-color-red);--sl-card-bg:var(--sl-color-red-low)}.card:where(.astro-oag6qnet):nth-child(4n+5){--sl-card-border:var(--sl-color-blue);--sl-card-bg:var(--sl-color-blue-low)}.title:where(.astro-oag6qnet){font-weight:600;font-size:var(--sl-text-h4);color:var(--sl-color-white);line-height:var(--sl-line-height-headings);align-items:center;gap:1rem}.card:where(.astro-oag6qnet) .icon:where(.astro-oag6qnet){border:1px solid var(--sl-card-border);background-color:var(--sl-card-bg);border-radius:.25rem;flex-shrink:0;padding:.2em}.card:where(.astro-oag6qnet) .body:where(.astro-oag6qnet){font-size:clamp(var(--sl-text-sm), calc(.5rem + 1vw), var(--sl-text-body));margin:0}}
+@layer starlight.components{svg:where(.astro-hkc32dio){color:var(--sl-icon-color);font-size:var(--sl-icon-size,1em);width:1em;height:1em;overflow:visible}}
+</style><script type="module" src="/_astro/page.cNngjUgL.js"></script></head><body class="astro-g5ptsecz"><a class="sl-skip-link astro-qb7clj6f" href="#_top">Skip to content</a><div class="flex min-h-screen flex-col astro-3iko6sul"><header class="fixed inset-0 z-(--sl-z-index-navbar) box-border h-(--sl-nav-height) w-full border-0 border-b border-solid border-(--sl-color-hairline) bg-(--sl-color-bg-nav) px-(--sl-nav-pad-x) py-(--sl-nav-pad-y) backdrop-blur astro-3iko6sul"><div class="header astro-nen7h5rs"><div class="title-wrapper astro-nen7h5rs"><span class="-m-1.5 rounded-md p-1.5 **:text-lg **:font-semibold **:text-(--sl-color-text) focus-visible:outline-offset-0"><a href="/" class="site-title sl-flex astro-6rvad3va"><img class="light:sl-hidden print:hidden astro-6rvad3va" alt src="/_astro/moraine-dark.CEVNFCXz.svg" width="128" height="128"><img class="dark:sl-hidden print:block astro-6rvad3va" alt src="/_astro/moraine.B97P_dWh.svg" width="128" height="128"><span class="astro-6rvad3va" translate="no">Moraine</span></a></span></div><div class="search astro-nen7h5rs"><site-search class="astro-nen7h5rs astro-hdulihjd" data-translations="{&quot;placeholder&quot;:&quot;Search&quot;}"><button class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90 md:h-9 md:w-full md:max-w-88 md:rounded-md md:border md:border-solid md:border-(--sl-color-gray-5) md:p-2 md:text-(--sl-color-text) md:transition-colors md:hover:bg-gray-400/10 astro-hdulihjd" data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4 astro-hdulihjd"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m21 21l-4.34-4.34" /><circle cx="11" cy="11" r="8" /></g></svg><span class="sl-hidden md:sl-block astro-hdulihjd" aria-hidden="true">Search</span><kbd class="sl-hidden md:sl-flex astro-hdulihjd" style="display: none;"><kbd class="astro-hdulihjd">Ctrl</kbd><kbd class="astro-hdulihjd">K</kbd></kbd></button><dialog style="padding:0" aria-label="Search" class="astro-hdulihjd"><div class="dialog-frame sl-flex astro-hdulihjd"><button data-close-modal class="sl-flex md:sl-hidden astro-hdulihjd">Cancel</button><div class="search-container astro-hdulihjd"><div id="starlight__search" class="astro-hdulihjd"></div></div></div></dialog></site-search><script>
+  ;(() => {
+    const openBtn = document.querySelector('button[data-open-modal]')
+    const shortcut = openBtn?.querySelector('kbd')
+    if (!openBtn || !(shortcut instanceof HTMLElement)) return
+    const platformKey = shortcut.querySelector('kbd')
+    if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+      platformKey.textContent = '⌘'
+      openBtn.setAttribute('aria-keyshortcuts', 'Meta+K')
+    }
+    shortcut.style.display = ''
+  })()
+</script><script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.BH3XwIQL.js"></script></div><div class="right-group astro-nen7h5rs"><div class="social astro-nen7h5rs"><a href="https://github.com/morainedb/moraine" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">GitHub</span><svg aria-hidden="true" class=" astro-hkc32dio" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><a href="mailto:info@contour.app" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">Contact</span><svg aria-hidden="true" class=" astro-hkc32dio" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M19 4H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3Zm-.41 2-5.88 5.88a1 1 0 0 1-1.42 0L5.41 6ZM20 17a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7.41l5.88 5.88a3 3 0 0 0 4.24 0L20 7.41Z"/></svg></a></div><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script><div class="size-8 overflow-visible"><astro-theme-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><div class="astro-theme-toggle-icon-light"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 19a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1m-4.95-2.05a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0m11.314 0l1.414 1.414a1 1 0 0 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 1.414-1.414m-5.049-9.836a5 5 0 1 1-2.532 9.674a5 5 0 0 1 2.532-9.674M4 11a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zm18 0a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM5.636 4.222L7.05 5.636A1 1 0 0 1 5.636 7.05L4.222 5.636a1 1 0 0 1 1.414-1.414m14.142 0a1 1 0 0 1 0 1.414L18.364 7.05a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0M12 1a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1" /></svg></div><div class="astro-theme-toggle-icon-dark"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 1.992a10 10 0 1 0 9.236 13.838c.341-.82-.476-1.644-1.298-1.31a6.5 6.5 0 0 1-6.864-10.787l.077-.08c.551-.63.113-1.653-.758-1.653h-.266l-.068-.006z" /></svg></div></astro-theme-toggle><script type="module">function e(){return typeof window>`u`?`light`:window.astroThemeToggle?.getTheme?.()||`light`}function t(e){typeof window<`u`&&window.astroThemeToggle?.setTheme?.(e)}function n(){t(e()===`light`?`dark`:`light`)}var r=`astro-theme-toggle-temporary-styles`;function i(){document.getElementById(r)?.remove()}function a(){i();let e=document.createElement(`style`);e.id=r,e.textContent=`::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }`,document.head.appendChild(e)}async function o(e,t,n){let r=document;if(typeof r.startViewTransition!=`function`){e();return}a();let o=r.startViewTransition(()=>{e()});await o?.ready,o?.finished?.then(i);let s=.7,c=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><defs><radialGradient id="toggle-theme-gradient"><stop offset="${s}"/><stop offset="1" stop-opacity="0"/></radialGradient></defs><circle cx="4" cy="4" r="4" fill="url(#toggle-theme-gradient)"/></svg>`,l=`data:image/svg+xml;base64,${window.btoa(c)}`,u=window.innerWidth,d=window.innerHeight,f=Math.ceil(Math.hypot(Math.max(t,u-t),Math.max(n,d-n))/s);document.documentElement.animate({maskImage:[`url('${l}')`,`url('${l}')`],maskRepeat:[`no-repeat`,`no-repeat`],maskPosition:[`${t}px ${n}px`,`${t-f}px ${n-f}px`],maskSize:[`0`,`${2*f}px`]},{duration:500,easing:`ease-in`,pseudoElement:`::view-transition-new(root)`})}function s(e){o(n,e.clientX,e.clientY)}var c=class extends HTMLElement{connectedCallback(){this.hasAttribute(`tabindex`)||this.setAttribute(`tabindex`,`0`),this.hasAttribute(`role`)||this.setAttribute(`role`,`button`),this.addEventListener(`click`,s),this.addEventListener(`keydown`,e=>{if(e.key===`Enter`||e.key===` `){e.preventDefault();let t=this.getBoundingClientRect();s({clientX:t.left+t.width/2,clientY:t.top+t.height/2})}})}};customElements.define(`astro-theme-toggle`,c);</script></div></div><div class="mobile-toggle astro-nen7h5rs"><nova-mobile-menu-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90 print:hidden" aria-label="Menu" aria-controls="starlight__sidebar"><div class="transition-transform [body[data-mobile-menu-expanded]_&amp;]:rotate-90"><svg width="1em" height="1em" viewBox="0 0 24 24" class="block [body[data-mobile-menu-expanded]_&amp;]:hidden"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16M4 12h16M4 19h16" /></svg><svg width="1em" height="1em" viewBox="0 0 24 24" class="hidden [body[data-mobile-menu-expanded]_&amp;]:block"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12" /></svg></div></nova-mobile-menu-toggle><script type="module" src="/_astro/MobileMenuToggle.astro_astro_type_script_index_0_lang.ByQAlRXN.js"></script></div></div></header><nav class="sidebar print:hidden astro-3iko6sul" aria-label="Main" id="nova-sidebar-nav"><div id="starlight__sidebar" class="nova-scroll-container invisible md:visible [body[data-mobile-menu-expanded]_&amp;]:max-md:visible fixed top-(--sl-nav-height) bottom-0 left-0 z-(--sl-z-index-menu) overflow-y-auto border-0 border-solid border-(--sl-color-hairline) bg-(--sl-color-black) max-md:w-full md:w-(--sl-sidebar-width) md:border-r astro-3iko6sul"><div class="sidebar-content flex h-full min-h-max flex-col px-(--sl-sidebar-pad-x) py-4 astro-3iko6sul"><sl-sidebar-state-persist data-hash="1xt4e4h" class="astro-ipdry5cl"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-rmhv4bp6"><li class="astro-rmhv4bp6"><details open class="astro-rmhv4bp6"><summary class="astro-rmhv4bp6"><span class="group-label astro-rmhv4bp6"><span class="large astro-rmhv4bp6">Guide</span></span><svg aria-hidden="true" class="caret astro-rmhv4bp6 astro-hkc32dio" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-rmhv4bp6"><li class="astro-rmhv4bp6"><a href="/guide/getting-started/" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">Getting started</span></a></li><li class="astro-rmhv4bp6"><a href="/guide/configuration/" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">Configuration</span></a></li><li class="astro-rmhv4bp6"><a href="/guide/operating/" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">Operating manual</span></a></li><li class="astro-rmhv4bp6"><a href="/guide/comparison/" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">Comparison</span></a></li></ul></details></li><li class="astro-rmhv4bp6"><details open class="astro-rmhv4bp6"><summary class="astro-rmhv4bp6"><span class="group-label astro-rmhv4bp6"><span class="large astro-rmhv4bp6">Design</span></span><svg aria-hidden="true" class="caret astro-rmhv4bp6 astro-hkc32dio" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-rmhv4bp6"><li class="astro-rmhv4bp6"><a href="/rfcs/" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">Overview</span></a></li><li class="astro-rmhv4bp6"><a href="/rfcs/architecture/" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">Architecture</span></a></li><li class="astro-rmhv4bp6"><a href="/rfcs/0001-storage-format/" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">Storage format</span></a></li><li class="astro-rmhv4bp6"><a href="/rfcs/0002-public-api/" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">Public API</span></a></li><li class="astro-rmhv4bp6"><a href="/rfcs/0003-commit-protocol/" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">Commit protocol</span></a></li><li class="astro-rmhv4bp6"><a href="/rfcs/0004-data-inlining/" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">Data inlining</span></a></li><li class="astro-rmhv4bp6"><a href="/rfcs/0005-ducklake-feature-mapping/" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">DuckLake feature mapping</span></a></li><li class="astro-rmhv4bp6"><a href="/rfcs/0006-extension-surface/" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">Extension surface</span></a></li><li class="astro-rmhv4bp6"><a href="/rfcs/0007-read-path-and-caching/" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">Read path, caching, and memory</span></a></li><li class="astro-rmhv4bp6"><a href="/rfcs/0008-crash-recovery/" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">Crash recovery</span></a></li><li class="astro-rmhv4bp6"><a href="/rfcs/0009-equality-indexes/" aria-current="page" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">Equality and range indexes</span></a></li><li class="astro-rmhv4bp6"><a href="/rfcs/0010-maintenance/" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">Maintenance</span></a></li><li class="astro-rmhv4bp6"><a href="/rfcs/0012-testing/" class="astro-rmhv4bp6"><span class="astro-rmhv4bp6">Testing</span></a></li></ul></details></li><li class="astro-rmhv4bp6"><a href="/benchmarks/" class="large astro-rmhv4bp6"><span class="astro-rmhv4bp6">Benchmarks</span></a></li><li class="astro-rmhv4bp6"><a href="/releases/" class="large astro-rmhv4bp6"><span class="astro-rmhv4bp6">Releases</span></a></li><li class="astro-rmhv4bp6"><a href="/roadmap/" class="large astro-rmhv4bp6"><span class="astro-rmhv4bp6">Roadmap</span></a></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="flex items-center justify-end gap-2 py-4 print:hidden"><a href="https://github.com/morainedb/moraine" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">GitHub</span><svg aria-hidden="true" class=" astro-hkc32dio" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a><a href="mailto:info@contour.app" rel="me" class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><span class="sr-only">Contact</span><svg aria-hidden="true" class=" astro-hkc32dio" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: currentColor;--sl-icon-size: 1rem;"><path d="M19 4H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3Zm-.41 2-5.88 5.88a1 1 0 0 1-1.42 0L5.41 6ZM20 17a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7.41l5.88 5.88a3 3 0 0 0 4.24 0L20 7.41Z"/></svg></a><div class="size-8 overflow-visible"><astro-theme-toggle class="flex size-8 rounded-md p-2 text-(--sl-color-text) transition hover:bg-gray-400/30 focus-visible:outline-offset-1 active:scale-90"><div class="astro-theme-toggle-icon-light"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 19a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1m-4.95-2.05a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0m11.314 0l1.414 1.414a1 1 0 0 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 1.414-1.414m-5.049-9.836a5 5 0 1 1-2.532 9.674a5 5 0 0 1 2.532-9.674M4 11a1 1 0 0 1 0 2H2a1 1 0 0 1 0-2zm18 0a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM5.636 4.222L7.05 5.636A1 1 0 0 1 5.636 7.05L4.222 5.636a1 1 0 0 1 1.414-1.414m14.142 0a1 1 0 0 1 0 1.414L18.364 7.05a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0M12 1a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1" /></svg></div><div class="astro-theme-toggle-icon-dark"><svg width="1em" height="1em" viewBox="0 0 24 24" class="size-4"><!-- Icon from Tabler Icons by Paweł Kuna - https://github.com/tabler/tabler-icons/blob/master/LICENSE --><path fill="currentColor" d="M12 1.992a10 10 0 1 0 9.236 13.838c.341-.82-.476-1.644-1.298-1.31a6.5 6.5 0 0 1-6.864-10.787l.077-.08c.551-.63.113-1.653-.758-1.653h-.266l-.068-.006z" /></svg></div></astro-theme-toggle></div></div></div></div></div></nav><div class="main-frame astro-3iko6sul"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-nrnkqug2"><aside class="right-sidebar-container print:hidden astro-nrnkqug2"><div class="right-sidebar astro-nrnkqug2"><div class="lg:sl-hidden astro-qok35upx"><div class="[&amp;_nav]:backdrop-blur [&amp;_summary]:border-b-(--sl-color-hairline)"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-66cqc7ze"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-66cqc7ze"><details id="starlight__mobile-toc" class="astro-66cqc7ze"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-66cqc7ze"><span class="toggle sl-flex astro-66cqc7ze">On this page<svg aria-hidden="true" class="caret astro-66cqc7ze astro-hkc32dio" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-66cqc7ze"></span></summary><div class="dropdown astro-66cqc7ze"><ul class="isMobile astro-jugkfwgx" style="--depth: 0;"><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#_top" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Overview</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#summary" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Summary</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#the-index-definition" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">The index definition</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#entry-keys" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Entry keys</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#canonical-encoding" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Canonical encoding</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#coverage" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Coverage</span></a><ul class="isMobile astro-jugkfwgx" style="--depth: 1;"><li style="--depth: 1;" class="astro-jugkfwgx"><a href="#backfill-at-creation" style="--depth: 1;" class="astro-jugkfwgx"><span style="--depth: 1;" class="astro-jugkfwgx">Backfill at creation</span></a></li><li style="--depth: 1;" class="astro-jugkfwgx"><a href="#re-derivation-and-compaction" style="--depth: 1;" class="astro-jugkfwgx"><span style="--depth: 1;" class="astro-jugkfwgx">Re-derivation and compaction</span></a></li></ul></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#uniqueness-enforcement" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Uniqueness enforcement</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#commit-bounds" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Commit bounds</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#row-id-payload-and-lookups" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Row-id payload and lookups</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#staged-builds" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Staged builds</span></a><ul class="isMobile astro-jugkfwgx" style="--depth: 1;"><li style="--depth: 1;" class="astro-jugkfwgx"><a href="#deferred-upkeep" style="--depth: 1;" class="astro-jugkfwgx"><span style="--depth: 1;" class="astro-jugkfwgx">Deferred upkeep</span></a></li></ul></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#row-id-resolution-for-data-files" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Row-id resolution for data files</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#extension-surface" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Extension surface</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#verification-and-the-certificate" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Verification and the certificate</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#index-accelerated-planning" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Index-accelerated planning</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#format-gate-and-reclamation" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Format gate and reclamation</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-qok35upx"><div class="sl-container astro-qok35upx"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-jugkfwgx" style="--depth: 0;"><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#_top" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Overview</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#summary" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Summary</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#the-index-definition" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">The index definition</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#entry-keys" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Entry keys</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#canonical-encoding" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Canonical encoding</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#coverage" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Coverage</span></a><ul class="astro-jugkfwgx" style="--depth: 1;"><li style="--depth: 1;" class="astro-jugkfwgx"><a href="#backfill-at-creation" style="--depth: 1;" class="astro-jugkfwgx"><span style="--depth: 1;" class="astro-jugkfwgx">Backfill at creation</span></a></li><li style="--depth: 1;" class="astro-jugkfwgx"><a href="#re-derivation-and-compaction" style="--depth: 1;" class="astro-jugkfwgx"><span style="--depth: 1;" class="astro-jugkfwgx">Re-derivation and compaction</span></a></li></ul></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#uniqueness-enforcement" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Uniqueness enforcement</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#commit-bounds" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Commit bounds</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#row-id-payload-and-lookups" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Row-id payload and lookups</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#staged-builds" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Staged builds</span></a><ul class="astro-jugkfwgx" style="--depth: 1;"><li style="--depth: 1;" class="astro-jugkfwgx"><a href="#deferred-upkeep" style="--depth: 1;" class="astro-jugkfwgx"><span style="--depth: 1;" class="astro-jugkfwgx">Deferred upkeep</span></a></li></ul></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#row-id-resolution-for-data-files" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Row-id resolution for data files</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#extension-surface" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Extension surface</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#verification-and-the-certificate" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Verification and the certificate</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#index-accelerated-planning" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Index-accelerated planning</span></a></li><li style="--depth: 0;" class="astro-jugkfwgx"><a href="#format-gate-and-reclamation" style="--depth: 0;" class="astro-jugkfwgx"><span style="--depth: 0;" class="astro-jugkfwgx">Format gate and reclamation</span></a></li></ul></nav></starlight-toc><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-nrnkqug2"><main data-pagefind-body class="astro-g5ptsecz" lang="en" dir="ltr"><div class="content-panel astro-a7po4psb"><div class="sl-container astro-a7po4psb"><h1 id="_top" class="astro-bebwqqxs">Equality and range indexes</h1></div></div><div class="content-panel astro-a7po4psb"><div class="sl-container astro-a7po4psb"><div class="sl-markdown-content"><div class="sl-heading-wrapper level-h2"><h2 id="summary">Summary</h2><a class="sl-anchor-link" href="#summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Summary”</span></a></div>
+<p>Moraine adds a native, ordered index over DuckLake table columns. The definition
+is a catalog entity. Entries live in the <code dir="auto">index</code> subspace, point at stable row
+ids, and land in the same commit as the rows they cover. Unique entries are
+keyed on the value itself, so racing inserts of one value collide in the store.
+Builds too large for one commit run staged across bounded steps. The planner
+narrows DuckLake scans through lookups pinned to one read revision.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="the-index-definition">The index definition</h2><a class="sl-anchor-link" href="#the-index-definition"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “The index definition”</span></a></div>
+<p>An index is an <code dir="auto">index</code> kind in the <code dir="auto">current</code> and <code dir="auto">history</code> keyspaces, keyed
+<code dir="auto">(table_id, index_id)</code>, with <code dir="auto">index_id</code> from the global catalog-id counter. The
+value carries the name, the indexed columns by field id in declared order (so
+<code dir="auto">rename_column</code> leaves an index untouched), the unique flag, per-column
+direction and NULL placement, the maintenance mode, the build state and
+cursors, the poison flag, and the certificate snapshot. The definition is
+temporally versioned like every entity; the entries are live-only.</p>
+<p><code dir="auto">ReadScope</code> and <code dir="auto">CatalogSnapshot</code> expose <code dir="auto">indexes_of(table)</code>,
+<code dir="auto">index_by_name(table, name)</code>, <code dir="auto">index_by_schema_name(schema, name)</code>,
+<code dir="auto">index_on_columns(table, columns)</code>, and <code dir="auto">index_by_id(table, id)</code>. The domain
+types are <code dir="auto">IndexId</code>, <code dir="auto">IndexDef</code>, <code dir="auto">IndexInfo</code>, <code dir="auto">IndexState</code>, <code dir="auto">IndexMaintenance</code>,
+<code dir="auto">ColumnOrder</code>, <code dir="auto">IndexEntry</code>, <code dir="auto">FileIndexRemoval</code>, and <code dir="auto">BuildStep</code>. An index name
+is unique within its schema, compared case-insensitively, checked inside the
+creating commit.</p>
+<p>The <code dir="auto">Transaction</code> verbs:</p>
+<table>
+<thead>
+<tr>
+<th>Verb</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code dir="auto">create_index(table, def, backfill)</code></td>
+<td>Inserts a ready definition and stages the writer-supplied backfill entries in the same commit. Ascending, NULLS LAST.</td>
+</tr>
+<tr>
+<td><code dir="auto">create_index_ordered(table, def, orders, backfill)</code></td>
+<td>As <code dir="auto">create_index</code>, with one <code dir="auto">ColumnOrder</code> per column.</td>
+</tr>
+<tr>
+<td><code dir="auto">create_index_ordered_with_maintenance(table, def, orders, maintenance, backfill)</code></td>
+<td>As <code dir="auto">create_index_ordered</code>, selecting synchronous or deferred upkeep. Deferred is refused for a unique index.</td>
+</tr>
+<tr>
+<td><code dir="auto">create_index_staged(table, def)</code></td>
+<td>Inserts the definition in <code dir="auto">building</code> state with no entries.</td>
+</tr>
+<tr>
+<td><code dir="auto">create_index_staged_ordered(table, def, orders)</code></td>
+<td>The staged form with per-column orders.</td>
+</tr>
+<tr>
+<td><code dir="auto">create_index_staged_ordered_with_maintenance(table, def, orders, maintenance)</code></td>
+<td>The staged form with orders and upkeep mode.</td>
+</tr>
+<tr>
+<td><code dir="auto">build_index_step(index, batch, is_final)</code></td>
+<td>Stages one batch of writer-supplied entries, advances the cursor, and flips the index ready when <code dir="auto">is_final</code>.</td>
+</tr>
+<tr>
+<td><code dir="auto">record_index_verification(index, observed, at)</code></td>
+<td>Records or withdraws the certificate. Refused if the index is not ready or its definition moved since <code dir="auto">observed</code>.</td>
+</tr>
+<tr>
+<td><code dir="auto">drop_index(index)</code></td>
+<td>Ends the definition into <code dir="auto">history</code>. Entries are orphaned for later reclamation.</td>
+</tr>
+</tbody>
+</table>
+<p>Index DDL is recorded in <code dir="auto">changes_made</code> as <code dir="auto">altered_table:&lt;table_id&gt;</code> and sets
+<code dir="auto">schema_changed</code>, so it conflicts with concurrent inserts, deletes, and other
+alters: a <code dir="auto">create_index</code> racing a <code dir="auto">register_data_file</code> aborts with
+<code dir="auto">CommitConflict</code> and the caller re-drives its backfill against the new file
+set. The <a href="/rfcs/0003-commit-protocol/">commit protocol</a> defines the conflict matrix.</p>
+<p><code dir="auto">drop_column</code>, and <code dir="auto">alter_column</code> with a type change, on a column a live index
+references fail with <code dir="auto">Constraint</code>: the encoding is type-bound, so the index must
+be dropped first. <code dir="auto">drop_table</code> ends the table’s indexes with it.</p>
+<p><code dir="auto">create_index</code> refuses columns whose Parquet form and inline Arrow form cannot
+derive the same bytes: <code dir="auto">HUGEINT</code>, <code dir="auto">UHUGEINT</code>, <code dir="auto">INT128</code>, and <code dir="auto">UINT128</code>, which
+DuckDB writes to Parquet as a lossy <code dir="auto">double</code>, and <code dir="auto">VARIANT</code>, which has no single
+scalar to encode. The check is <code dir="auto">ensure_indexable</code> in
+<code dir="auto">crates/moraine/src/catalog/index_policy.rs</code>.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="entry-keys">Entry keys</h2><a class="sl-anchor-link" href="#entry-keys"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Entry keys”</span></a></div>
+<p>Entries occupy their own subspace, one leading discriminant byte in the <code dir="auto">Key</code>
+enum, so entry churn compacts apart from the metadata subspaces. The layout is
+pinned by golden vectors like every other key kind.</p>
+<table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Key components</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code dir="auto">index/unique</code></td>
+<td><code dir="auto">index_id</code>, <code dir="auto">canon(values)</code></td>
+<td><code dir="auto">row_id</code></td>
+</tr>
+<tr>
+<td><code dir="auto">index/multi</code></td>
+<td><code dir="auto">index_id</code>, <code dir="auto">canon(values)</code>, <code dir="auto">row_id</code></td>
+<td>empty</td>
+</tr>
+</tbody>
+</table>
+<p>A unique entry’s key is the value alone, so two commits inserting the same
+value write the same key and collide in SlateDB’s write-write conflict
+detection; the loser retries, sees the winner’s entry, and returns
+<code dir="auto">Constraint</code>. A non-unique entry appends the row id, so rows sharing a value
+occupy distinct keys and concurrent appends stay benign; a lookup for <code dir="auto">v</code> is
+the ascending prefix scan over <code dir="auto">index/multi/{index_id}/{canon(v)}/</code>. <code dir="auto">index_id</code>
+leads both kinds, so each index is one contiguous range that lookups scan and
+reclamation deletes.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="canonical-encoding">Canonical encoding</h2><a class="sl-anchor-link" href="#canonical-encoding"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Canonical encoding”</span></a></div>
+<p>Entry keys embed column values in a canonical, order-preserving encoding per
+DuckLake column type: <code dir="auto">encode(x) &lt; encode(y)</code> as unsigned bytes if and only if
+<code dir="auto">x &lt; y</code> in the type’s SQL order. Golden vectors and proptest roundtrips pin it.</p>
+<table>
+<thead>
+<tr>
+<th>Type class</th>
+<th>Encoding</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Integers</td>
+<td>Fixed-width big-endian with the sign bit flipped, width normalized per column type.</td>
+</tr>
+<tr>
+<td>Strings and blobs</td>
+<td>The UTF-8 or raw bytes, <code dir="auto">storekey</code>-escaped so component boundaries stay unambiguous. Order is DuckDB’s default binary order.</td>
+</tr>
+<tr>
+<td>Floats</td>
+<td><code dir="auto">-0.0</code> normalized to <code dir="auto">+0.0</code>, every NaN collapsed to one pattern, then the total-order transform. NaN sorts greatest.</td>
+</tr>
+<tr>
+<td>Temporal types</td>
+<td>Their underlying integer count.</td>
+</tr>
+<tr>
+<td><code dir="auto">UUID</code></td>
+<td>A 16-byte blob on both write paths.</td>
+</tr>
+<tr>
+<td>Composite keys</td>
+<td>Component encodings concatenated in declared column order under <code dir="auto">storekey</code> tuple framing, so <code dir="auto">("ab","c")</code> and <code dir="auto">("a","bc")</code> stay distinct and a shorter value sorts before its extension.</td>
+</tr>
+</tbody>
+</table>
+<p>A <code dir="auto">Descending</code> column stores the bitwise complement of its fully framed
+component, terminator included, so variable-length values reverse correctly;
+the leading NULL flag is not complemented. NULL placement is per column,
+<code dir="auto">NullOrder::First</code> or <code dir="auto">NullOrder::Last</code>, carried by a leading flag byte on each
+component. A row with a NULL in any indexed column is stored, so <code dir="auto">IS NULL</code> can
+find it; such a row is always multi-shaped and exempt from the value collision,
+so a unique index admits any number of NULL rows, and an equality lookup on
+NULL has no answer. Orders are recorded only where they diverge from ascending,
+NULLS LAST, so an all-default index is byte-identical to one created without
+orders.</p>
+<p>A composite key whose component encodings exceed <code dir="auto">MAX_INDEX_KEY_BYTES</code>, 1024
+bytes, is refused with <code dir="auto">Constraint</code> at insert or registration.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="coverage">Coverage</h2><a class="sl-anchor-link" href="#coverage"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Coverage”</span></a></div>
+<p>Writes to a table with a maintained index must supply or derive entries
+for every added row and remove entries for every deleted row:</p>
+<table>
+<thead>
+<tr>
+<th>Moment</th>
+<th>Embedding API</th>
+<th>Extension path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code dir="auto">inline_insert</code></td>
+<td>Moraine derives entries from the rows and stages them in the same batch.</td>
+<td>Same, from the Arrow body DuckLake stages.</td>
+</tr>
+<tr>
+<td>Inline flush</td>
+<td>Nothing. Entries name row ids, which flush preserves.</td>
+<td>Same.</td>
+</tr>
+<tr>
+<td><code dir="auto">register_data_file</code></td>
+<td>Writer-supplied <code dir="auto">(ordinal, values)</code> pairs, mapped to <code dir="auto">row_id_start + ordinal</code> at commit.</td>
+<td>Moraine reads the registered file’s indexed columns and derives entries.</td>
+</tr>
+<tr>
+<td><code dir="auto">inline_delete</code> of a store-resident row</td>
+<td>Moraine recomputes the values from the chunk and stages the removal.</td>
+<td>Same.</td>
+</tr>
+<tr>
+<td><code dir="auto">register_delete_file</code>, or <code dir="auto">inline_delete</code> against flushed rows</td>
+<td>Writer-supplied <code dir="auto">FileIndexRemoval</code> values <code dir="auto">(row_id, values)</code> per killed row.</td>
+<td>Moraine reads the killed positions from the target file.</td>
+</tr>
+</tbody>
+</table>
+<p>On the embedding API, <code dir="auto">register_data_file</code>, <code dir="auto">register_delete_file</code>, and
+<code dir="auto">inline_delete</code> on an indexed table fail with <code dir="auto">Constraint</code> when they omit the
+required entries; a removal must name the row being removed, and a dense
+target’s row id must lie inside the target’s range.</p>
+<p>On the extension path every entry is moraine’s own work: it projects the
+indexed columns, row positions, and row-id column from a registered file, and
+reads the killed positions’ values from a delete file’s target. The inline body
+is encoded losslessly, matching how DuckDB writes Parquet, so a value inserted
+inline and the same value written to a file derive the same bytes. A commit
+registering a data or delete file on a table with a maintained index fails with
+<code dir="auto">Constraint</code>, naming the file, when moraine has no <code dir="auto">DATA_PATH</code> store: the lake
+records no data path, or is encrypted, since moraine reads no byte of an
+encrypted file.
+The bundled DuckLake records the attach’s <code dir="auto">DATA_PATH</code> in the <code dir="auto">data_path</code>
+metadata option when the catalog serves none, and moraine adopts it on first
+use when the attach named no <code dir="auto">META_DATA_PATH</code>; it is served back as
+DuckLake’s <code dir="auto">ducklake_metadata</code> row, and a re-attach supplying a conflicting
+value is refused.
+A table whose rows stay inlined needs no data store. A unique index’s scoped
+read is synchronous at commit and a failed read aborts it; the check is never
+skipped.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="backfill-at-creation">Backfill at creation</h3><a class="sl-anchor-link" href="#backfill-at-creation"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Backfill at creation”</span></a></div>
+<p>Inlined rows are backfilled by scanning the chunks; rows in external files need
+writer-supplied entries, or, for <code dir="auto">CREATE INDEX</code>, a scoped read of every live
+data file, so the cost is the table’s indexed columns. The build is one commit
+and one atomic batch, with uniqueness validated over the assembled set before
+staging. A backfill above the commit bound returns an error before staging
+anything, and the caller re-drives it as a staged build. A table that already
+holds files cannot be indexed without a data store to backfill from.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="re-derivation-and-compaction">Re-derivation and compaction</h3><a class="sl-anchor-link" href="#re-derivation-and-compaction"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Re-derivation and compaction”</span></a></div>
+<p>A registered file is not always new rows. Multi entries re-derive as idempotent
+puts and a unique entry already naming the same row is a no-op, so UPDATE
+rewrites and inline flush do not abort against their own entries. No
+register-side path stages an entry delete.</p>
+<p>A commit whose change set names only compaction derives nothing:
+<code dir="auto">ChangeSet::compaction_only_tables</code> returns the tables named by
+<code dir="auto">merge_adjacent</code>, <code dir="auto">rewrite_delete</code>, or the legacy <code dir="auto">compacted_table</code> kind when
+nothing else appears, and an inline flush classifies the same way when its only
+deletes are the flushed tables’ tombstone moves and it deletes no data file.
+Such a commit’s files are read only for the row-id columns that hold entries to
+their sources. This keeps a large indexed table compactable, because a merge
+decides its own batch size and cannot split.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="uniqueness-enforcement">Uniqueness enforcement</h2><a class="sl-anchor-link" href="#uniqueness-enforcement"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Uniqueness enforcement”</span></a></div>
+<p>At commit, each new unique entry is point-read through the transaction: present
+with a different row id is <code dir="auto">Constraint</code>, present with the same row id is a
+no-op, absent stages the put. Duplicates within one commit collide in memory,
+and the window between the read and a concurrent identical put is closed by the
+key collision. Entries are live-only, and deletes remove entries in the batch
+that kills the row, so delete-then-reinsert behaves as SQL expects.</p>
+<p>A writer-supplied deletion of a unique entry is dropped unless the stored row
+id is the row being removed. A deletion the committer derived itself against a
+ready index skips that read; against a building or poisoned index the guard
+stays.</p>
+<p>The rejection names the index, the claiming row, the holding row, and whether
+the collision was within the commit or against a stored entry, and carries no
+key data. Its text avoids the substrings DuckLake’s commit loop retries on, so
+a rejected bulk <code dir="auto">INSERT</code> surfaces at once; the
+<a href="/rfcs/0006-extension-surface/">extension surface</a> states that wire contract.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="commit-bounds">Commit bounds</h2><a class="sl-anchor-link" href="#commit-bounds"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Commit bounds”</span></a></div>
+<p><code dir="auto">stage_index_entries</code> refuses a commit above <code dir="auto">MAX_INDEX_ENTRIES_PER_COMMIT</code>,
+one million entries, before doing any work, naming the count, the limit, and
+the remedy of splitting the load. <code dir="auto">MAX_INDEX_STAGED_BYTES_PER_COMMIT</code>, 64 MiB
+over encoded key and value bytes, is checked before each write enters the
+batch. Both are fixed invariants in
+<code dir="auto">crates/moraine/src/transaction/index_maintenance.rs</code>, not <code dir="auto">CatalogOptions</code>.</p>
+<p>A staged build step carries two further bounds in <code dir="auto">BuildStep</code>, settable per
+call: <code dir="auto">entries</code>, default one million, bounds one step’s buffer; <code dir="auto">bytes</code>, default
+8 MiB measured on the physical keys staged, bounds the single object-store
+request a batch becomes, because a batch too large for the request timeout
+retries forever. A step ends at whichever bound it reaches first and always
+carries at least one entry.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="row-id-payload-and-lookups">Row-id payload and lookups</h2><a class="sl-anchor-link" href="#row-id-payload-and-lookups"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Row-id payload and lookups”</span></a></div>
+<p>The entry payload is a row id. Flush, compaction, and UPDATE rewrites re-home
+rows and preserve their ids, so no maintenance operation rewrites an entry, and
+a file’s rows never leave the catalog without a row-grain deletion having taken
+their entries or a replacement carrying them under preserved ids.</p>
+<p>Lookups are accessors on <code dir="auto">ReadOnlyCatalog</code> in
+<code dir="auto">crates/moraine/src/catalog/handle/index_lookup.rs</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Accessor</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code dir="auto">index_lookup(table, index, values)</code></td>
+<td>Row ids for one complete equality key. A point get on a unique index, a prefix scan on a non-unique one.</td>
+</tr>
+<tr>
+<td><code dir="auto">index_lookup_many(table, index, keys)</code></td>
+<td>The union of row ids for a set of complete keys, deduplicated and resolved under one head view. An empty set returns no rows after validating the index.</td>
+</tr>
+<tr>
+<td><code dir="auto">index_range(table, index, lower, upper, reverse)</code></td>
+<td>Row ids for a value window. Each bound is <code dir="auto">Included</code>, <code dir="auto">Excluded</code>, or <code dir="auto">Unbounded</code>. Results come back in stored order, or its opposite when <code dir="auto">reverse</code> is set.</td>
+</tr>
+<tr>
+<td><code dir="auto">index_nulls(table, index, prefix, reverse)</code></td>
+<td>Row ids for an <code dir="auto">IS NULL</code> query. <code dir="auto">prefix</code> is a leading run of <code dir="auto">Some(value)</code> and <code dir="auto">None</code>, at least one <code dir="auto">None</code> required.</td>
+</tr>
+<tr>
+<td><code dir="auto">index_predicate_rows(scope, table, predicates)</code></td>
+<td>Selects a ready index for conjunctive predicates. Described under planning.</td>
+</tr>
+</tbody>
+</table>
+<p>A range names an equality prefix over the leading columns plus one range on the
+next column; a bare range on a non-leading column is refused. Comparison
+predicates never match NULL, so <code dir="auto">index_range</code> clamps open sides to the non-null
+region and <code dir="auto">index_nulls</code> serves the NULL subrange. A multi-column bound is a
+tuple, and a tuple window requires every named column to sort the same way.</p>
+<p>Lookups are head-only: a lookup through <code dir="auto">read_scope_at(snapshot)</code> returns an
+error and time travel remains a scan. A lookup against a <code dir="auto">Building</code> or
+<code dir="auto">Maintaining</code> index fails with <code dir="auto">Error::IndexBuilding</code>. A warm read-write handle
+serves lookups from the view it already holds; a read-only handle probes under a
+read session, per the <a href="/rfcs/0007-read-path-and-caching/">read path</a>.</p>
+<p><code dir="auto">locate_row_ids(store, prefix, table, row_ids)</code> resolves row ids to
+<code dir="auto">FileRowCandidate { row_id, data_file_id }</code> at head, <code dir="auto">None</code> for a live inlined
+row or a row located nowhere. Location is derived cache state and adds no
+<code dir="auto">index</code> keys.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="staged-builds">Staged builds</h2><a class="sl-anchor-link" href="#staged-builds"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Staged builds”</span></a></div>
+<p>A backfill larger than one commit runs as a <code dir="auto">building</code> to <code dir="auto">ready</code> lifecycle:</p>
+<ol>
+<li>The definition commits in <code dir="auto">building</code> state as <code dir="auto">altered_table</code> with
+<code dir="auto">schema_changed</code>. From this commit forward every writer maintains the index
+under full coverage, and unique entries are value-keyed.</li>
+<li>A derivation pass reads the definition, inline rows, file registrations,
+schemas, and delete bookkeeping through one snapshot-isolated read session,
+walks live inline chunks then external files in durable source order,
+applies deletes as each source is read, and streams entries into steps.</li>
+<li>Each step commits as <code dir="auto">inserted_into_table:&lt;table_id&gt;</code> and advances a source
+cursor on the definition: an inline cursor of
+<code dir="auto">(schema_version, begin_snapshot, chunk_seq)</code> and row offset, and an external
+cursor of <code dir="auto">(data_file_id, position)</code>. The step checks the derivation
+snapshot inside its commit closure; a concurrent delete writes
+<code dir="auto">deleted_from_table</code>, which conflicts, and the driver re-derives at a fresh
+snapshot from the durable cursor. An intermediate step mints a snapshot but
+writes no <code dir="auto">ducklake_schema_versions</code> row.</li>
+<li>When the cursor reaches the end of the live set and the definition is not
+poisoned, one final commit flips <code dir="auto">building</code> to <code dir="auto">ready</code> as <code dir="auto">altered_table</code>
+with <code dir="auto">schema_changed</code>. In-flight writers conflict, re-run, and see <code dir="auto">ready</code>.
+From the flip the entry range is byte-identical to a from-scratch build
+over the same live rows.</li>
+</ol>
+<p>The builder covers the rows live at its derivation snapshot; everything
+committed after the definition is covered by the writer that committed it. A
+row that dies before its step lands is excluded by the delete bookkeeping,
+caught by the in-closure snapshot check, or surfaces as <code dir="auto">CommitConflict</code>, and
+every case resolves into derivation from a fresh snapshot.</p>
+<p>A duplicate found during <code dir="auto">building</code> poisons the build: whoever finds it stages
+a terminal <code dir="auto">poisoned</code> flag on the definition, drops the colliding claim, and
+lands normally. The driver stops at its next step, ends the definition into
+<code dir="auto">history</code>, and surfaces <code dir="auto">Constraint</code> to the creating caller. Poisoning writes
+the definition key, so it conflicts with cursor advances and every interleaving
+converges. Before its first pass a build fills a bloom filter with every unique
+key the index already holds, so a never-seen key is staged as absent without a
+read.</p>
+<p>The <code dir="auto">Catalog</code> drivers,
+<code dir="auto">create_index_staged(table, def, orders, data_store, data_prefix, step)</code> and
+<code dir="auto">create_index_staged_with_maintenance</code>, return once the index is ready or the
+build has failed; a failed build drops its definition, an interrupted call
+leaves it <code dir="auto">building</code>, and calling again with the same <code dir="auto">def</code> resumes from the
+cursor. <code dir="auto">drop_index</code> abandons a build. A data store is required whenever the
+table has live registered files, checked before creating or adopting a
+definition, inside the definition’s commit closure, and at the start of every
+pass; a missing store leaves a resumable build intact. <code dir="auto">moraine_indexes</code>
+exposes <code dir="auto">is_building</code> and <code dir="auto">state</code>; a poisoned definition reports <code dir="auto">is_building</code>
+true, so a caller gating writes on readiness reads <code dir="auto">state</code>.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="deferred-upkeep">Deferred upkeep</h3><a class="sl-anchor-link" href="#deferred-upkeep"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Deferred upkeep”</span></a></div>
+<p>An index created with <code dir="auto">IndexMaintenance::Deferred</code>, refused for a unique index,
+moves SQL additions out of the data commit: a commit adding covered rows flips
+the index from <code dir="auto">ready</code> to <code dir="auto">maintaining</code> in the same snapshot, persists the
+repair cursor, and stages no additions. Deletions stay synchronous in every
+state, so an UPDATE removes the old value in its data commit and leaves the new
+value for the repair. <code dir="auto">maintaining</code> serves no lookups. Once the data snapshot
+is durable, <code dir="auto">Catalog::repair_deferred_indexes(data_store, data_prefix, step)</code>
+drives the bounded backfill and flips the index back to <code dir="auto">ready</code>; intermediate
+steps classify <code dir="auto">inserted_into_table</code> and the final flip is
+<code dir="auto">FinishIndexMaintenance</code>, an <code dir="auto">altered_table</code> operation that does not advance
+schema history. A failed repair leaves the durable <code dir="auto">maintaining</code> marker, and
+the maintenance scheduler repairs maintaining indexes before sweeping dropped
+ones.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="row-id-resolution-for-data-files">Row-id resolution for data files</h2><a class="sl-anchor-link" href="#row-id-resolution-for-data-files"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Row-id resolution for data files”</span></a></div>
+<p>UPDATE, <code dir="auto">rewrite_data_files</code>, and non-adjacent <code dir="auto">merge_adjacent_files</code> write a
+trailing <code dir="auto">_ducklake_internal_row_id</code> column tagged with DuckDB’s reserved field
+id <code dir="auto">ROW_ID_FIELD_ID</code> and record <code dir="auto">row_id_start</code> as NULL or as the file’s minimum
+embedded id; a flushed inline file carries both, and its ids may hold gaps.
+<code dir="auto">RowIdSource::Resolve</code> takes the embedded column when present, else
+<code dir="auto">row_id_start + position</code>, else <code dir="auto">Corruption</code>; a NULL or negative embedded id is
+<code dir="auto">Corruption</code>. <code dir="auto">RowIdSource::Ordinal</code> serves the extension’s registration
+helper, whose positions are re-mapped onto a freshly allocated dense range, and
+refuses a file carrying the embedded column, since registering it under new ids
+would fork its identity.</p>
+<p>Deleted positions are passed to the target’s scoped read, and an entry is
+removed when its ordinal is named by a delete file or an inline file-delete.
+Indexed columns are located by field id through the
+<a href="/rfcs/0005-ducklake-feature-mapping/">column mapping rules</a>; missing fields use
+<code dir="auto">initial_default</code>, and old physical values convert to the current type with
+checked casts.</p>
+<p>Every <code dir="auto">ducklake_file_column_stats</code> insert, the reserved row-id column’s
+included, requires a <code dir="auto">ducklake_snapshot</code> insert in the same commit. A
+head-preserving maintenance batch may carry only raw deletes,
+deletion-schedule inserts, <code dir="auto">ducklake_metadata</code> writes, and inline operations;
+<code dir="auto">translate_maintenance</code> in <code dir="auto">crates/moraine/src/transaction/staged.rs</code> refuses
+anything else with <code dir="auto">Constraint</code>.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="extension-surface">Extension surface</h2><a class="sl-anchor-link" href="#extension-surface"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Extension surface”</span></a></div>
+<p>DuckLake rejects index DDL, so the shim registers an <code dir="auto">OperatorExtension</code> that
+binds <code dir="auto">CREATE INDEX</code>, <code dir="auto">CREATE UNIQUE INDEX</code>, and <code dir="auto">DROP INDEX</code> for moraine-backed
+lakes, and a <code dir="auto">PlannerExtension</code> for <code dir="auto">DROP INDEX IF EXISTS</code>, both executing
+through the core build and drop engine.</p>
+<div data-nova-code-container="" class="not-content relative overflow-hidden [&amp;_pre]:relative [&amp;_nova-code-copy-button]:opacity-0 [&amp;:hover_nova-code-copy-button]:opacity-100 border border-solid border-(--sl-color-gray-5) rounded-md"><pre class="astro-code astro-code-themes one-light github-dark-dimmed" style="--shiki-light:#383A42;--shiki-dark:#adbac7;--shiki-light-bg:#FAFAFA;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="sql" dir="ltr"><code><span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">CREATE</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067"> UNIQUE INDEX</span><span style="--shiki-light:#4078F2;--shiki-dark:#DCBDFB"> by_id</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067"> ON</span><span style="--shiki-light:#986801;--shiki-dark:#6CB6FF"> lake</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#986801;--shiki-dark:#6CB6FF">main</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">.users(id);</span></span>
+<span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">CREATE</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067"> INDEX</span><span style="--shiki-light:#4078F2;--shiki-dark:#DCBDFB"> IF</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067"> NOT</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067"> EXISTS</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7"> by_region </span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">ON</span><span style="--shiki-light:#986801;--shiki-dark:#6CB6FF"> lake</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#986801;--shiki-dark:#6CB6FF">main</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">.users(region)</span></span>
+<span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">    WITH</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7"> (staged </span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">=</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7"> true, step_entries </span><span style="--shiki-light:#383A42;--shiki-dark:#F47067">=</span><span style="--shiki-light:#986801;--shiki-dark:#6CB6FF"> 100000</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">);</span></span>
+<span class="line"><span style="--shiki-light:#A626A4;--shiki-dark:#F47067">DROP</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067"> INDEX</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067"> IF</span><span style="--shiki-light:#A626A4;--shiki-dark:#F47067"> EXISTS</span><span style="--shiki-light:#986801;--shiki-dark:#6CB6FF"> lake</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#986801;--shiki-dark:#6CB6FF">main</span><span style="--shiki-light:#383A42;--shiki-dark:#ADBAC7">.by_region;</span></span></code></pre><nova-code-copy-button type="button" data-code="CREATE UNIQUE INDEX by_id ON lake.main.users(id);
+CREATE INDEX IF NOT EXISTS by_region ON lake.main.users(region)
+    WITH (staged = true, step_entries = 100000);
+DROP INDEX IF EXISTS lake.main.by_region;" title="Copy code" aria-label="Copy code" class="absolute top-2 right-2 m-0 size-6 rounded border border-solid border-(--sl-color-gray-5) bg-gray-100/30 p-1 text-black backdrop-blur-sm transition hover:bg-gray-200/50 active:scale-90 dark:bg-gray-600/30 dark:text-white hover:dark:bg-gray-500/50"></nova-code-copy-button></div>
+<p>Native DDL requires autocommit and a writable lake, commits autonomously, and
+returns no rows. Options are <code dir="auto">staged</code>, <code dir="auto">step_entries</code>, <code dir="auto">step_bytes</code>,
+<code dir="auto">maintenance</code>, <code dir="auto">directions</code>, and <code dir="auto">nulls</code>; <code dir="auto">step_entries</code> and <code dir="auto">step_bytes</code> must
+be positive, and <code dir="auto">maintenance = 'deferred'</code> is limited to non-unique indexes.
+DuckDB’s parser discards per-column <code dir="auto">ASC</code>, <code dir="auto">DESC</code>, and NULL-placement clauses,
+so ordering is <code dir="auto">WITH (directions = ['desc', 'asc'], nulls = ['first', 'last'])</code>,
+one element per column. Expression indexes, partial indexes, <code dir="auto">PRIMARY KEY</code>, and
+table-level <code dir="auto">UNIQUE</code> are unsupported. <code dir="auto">IF NOT EXISTS</code> tests the schema-level
+name, and repeating an interrupted staged create without it resumes the build.</p>
+<p>The table functions take <code dir="auto">catalog, schema, table, index</code> as leading strings,
+written <code dir="auto">…</code> below; <code dir="auto">moraine_indexes</code> stops at the table.</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code dir="auto">moraine_index_lookup(…, v…)</code></td>
+<td><code dir="auto">(row_id, data_file_id)</code> for one equality key, one variadic value per indexed column.</td>
+</tr>
+<tr>
+<td><code dir="auto">moraine_index_in(…, keys)</code></td>
+<td>Rows for the union of complete keys: a list of scalars for a single-column index, a list of <code dir="auto">row(...)</code> values for a composite one. A key containing NULL matches no row.</td>
+</tr>
+<tr>
+<td><code dir="auto">moraine_index_range(…, lower, upper, lower_inclusive, upper_inclusive, reverse := b)</code></td>
+<td>Rows for a value window. A NULL bound is an open side.</td>
+</tr>
+<tr>
+<td><code dir="auto">moraine_index_nulls(…, prefix…, reverse := b)</code></td>
+<td>Rows for an <code dir="auto">IS NULL</code> query. A <code dir="auto">NULL</code> argument means <code dir="auto">IS NULL</code>, any other means equality.</td>
+</tr>
+<tr>
+<td><code dir="auto">moraine_index_verify(…)</code></td>
+<td>Recomputes the entry set and reports <code dir="auto">stored</code>, <code dir="auto">expected</code>, <code dir="auto">missing</code>, <code dir="auto">dead</code>, <code dir="auto">mismatched</code>, and <code dir="auto">certified_at</code>.</td>
+</tr>
+<tr>
+<td><code dir="auto">moraine_indexes(catalog, schema, table)</code></td>
+<td><code dir="auto">index_id</code>, <code dir="auto">index_name</code>, <code dir="auto">is_unique</code>, <code dir="auto">is_building</code>, <code dir="auto">state</code>, and <code dir="auto">certified_at</code>. <code dir="auto">state</code> is <code dir="auto">ready</code>, <code dir="auto">building</code>, <code dir="auto">maintaining</code>, or <code dir="auto">poisoned</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Each function resolves the store handle from the attached catalog and the table
+id from <code dir="auto">ducklake_table</code>, then drives the same core accessors as the embedding
+API; the read functions bind their arguments as constants and resolve against
+the revision the current DuckDB transaction pinned. A <code dir="auto">Constraint</code> raised on
+the SQL write path carries none of the substrings DuckLake’s commit loop
+retries on (<code dir="auto">conflict</code>, <code dir="auto">concurrent</code>, <code dir="auto">unique</code>, <code dir="auto">primary key</code>), while a genuine
+<code dir="auto">CommitConflict</code> does, so DuckLake retries, the re-read finds the winner’s
+entry, and the permanent <code dir="auto">Constraint</code> surfaces then. <code dir="auto">data_file_id</code> is NULL for
+an inlined or unlocated row, so a statement naming exact rows joins with
+<code dir="auto">rowid = row_id AND data_file_id IS NOT DISTINCT FROM hits.data_file_id</code>; tuple
+<code dir="auto">IN</code> against these columns drops every NULL file id and is unsafe as a DELETE
+or UPDATE predicate.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="verification-and-the-certificate">Verification and the certificate</h2><a class="sl-anchor-link" href="#verification-and-the-certificate"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Verification and the certificate”</span></a></div>
+<p><code dir="auto">ReadOnlyCatalog::verify_index(table, index, data_store, data_prefix)</code>
+recomputes the entry set at the current snapshot through the scoped reads the
+backfill uses and diffs it against the index. <code dir="auto">IndexVerification</code> reports:</p>
+<table>
+<thead>
+<tr>
+<th>Count</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code dir="auto">stored</code></td>
+<td>Entries the index holds.</td>
+</tr>
+<tr>
+<td><code dir="auto">expected</code></td>
+<td>Entries the live rows require.</td>
+</tr>
+<tr>
+<td><code dir="auto">missing</code></td>
+<td>A required entry the index does not hold.</td>
+</tr>
+<tr>
+<td><code dir="auto">dead</code></td>
+<td>A held entry no live row requires.</td>
+</tr>
+<tr>
+<td><code dir="auto">mismatched</code></td>
+<td>A unique entry under the right value naming another row.</td>
+</tr>
+</tbody>
+</table>
+<p>Verification reads the indexed columns of every live row and holds the
+stored entry set in memory.
+A <code dir="auto">building</code> index is refused.</p>
+<p><code dir="auto">certify_index</code> runs the pass through a read-write attach and records the
+outcome with <code dir="auto">record_index_verification</code>: a clean pass writes the snapshot it
+agreed at as <code dir="auto">verified_at_snapshot</code>, a pass that found any discrepancy clears an
+earlier agreement, and the recording is refused if the definition moved since
+the pass observed it. A staged build step, a rebuild, and a deferred repair
+withdraw the certificate; ordinary maintained writes do not. The certificate is
+a separate field whose only state coupling is requiring <code dir="auto">Ready</code>;
+<code dir="auto">moraine_indexes</code> reports it as <code dir="auto">certified_at</code>, and a read-only attach reports
+without writing.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="index-accelerated-planning">Index-accelerated planning</h2><a class="sl-anchor-link" href="#index-accelerated-planning"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Index-accelerated planning”</span></a></div>
+<p>DuckLake owns the planner. The extension’s optimizer rule translates pushed
+constant predicates into conjunctive column comparisons and offers them to
+<code dir="auto">ReadOnlyCatalog::index_predicate_rows(scope, table, predicates)</code>, which takes
+<code dir="auto">IndexPredicate { column, comparison }</code> with <code dir="auto">IndexComparison</code> an equality list,
+<code dir="auto">IsNull</code>, or an inclusive or exclusive bound. It selects a ready index with the
+longest usable prefix, probes it, and returns
+<code dir="auto">IndexPredicateRows { rows, certified_exact }</code>, or <code dir="auto">None</code> when no ready index
+covers a leading predicate. The original predicate is still evaluated over the
+candidate rows. A certified full-key probe with no residual predicate is the
+one case where a <code dir="auto">DELETE</code> is rewritten to positional deletion without a scan.</p>
+<p>Index scans use four components:</p>
+<ul>
+<li><code dir="auto">IndexReadScope</code> pins catalog, index, file, and inline reads to one committed
+revision, including DuckLake’s file-list and metadata reads for the statement.
+<code dir="auto">IndexReadIdentity</code> lets a plan check whether it can reuse results without
+retaining the transaction.</li>
+<li><code dir="auto">locate_row_positions_at(scope, data_store, data_prefix, table, pairs)</code> maps
+<code dir="auto">(row_id, data_file_id)</code> pairs to <code dir="auto">LocatedDeletion</code> positions at that
+revision.</li>
+<li><code dir="auto">LocatedRowScan</code>, returned by <code dir="auto">scan_rows_at</code> and exposed in SQL as
+<code dir="auto">moraine_summary_scan</code>, reads the requested columns at those positions,
+one Arrow batch at a time.</li>
+<li>Per-table file directories and row summaries map row ids to files and inline
+chunks. They update as the file map changes and use the
+<a href="/rfcs/0007-read-path-and-caching/#published-row-summaries">published row summaries</a>.</li>
+</ul>
+<p>Candidate row ids and file ids feed DuckLake’s scan as filters on <code dir="auto">rowid</code> and
+the virtual <code dir="auto">data_file_id</code> column, so both the file list and the rows read
+narrow. Results are memoized per pinned revision. A transaction with staged
+writes keeps probing at the revision it started on, because entries carry no
+transaction-local overlay.</p>
+<p>The rule declines, leaving the ordinary plan, for a scan at a snapshot other
+than the transaction’s, a transaction with local inserts, no ready index over a
+leading predicate, a value of a type the index does not cover, or a failed
+probe, which is logged. The positional DELETE rewrite additionally requires a
+certified index, every pushed predicate answered in full, every resolved row in
+a committed file, no deletion vectors on the table, no <code dir="auto">RETURNING</code>, and nothing
+but projections between the delete and its scan. UPDATE keeps the ordinary
+operator and narrows its reads through the pushed filters.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="format-gate-and-reclamation">Format gate and reclamation</h2><a class="sl-anchor-link" href="#format-gate-and-reclamation"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Format gate and reclamation”</span></a></div>
+<p>The minimum readable format already includes the index subspace, staged build
+state, and deferred upkeep, so index operations stamp no format of their own
+and an older writer that would maintain no entries is excluded at open; the
+<a href="/rfcs/0001-storage-format/">storage format</a> owns the version ladder. Read-only
+attaches over an indexed store are unaffected.</p>
+<p><code dir="auto">drop_index</code>, and <code dir="auto">drop_table</code> ending a table’s indexes, orphan the entry range
+and delete no entries. <code dir="auto">Catalog::maintain</code> with <code dir="auto">sweep_orphaned_index_entries</code>
+discovers dead index ids by seeking through the <code dir="auto">index</code> subspace and reclaims
+each range in head-preserving batches; ids are never reused, so an id absent
+from the live catalog is dead forever. <a href="/rfcs/0010-maintenance/">Maintenance</a>
+specifies the sweep.</p>
+</div><script type="module">var e=class extends HTMLElement{constructor(){super()}connectedCallback(){let e=()=>{let e=t===`ready`?`<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></g></svg>`:`<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/></svg>`;this.innerHTML=`<span class="w-full h-full block [&_svg]:w-full [&_svg]:h-full">`+e+`</span>`},t=`ready`;e(),this.addEventListener(`click`,()=>{if(t===`ready`){t=`success`,e();let n=this.dataset.code||``;navigator.clipboard.writeText(n),setTimeout(()=>{t=`ready`,e()},1500)}})}};customElements.define(`nova-code-copy-button`,e);</script><script type="module" src="/_astro/MarkdownContent.astro_astro_type_script_index_0_lang.CadSzKTi.js"></script><footer class="sl-flex astro-ddtxxk7k"><div class="meta sl-flex astro-ddtxxk7k"></div><div class="flex min-w-full flex-row items-stretch justify-between gap-2 px-1 pt-0 pb-6 print:hidden" dir="ltr"><a href="/rfcs/0008-crash-recovery/" rel="prev" data-side="left" class="group m-0 flex items-center justify-end gap-2 rounded-xl p-2 font-medium text-(--sl-color-gray-2) no-underline transition hover:text-(--sl-color-white) md:text-lg [[rel='next']]:flex-row [[rel='prev']]:flex-row-reverse"><span>Crash recovery</span><svg width="1em" height="1em" viewBox="0 0 24 24" class="block min-h-5 min-w-5 transition group-hover:-translate-x-1"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18l-6-6l6-6" /></svg></a><div class="flex-1"></div><a href="/rfcs/0010-maintenance/" rel="next" data-side="right" class="group m-0 flex items-center justify-end gap-2 rounded-xl p-2 font-medium text-(--sl-color-gray-2) no-underline transition hover:text-(--sl-color-white) md:text-lg [[rel='next']]:flex-row [[rel='prev']]:flex-row-reverse"><span>Maintenance</span><svg width="1em" height="1em" viewBox="0 0 24 24" class="block min-h-5 min-w-5 transition group-hover:translate-x-1"><!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE --><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6" /></svg></a></div></footer></div></div></main></div></div></div></div></body></html>
